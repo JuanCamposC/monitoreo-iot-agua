@@ -1,0 +1,78 @@
+from flask import Flask, jsonify
+from flask_cors import CORS
+from pymongo import MongoClient
+from bson import ObjectId
+import json
+
+app = Flask(__name__)
+CORS(app)
+
+
+MONGO_URI = "mongodb+srv://cimarq:eGEr87FyYHIadm4p@proyectotitulo.idqwtmo.mongodb.net/"
+client = MongoClient(MONGO_URI)
+db = client.cimarq
+
+def serializa_doc(doc):
+    if doc:
+        doc['_id'] = str(doc['_id'])
+    return doc
+
+@app.route('/')
+def home():
+    return jsonify({"message": "API CIMARQ Funcionando"})
+
+# Obtener datos de temperatura
+@app.route('/temperatura', methods=['GET'])
+def get_temperatura():
+    try:
+        collection = db.temperatura
+        datos = list(collection.find())
+        for doc in datos:
+            doc['_id'] = str(doc['_id'])
+        return jsonify({"success": True, "data": datos})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+# Obtener datos de ph
+@app.route('/ph', methods=['GET'])
+def get_ph():
+    try:
+        collection = db.ph
+        datos = list(collection.find())
+        for doc in datos:
+            doc['_id'] = str(doc['_id'])
+        return jsonify({"success": True, "data": datos})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+# Obtener datos de oxigeno
+@app.route('/oxigeno', methods=['GET'])
+def get_oxigeno():
+    try:
+        collection = db.oxigeno
+        datos = list(collection.find())
+        for doc in datos:
+            doc['_id'] = str(doc['_id'])
+        return jsonify({"success": True, "data": datos})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+# Obtener todos los datos
+@app.route('/sensores', methods=['GET'])
+def get_sensores():
+    try:
+        temperatura = list(db.temperatura.find())
+        ph = list(db.ph.find())
+        oxigeno = list(db.oxigeno.find())
+        for doc in temperatura:
+            doc['_id'] = str(doc['_id'])
+        for doc in ph:
+            doc['_id'] = str(doc['_id'])
+        for doc in oxigeno:
+            doc['_id'] = str(doc['_id'])
+        return jsonify({"success": True, "data": {"temperatura": temperatura, "ph": ph, "oxigeno": oxigeno}})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)
