@@ -17,8 +17,20 @@ CORS(app)
 
 # Configuración MongoDB
 MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://cimarq:eGEr87FyYHIadm4p@proyectotitulo.idqwtmo.mongodb.net/")
+DB_NAME = os.getenv("DB_NAME", "cimarq")
 client = MongoClient(MONGO_URI)
-db = client.cimarq
+db = client[DB_NAME]
+
+# Configuración MQTT
+MQTT_BROKER = os.getenv("MQTT_BROKER", "broker.hivemq.com")
+MQTT_PORT = int(os.getenv("MQTT_PORT", 1883))
+MQTT_USERNAME = os.getenv("MQTT_USERNAME", "")
+MQTT_PASSWORD = os.getenv("MQTT_PASSWORD", "")
+
+# Tópicos MQTT
+TEMPERATURA_TOPIC = os.getenv("TEMPERATURA_TOPIC", "tu_proyecto/temperatura/update")
+PH_TOPIC = os.getenv("PH_TOPIC", "tu_proyecto/ph/update")
+OXIGENO_TOPIC = os.getenv("OXIGENO_TOPIC", "tu_proyecto/oxigeno/update")
 
 # Variables globales para MQTT
 mqtt_client = None
@@ -36,10 +48,11 @@ def on_connect(client, userdata, flags, rc):
     if rc == 0:
         mqtt_connected = True
         print("Conectado al broker MQTT")
-        # Suscribirse a los tópicos
-        client.subscribe("tu_proyecto/temperatura/update")
-        client.subscribe("tu_proyecto/ph/update") 
-        client.subscribe("tu_proyecto/oxigeno/update")
+        # Suscribirse a los tópicos usando variables de entorno
+        client.subscribe(TEMPERATURA_TOPIC)
+        client.subscribe(PH_TOPIC) 
+        client.subscribe(OXIGENO_TOPIC)
+        print(f"Suscrito a tópicos: {TEMPERATURA_TOPIC}, {PH_TOPIC}, {OXIGENO_TOPIC}")
     else:
         mqtt_connected = False
         print(f"Error de conexión MQTT: {rc}")
@@ -83,10 +96,14 @@ def init_mqtt():
         mqtt_client.on_connect = on_connect
         mqtt_client.on_message = on_message
         
-        # Conectar al broker (usando HiveMQ como en tu frontend)
-        mqtt_client.connect("broker.hivemq.com", 1883, 60)
+        # Configurar autenticación si está disponible
+        if MQTT_USERNAME and MQTT_PASSWORD:
+            mqtt_client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
+        
+        # Conectar al broker usando variables de entorno
+        mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
         mqtt_client.loop_start()
-        print("Cliente MQTT iniciado")
+        print(f"Cliente MQTT iniciado - Broker: {MQTT_BROKER}:{MQTT_PORT}")
     except Exception as e:
         print(f"Error iniciando MQTT: {e}")
 

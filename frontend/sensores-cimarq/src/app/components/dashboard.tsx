@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Box, Typography, Card, CardContent, Chip, Alert, CircularProgress, Paper } from '@mui/material';
+import { Box, Typography, Card, CardContent, Chip, Alert, CircularProgress, Paper, CardActionArea } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import Link from 'next/link';
 import GeneralChart from './graficos/GeneralChart';
@@ -132,84 +132,89 @@ export default function SensoresPage() {
           )}
         </Paper>
 
-
         {/* Cards de sensores */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
         {/* Temperatura */}
         <Grid size= {{xs: 12, md: 4}}>
           <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography variant="h6" color="text.secondary">
-                  Temperatura
+            <CardActionArea component={Link} href='/sensores/temperatura' sx={{ height: "100%"}}>
+              <CardContent>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                  <Typography variant="h6" color="text.secondary">
+                    Temperatura
+                  </Typography>
+                  {latestTemp && (
+                    <Chip 
+                      label={getTemperaturaEstado(Number(latestTemp)).text}
+                      color={getTemperaturaEstado(Number(latestTemp)).color as any}
+                      size="small"
+                    />
+                  )}
+                </Box>
+                <Typography variant="h3" component="div" color="primary">
+                  {latestTemp ? `${Number(latestTemp).toFixed(1)}°C` : 'Sin datos'}
                 </Typography>
-                {latestTemp && (
-                  <Chip 
-                    label={getTemperaturaEstado(Number(latestTemp)).text}
-                    color={getTemperaturaEstado(Number(latestTemp)).color as any}
-                    size="small"
-                  />
-                )}
-              </Box>
-              <Typography variant="h3" component="div" color="primary">
-                {latestTemp ? `${Number(latestTemp).toFixed(1)}°C` : 'Sin datos'}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Total de registros: {data.temperatura.length}
-              </Typography>
-            </CardContent>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  Total de registros: {data.temperatura.length}
+                </Typography>
+              </CardContent>
+            </CardActionArea>
           </Card>
         </Grid>
 
         {/* pH */}
         <Grid size= {{xs: 12, md: 4}}>
           <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography variant="h6" color="text.secondary">
-                  pH
+            <CardActionArea component={Link} href='/sensores/ph' sx={{ height: "100%"}}>
+              <CardContent>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                  <Typography variant="h6" color="text.secondary">
+                    pH
+                  </Typography>
+                  {latestPh && (
+                    <Chip 
+                      label={getPhEstado(Number(latestPh)).text}
+                      color={getPhEstado(Number(latestPh)).color as any}
+                      size="small"
+                    />
+                  )}
+                </Box>
+                <Typography variant="h3" component="div" color="secondary">
+                  {latestPh ? Number(latestPh).toFixed(1) : 'Sin datos'}
                 </Typography>
-                {latestPh && (
-                  <Chip 
-                    label={getPhEstado(Number(latestPh)).text}
-                    color={getPhEstado(Number(latestPh)).color as any}
-                    size="small"
-                  />
-                )}
-              </Box>
-              <Typography variant="h3" component="div" color="secondary">
-                {latestPh ? Number(latestPh).toFixed(1) : 'Sin datos'}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Total de registros: {data.ph.length}
-              </Typography>
-            </CardContent>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  Total de registros: {data.ph.length}
+                </Typography>
+              </CardContent>
+            </CardActionArea>
           </Card>
         </Grid>
 
         {/* Oxígeno */}
         <Grid size= {{xs: 12, md: 4}}>
           <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography variant="h6" color="text.secondary">
-                  Oxígeno
+            <CardActionArea component={Link} href='/sensores/oxigeno' sx={{ height: "100%"}}>
+              <CardContent>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                  <Typography variant="h6" color="text.secondary">
+                    Oxígeno
+                  </Typography>
+                  {latestOxigeno && (
+                    <Chip 
+                      label={getOxigenoEstado(Number(latestOxigeno)).text}
+                      color={getOxigenoEstado(Number(latestOxigeno)).color as any}
+                      size="small"
+                    />
+                  )}
+                </Box>
+                <Typography variant="h3" component="div" color="info.main">
+                  {latestOxigeno ? `${Number(latestOxigeno).toFixed(1)} mg/L` : 'Sin datos'}
                 </Typography>
-                {latestOxigeno && (
-                  <Chip 
-                    label={getOxigenoEstado(Number(latestOxigeno)).text}
-                    color={getOxigenoEstado(Number(latestOxigeno)).color as any}
-                    size="small"
-                  />
-                )}
-              </Box>
-              <Typography variant="h3" component="div" color="info.main">
-                {latestOxigeno ? `${Number(latestOxigeno).toFixed(1)} mg/L` : 'Sin datos'}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Total de registros: {data.oxigeno.length}
-              </Typography>
-            </CardContent>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  Total de registros: {data.oxigeno.length}
+                </Typography>
+              </CardContent>
+            </CardActionArea>
           </Card>
         </Grid>
       </Grid>
