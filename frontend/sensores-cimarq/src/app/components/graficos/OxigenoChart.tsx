@@ -177,19 +177,13 @@ export default function OxygenChart({ data, title = "Análisis de Oxígeno Disue
             <CardContent>
               <Typography variant="h6" gutterBottom>Información</Typography>
               <Typography variant="body2" color="text.secondary">
-                🐟 Lecturas totales: {data.length}
+                Lecturas totales: {data.length}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                📊 Variación: {(stats.max - stats.min).toFixed(1)} mg/L
+                Variación: {(stats.max - stats.min).toFixed(1)} mg/L
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                🕒 Última lectura: {processedData[processedData.length - 1]?.fechaTexto || 'N/A'}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                💡 Nivel crítico para peces: &lt; 4 mg/L
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                🌊 Óptimo para acuicultura: 6-8 mg/L
+                Última lectura: {processedData[processedData.length - 1]?.fechaTexto || 'N/A'}
               </Typography>
             </CardContent>
           </Card>

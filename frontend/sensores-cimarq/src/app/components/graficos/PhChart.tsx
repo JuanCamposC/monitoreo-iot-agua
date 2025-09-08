@@ -40,7 +40,7 @@ export default function PhChart({ data, title = "Análisis de pH" }: PhChartProp
   // Determinar estado del pH actual
   const getPhStatus = (ph: number) => {
     if (ph < 6.5) return { text: 'Ácido', color: 'error', bgColor: '#ffebee' };
-    if (ph > 8.5) return { text: 'Básico', color: 'warning', bgColor: '#fff3e0' };
+    if (ph > 8.5) return { text: 'Alcalino', color: 'warning', bgColor: '#fff3e0' };
     return { text: 'Neutro', color: 'success', bgColor: '#e8f5e8' };
   };
 
@@ -164,9 +164,11 @@ export default function PhChart({ data, title = "Análisis de pH" }: PhChartProp
             <CardContent>
               <Typography variant="h6" gutterBottom>Rangos de pH</Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Chip label="Ácido: < 6.5" color="error" variant="outlined" size="small" />
-                <Chip label="Neutro: 6.5 - 8.5" color="success" variant="outlined" size="small" />
-                <Chip label="Básico: > 8.5" color="warning" variant="outlined" size="small" />
+                <Chip label="Muy Ácido: < 6.5" color="error" variant="outlined" size="small" />
+                <Chip label="Ácido: < 7" color="error" variant="outlined" size="small" />
+                <Chip label="Neutro: = 7" color="success" variant="outlined" size="small" />
+                <Chip label="Alcalino: > 7.5" color="warning" variant="outlined" size="small" />
+                <Chip label="Muy Alcalino: > 8.5" color="warning" variant="outlined" size="small" />
               </Box>
             </CardContent>
           </Card>
@@ -175,16 +177,13 @@ export default function PhChart({ data, title = "Análisis de pH" }: PhChartProp
             <CardContent>
               <Typography variant="h6" gutterBottom>Información</Typography>
               <Typography variant="body2" color="text.secondary">
-                🧪 Lecturas totales: {data.length}
+                Lecturas totales: {data.length}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                📊 Variación: {(stats.max - stats.min).toFixed(2)}
+                Variación: {(stats.max - stats.min).toFixed(2)}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                🕒 Última lectura: {processedData[processedData.length - 1]?.fechaTexto || 'N/A'}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                💡 pH óptimo para acuicultura: 6.5 - 8.5
+                Última lectura: {processedData[processedData.length - 1]?.fechaTexto || 'N/A'}
               </Typography>
             </CardContent>
           </Card>

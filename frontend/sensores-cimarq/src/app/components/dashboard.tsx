@@ -82,7 +82,7 @@ export default function SensoresPage() {
 
   const getPhEstado = (ph: number) => {
     if (ph < 6.5) return { color: 'warning', text: 'Ácido' };
-    if (ph > 7.5) return { color: 'error', text: 'Básico' };
+    if (ph > 7.5) return { color: 'error', text: 'Alcalino' };
     return { color: 'success', text: 'Neutro' };
   };
 
