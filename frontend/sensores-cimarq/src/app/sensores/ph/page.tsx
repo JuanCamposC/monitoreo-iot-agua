@@ -20,7 +20,7 @@ export default function PHPage() {
   useEffect(() => {
     const fetchPH = async () => {
       try {
-        const response = await fetch('http://localhost:5000/ph?limit=50');
+        const response = await fetch('http://localhost:5000/ph');
         const data = await response.json();
         
         if (data.success) {

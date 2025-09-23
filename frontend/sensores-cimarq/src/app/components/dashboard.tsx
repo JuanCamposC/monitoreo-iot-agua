@@ -122,7 +122,7 @@ export default function SensoresPage() {
         {/* Estado MQTT */}
         <Paper sx={{ p: 3, mb: 4, borderRadius: 2, boxShadow: 3 }}>
           <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Typography variant="h6">Estado</Typography>
+            <Typography variant="h6">Estado de los Sensores</Typography>
             <Chip label={mqttStatus.connected ? "Conectado" : "Desconectado"} color={mqttStatus.connected ? "success" : "error"} size="small"/>
           </Box>
           {mqttStatus.last_message && (
