@@ -20,7 +20,7 @@ interface GeneralChartProps {
 
 export default function GeneralChart({ temperatureData, phData, oxygenData }: GeneralChartProps) {
   // Preparar datos para el gráfico combinado
-  const prepareChartData = (sensorData: SensorData[], field: string, limit: number = 10) => {
+  const prepareChartData = (sensorData: SensorData[], field: string, limit: number = 20) => {
     const sortedData = sensorData
       .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime())
       .slice(-limit);
@@ -62,7 +62,7 @@ export default function GeneralChart({ temperatureData, phData, oxygenData }: Ge
     <Card>
       <CardContent>
         <Typography variant="h5" component="h2" gutterBottom>
-          Tendencias Generales de Sensores (Últimos 10 registros)
+          Tendencias Generales de Sensores (Últimos 20 registros)
         </Typography>
         
         {maxLength > 0 ? (

@@ -70,7 +70,7 @@ export default function SensoresPage() {
   // Funciones auxiliares
   const getLatestValue = (sensorData: SensorData[], field: string) => {
     if (sensorData.length === 0) return null;
-    const latest = sensorData[0];
+    const latest = sensorData[sensorData.length -1 ];
     return latest[field as keyof SensorData] || latest.valor || null;
   };
 
