@@ -20,7 +20,7 @@ export default function OxigenoPage() {
   useEffect(() => {
     const fetchOxigeno = async () => {
       try {
-        const response = await fetch('http://localhost:5000/oxigeno');
+        const response = await fetch('http://localhost:5000/api/v1/oxigeno');
         const data = await response.json();
         
         if (data.success) {

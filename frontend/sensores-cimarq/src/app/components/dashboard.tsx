@@ -43,7 +43,7 @@ export default function SensoresPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:5000/sensores');
+        const response = await fetch('http://localhost:5000/api/v1/sensores');
         const result: ApiResponse = await response.json();
         
         if (result.success) {
@@ -70,7 +70,7 @@ export default function SensoresPage() {
   // Funciones auxiliares
   const getLatestValue = (sensorData: SensorData[], field: string) => {
     if (sensorData.length === 0) return null;
-    const latest = sensorData[sensorData.length -1 ];
+    const latest = sensorData[0];
     return latest[field as keyof SensorData] || latest.valor || null;
   };
 
@@ -127,7 +127,7 @@ export default function SensoresPage() {
           </Box>
           {mqttStatus.last_message && (
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1, textAlign: "right" }}>
-              Último mensaje: {new Date(mqttStatus.last_message).toLocaleString()}
+              Último registro: {new Date(mqttStatus.last_message).toLocaleString()}
             </Typography>
           )}
         </Paper>

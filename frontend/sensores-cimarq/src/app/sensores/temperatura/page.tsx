@@ -20,7 +20,7 @@ export default function TemperaturaPage() {
   useEffect(() => {
     const fetchTemperatura = async () => {
       try {
-        const response = await fetch('http://localhost:5000/temperatura');
+        const response = await fetch('http://localhost:5000/api/v1/temperatura');
         const data = await response.json();
         
         if (data.success) {
