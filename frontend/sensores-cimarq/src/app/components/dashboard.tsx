@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Box, Typography, Card, CardContent, Chip, Alert, CircularProgress, Paper, CardActionArea } from '@mui/material';
+import { Box, Typography, Card, CardContent, Chip, Alert, CircularProgress, Paper, CardActionArea, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import Link from 'next/link';
 import GeneralChart from './graficos/GeneralChart';
@@ -38,6 +38,7 @@ export default function SensoresPage() {
     connected: false, 
     last_message: null 
   });
+  const [timeFilter, setTimeFilter] = useState('24h'); // Estado para el filtro de tiempo
 
   // Obtener datos del backend Flask
   useEffect(() => {
@@ -66,6 +67,36 @@ export default function SensoresPage() {
     const interval = setInterval(fetchData, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  // Función para filtrar datos por tiempo
+  const filterDataByTime = (data: SensorData[], filter: string) => {
+    if (filter === 'Todo') return data;
+    
+    const now = new Date();
+    let timeLimit: Date;
+    
+    switch (filter) {
+      case '1h':
+        timeLimit = new Date(now.getTime() - 60 * 60 * 1000);
+        break;
+      case '6h':
+        timeLimit = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+        break;
+      case '24h':
+        timeLimit = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        break;
+      case '7d':
+        timeLimit = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        return data;
+    }
+    
+    return data.filter(item => {
+      const itemDate = new Date(item.fecha);
+      return itemDate >= timeLimit;
+    });
+  };
 
   // Funciones auxiliares
   const getLatestValue = (sensorData: SensorData[], field: string) => {
@@ -115,9 +146,27 @@ export default function SensoresPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-4 lg:p-6">
       <div className="max-w-7xl mx-auto">
-        <Typography variant="h3" component="h1" gutterBottom align="center" sx={{ mb: 4, color: '#1f2937' }}>
-          Dashboard de Sensores CIMARQ
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
+          <Typography variant="h3" component="h1" sx={{ color: '#1f2937', flexGrow: 1, textAlign: { xs: 'center', md: 'left' } }}>
+            Dashboard de Sensores CIMARQ
+          </Typography>
+          
+          {/* Selector de período */}
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel>Período de Análisis</InputLabel>
+            <Select
+              value={timeFilter}
+              label="Período de Análisis"
+              onChange={(e) => setTimeFilter(e.target.value)}
+            >
+              <MenuItem value="1h">Última hora</MenuItem>
+              <MenuItem value="6h">Últimas 6h</MenuItem>
+              <MenuItem value="24h">Últimas 24h</MenuItem>
+              <MenuItem value="7d">Últimos 7 días</MenuItem>
+              <MenuItem value="Todo">Todos los datos</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
         
         {/* Estado MQTT */}
         <Paper sx={{ p: 3, mb: 4, borderRadius: 2, boxShadow: 3 }}>
@@ -155,7 +204,7 @@ export default function SensoresPage() {
                   {latestTemp ? `${Number(latestTemp).toFixed(1)}°C` : 'Sin datos'}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  Total de registros: {data.temperatura.length}
+                  Período: {filterDataByTime(data.temperatura, timeFilter).length} | Total: {data.temperatura.length}
                 </Typography>
               </CardContent>
             </CardActionArea>
@@ -183,7 +232,7 @@ export default function SensoresPage() {
                   {latestPh ? Number(latestPh).toFixed(1) : 'Sin datos'}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  Total de registros: {data.ph.length}
+                  Período: {filterDataByTime(data.ph, timeFilter).length} | Total: {data.ph.length}
                 </Typography>
               </CardContent>
             </CardActionArea>
@@ -211,7 +260,7 @@ export default function SensoresPage() {
                   {latestOxigeno ? `${Number(latestOxigeno).toFixed(1)} mg/L` : 'Sin datos'}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  Total de registros: {data.oxigeno.length}
+                  Período: {filterDataByTime(data.oxigeno, timeFilter).length} | Total: {data.oxigeno.length}
                 </Typography>
               </CardContent>
             </CardActionArea>
@@ -222,9 +271,10 @@ export default function SensoresPage() {
       {/* Gráfico general de tendencias */}
       <Box sx={{ mb: 4 }}>
         <GeneralChart 
-          temperatureData={data.temperatura}
-          phData={data.ph}
-          oxygenData={data.oxigeno}
+          temperatureData={filterDataByTime(data.temperatura, timeFilter)}
+          phData={filterDataByTime(data.ph, timeFilter)}
+          oxygenData={filterDataByTime(data.oxigeno, timeFilter)}
+          timeFilter={timeFilter}
         />
       </Box>
 
@@ -234,17 +284,22 @@ export default function SensoresPage() {
           Información del Sistema
         </Typography>
         <Grid container spacing={2}>
-          <Grid size= {{xs: 12, md: 4}}>
+          <Grid size= {{xs: 12, md: 3}}>
             <Typography variant="body2" color="text.secondary" textAlign="center">
               Actualización automática: cada 5 segundos
             </Typography>
           </Grid>
-          <Grid size= {{xs: 12, md: 4}}>
+          <Grid size= {{xs: 12, md: 3}}>
+            <Typography variant="body2" color="text.secondary" textAlign="center">
+              Período activo: {timeFilter === '1h' ? 'Última hora' : timeFilter === '6h' ? 'Últimas 6h' : timeFilter === '24h' ? 'Últimas 24h' : timeFilter === '7d' ? 'Últimos 7 días' : 'Todos los datos'}
+            </Typography>
+          </Grid>
+          <Grid size= {{xs: 12, md: 3}}>
             <Typography variant="body2" color="text.secondary" textAlign="center">
               Version 0.3.0
             </Typography>
           </Grid>
-          <Grid size= {{xs: 12, md: 4}}>
+          <Grid size= {{xs: 12, md: 3}}>
             <Typography variant="body2" color="text.secondary" textAlign="center">
               Última actualización: {new Date().toLocaleTimeString()}
             </Typography>

@@ -1,7 +1,8 @@
 'use client';
 
 import { LineChart } from '@mui/x-charts/LineChart';
-import { Box, Typography, Card, CardContent, Chip } from '@mui/material';
+import { Box, Typography, Card, CardContent, Chip, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { useState } from 'react';
 
 interface SensorData {
   _id: string;
@@ -18,15 +19,88 @@ interface PhChartProps {
 }
 
 export default function PhChart({ data, title = "Análisis de pH" }: PhChartProps) {
-  // Preparar datos para el gráfico
-  const processedData = data
+  // Estado para controlar el filtro de tiempo
+  const [timeFilter, setTimeFilter] = useState('24h'); // 1h, 6h, 24h, 7d, todo
+
+  // Función para filtrar datos por tiempo
+  const filterDataByTime = (data: SensorData[], filter: string) => {
+    if (filter === 'Todo') return data;
+    
+    const now = new Date();
+    let timeLimit: Date;
+    
+    switch (filter) {
+      case '1h':
+        timeLimit = new Date(now.getTime() - 60 * 60 * 1000);
+        break;
+      case '6h':
+        timeLimit = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+        break;
+      case '24h':
+        timeLimit = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        break;
+      case '7d':
+        timeLimit = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        return data;
+    }
+    
+    return data.filter(item => {
+      const itemDate = new Date(item.fecha || item.timestamp || '');
+      return itemDate >= timeLimit;
+    });
+  };
+
+  // Función para reducir puntos de datos manteniendo la tendencia
+  const downsampleData = (data: any[], maxPoints: number) => {
+    if (data.length <= maxPoints) return data;
+    
+    const step = Math.ceil(data.length / maxPoints);
+    const downsampled = [];
+    
+    for (let i = 0; i < data.length; i += step) {
+      // Tomar el promedio de los puntos en el intervalo
+      const slice = data.slice(i, i + step);
+      const avgPh = slice.reduce((sum, item) => sum + item.ph, 0) / slice.length;
+      
+      downsampled.push({
+        ...slice[0], // Mantener la primera fecha del grupo
+        ph: avgPh
+      });
+    }
+    
+    return downsampled;
+  };
+
+  // Procesar datos con filtro de tiempo
+  const filteredData = filterDataByTime(data, timeFilter);
+  
+  const processedData = filteredData
     .map(item => ({
-      ph: item.ph || item.valor || 0,
+      ph: item.ph ?? item.valor ?? 0,
       fecha: new Date(item.fecha || item.timestamp || '').getTime(),
-      fechaTexto: new Date(item.fecha || item.timestamp || '').toLocaleDateString()
+      fechaTexto: new Date(item.fecha || item.timestamp || '').toLocaleString('es-CL', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      fechaCompleta: new Date(item.fecha || item.timestamp || '').toLocaleString('es-CL', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      }),
     }))
     .filter(item => !isNaN(item.fecha))
     .sort((a, b) => a.fecha - b.fecha);
+
+  // Reducir puntos para mejorar rendimiento
+  const maxPoints = timeFilter === '1h' ? 60 : timeFilter === '6h' ? 120 : timeFilter === '24h' ? 200 : 300;
+  const downsampledData = downsampleData(processedData, maxPoints);
 
   // Calcular estadísticas
   const phValues = processedData.map(d => d.ph);
@@ -46,10 +120,12 @@ export default function PhChart({ data, title = "Análisis de pH" }: PhChartProp
 
   const currentStatus = getPhStatus(stats.current);
 
-  // Preparar datos para el chart
+  // ======= DATOS DEL GRÁFICO =======
   const chartData = {
-    xAxis: processedData.map(d => d.fecha),
-    values: processedData.map(d => d.ph)
+    xAxis: downsampledData.map(d => d.fecha),
+    values: downsampledData.map(d => d.ph),
+    labels: downsampledData.map(d => d.fechaTexto),
+    fullLabels: downsampledData.map(d => d.fechaCompleta),
   };
 
   if (data.length === 0) {
@@ -67,9 +143,27 @@ export default function PhChart({ data, title = "Análisis de pH" }: PhChartProp
   return (
     <Card>
       <CardContent>
-        <Typography variant="h5" component="h2" gutterBottom>
-          {title}
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h5" component="h2">
+            {title}
+          </Typography>
+          
+          {/* Selector de rango de tiempo */}
+          <FormControl size="small" sx={{ minWidth: 120 }}>
+            <InputLabel>Período</InputLabel>
+            <Select
+              value={timeFilter}
+              label="Período"
+              onChange={(e) => setTimeFilter(e.target.value)}
+            >
+              <MenuItem value="1h">Última hora</MenuItem>
+              <MenuItem value="6h">Últimas 6h</MenuItem>
+              <MenuItem value="24h">Últimas 24h</MenuItem>
+              <MenuItem value="7d">Últimos 7 días</MenuItem>
+              <MenuItem value="Todo">Todos los datos</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
         
         {/* Estadísticas */}
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
@@ -175,15 +269,20 @@ export default function PhChart({ data, title = "Análisis de pH" }: PhChartProp
           
           <Card variant="outlined" sx={{ flex: '1 1 300px' }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>Información</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Lecturas totales: {data.length}
+              <Typography variant="h6" gutterBottom>
+                Análisis ({timeFilter})
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Variación: {(stats.max - stats.min).toFixed(2)}
+                Lecturas mostradas: {downsampledData.length}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Última lectura: {processedData[processedData.length - 1]?.fechaTexto || 'N/A'}
+                Total disponibles: {data.length}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Variación: {(stats.max - stats.min).toFixed(1)}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Última lectura: {processedData.at(-1)?.fechaTexto || 'N/A'}
               </Typography>
             </CardContent>
           </Card>
