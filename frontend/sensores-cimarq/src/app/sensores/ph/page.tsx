@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import PHChart from '../../components/graficos/PhChart';
+import { useConfiguracionRangos } from '../../hooks/useConfiguracionRangos';
 
 interface PHData {
   _id: string;
@@ -16,6 +17,7 @@ export default function PHPage() {
   const [historial, setHistorial] = useState<PHData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { evaluarEstadoSensor } = useConfiguracionRangos();
 
   useEffect(() => {
     const fetchPH = async () => {
@@ -58,19 +60,18 @@ export default function PHPage() {
   };
 
   const getEstadoColor = (ph: number) => {
-    if (ph < 6.5) return 'bg-red-100 text-red-800';
-    if (ph < 7) return 'bg-orange-100 text-orange-800';
-    if (ph > 8.5) return 'bg-blue-100 text-blue-800';
-    if (ph > 7.5) return 'bg-cyan-100 text-cyan-800';
-    return 'bg-green-100 text-green-800';
+    const estado = evaluarEstadoSensor('ph', ph);
+    const colorMap: Record<string, string> = {
+      'crítico': 'bg-red-100 text-red-800',
+      'aceptable': 'bg-yellow-100 text-yellow-800',
+      'óptimo': 'bg-green-100 text-green-800'
+    };
+    return colorMap[estado] || 'bg-gray-100 text-gray-800';
   };
 
   const getEstadoTexto = (ph: number) => {
-    if (ph < 6.5) return 'Muy Ácido';
-    if (ph < 7) return 'Ácido';
-    if (ph > 8.5) return 'Muy Alcalino';
-    if (ph > 7.5) return 'Alcalino';
-    return 'Neutro';
+    const estado = evaluarEstadoSensor('ph', ph);
+    return estado.charAt(0).toUpperCase() + estado.slice(1);
   };
 
   if (loading) {

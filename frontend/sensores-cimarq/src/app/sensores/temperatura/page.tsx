@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import TemperatureChart from '../../components/graficos/TemperaturaChart';
+import { useConfiguracionRangos } from '../../hooks/useConfiguracionRangos';
 
 interface TemperaturaData {
   _id: string;
@@ -16,6 +17,7 @@ export default function TemperaturaPage() {
   const [historial, setHistorial] = useState<TemperaturaData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { evaluarEstadoSensor } = useConfiguracionRangos();
 
   useEffect(() => {
     const fetchTemperatura = async () => {
@@ -58,15 +60,18 @@ export default function TemperaturaPage() {
   };
 
   const getEstadoColor = (temperatura: number) => {
-    if (temperatura < 18) return 'bg-blue-100 text-blue-800';
-    if (temperatura > 25) return 'bg-red-100 text-red-800';
-    return 'bg-green-100 text-green-800';
+    const estado = evaluarEstadoSensor('temperatura', temperatura);
+    const colorMap: Record<string, string> = {
+      'crítico': 'bg-red-100 text-red-800',
+      'aceptable': 'bg-yellow-100 text-yellow-800',
+      'óptimo': 'bg-green-100 text-green-800'
+    };
+    return colorMap[estado] || 'bg-gray-100 text-gray-800';
   };
 
   const getEstadoTexto = (temperatura: number) => {
-    if (temperatura < 18) return 'Frío';
-    if (temperatura > 25) return 'Caliente';
-    return 'Normal';
+    const estado = evaluarEstadoSensor('temperatura', temperatura);
+    return estado.charAt(0).toUpperCase() + estado.slice(1);
   };
 
   if (loading) {

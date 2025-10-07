@@ -5,6 +5,7 @@ import { Box, Typography, Card, CardContent, Chip, Alert, CircularProgress, Pape
 import Grid from '@mui/material/Grid';
 import Link from 'next/link';
 import GeneralChart from './graficos/GeneralChart';
+import { useConfiguracionRangos } from '../hooks/useConfiguracionRangos';
 
 interface SensorData {
   _id: string;
@@ -39,6 +40,7 @@ export default function SensoresPage() {
     last_message: null 
   });
   const [timeFilter, setTimeFilter] = useState('24h'); // Estado para el filtro de tiempo
+  const { evaluarEstadoSensor } = useConfiguracionRangos();
 
   // Obtener datos del backend Flask
   useEffect(() => {
@@ -106,21 +108,42 @@ export default function SensoresPage() {
   };
 
   const getTemperaturaEstado = (temp: number) => {
-    if (temp < 18) return { color: 'primary', text: 'Frío' };
-    if (temp > 25) return { color: 'error', text: 'Caliente' };
-    return { color: 'success', text: 'Normal' };
+    const estado = evaluarEstadoSensor('temperatura', temp);
+    const colorMap: Record<string, string> = {
+      'crítico': 'error',
+      'aceptable': 'warning', 
+      'óptimo': 'success'
+    };
+    return { 
+      color: colorMap[estado] || 'default', 
+      text: estado.charAt(0).toUpperCase() + estado.slice(1) 
+    };
   };
 
   const getPhEstado = (ph: number) => {
-    if (ph < 6.5) return { color: 'warning', text: 'Ácido' };
-    if (ph > 7.5) return { color: 'error', text: 'Alcalino' };
-    return { color: 'success', text: 'Neutro' };
+    const estado = evaluarEstadoSensor('ph', ph);
+    const colorMap: Record<string, string> = {
+      'crítico': 'error',
+      'aceptable': 'warning', 
+      'óptimo': 'success'
+    };
+    return { 
+      color: colorMap[estado] || 'default', 
+      text: estado.charAt(0).toUpperCase() + estado.slice(1) 
+    };
   };
 
   const getOxigenoEstado = (oxigeno: number) => {
-    if (oxigeno < 5) return { color: 'error', text: 'Bajo' };
-    if (oxigeno > 9) return { color: 'warning', text: 'Alto' };
-    return { color: 'success', text: 'Óptimo' };
+    const estado = evaluarEstadoSensor('oxigeno', oxigeno);
+    const colorMap: Record<string, string> = {
+      'crítico': 'error',
+      'aceptable': 'warning', 
+      'óptimo': 'success'
+    };
+    return { 
+      color: colorMap[estado] || 'default', 
+      text: estado.charAt(0).toUpperCase() + estado.slice(1) 
+    };
   };
 
   if (loading) {

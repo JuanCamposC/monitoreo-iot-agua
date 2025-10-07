@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import OxygenChart from '../../components/graficos/OxigenoChart';
+import { useConfiguracionRangos } from '../../hooks/useConfiguracionRangos';
 
 interface OxigenoData {
   _id: string;
@@ -16,6 +17,7 @@ export default function OxigenoPage() {
   const [historial, setHistorial] = useState<OxigenoData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { evaluarEstadoSensor } = useConfiguracionRangos();
 
   useEffect(() => {
     const fetchOxigeno = async () => {
@@ -58,17 +60,18 @@ export default function OxigenoPage() {
   };
 
   const getEstadoColor = (oxigeno: number) => {
-    if (oxigeno < 5) return 'bg-red-100 text-red-800';
-    if (oxigeno < 7) return 'bg-yellow-100 text-yellow-800';
-    if (oxigeno > 12) return 'bg-blue-100 text-blue-800';
-    return 'bg-green-100 text-green-800';
+    const estado = evaluarEstadoSensor('oxigeno', oxigeno);
+    const colorMap: Record<string, string> = {
+      'crítico': 'bg-red-100 text-red-800',
+      'aceptable': 'bg-yellow-100 text-yellow-800',
+      'óptimo': 'bg-green-100 text-green-800'
+    };
+    return colorMap[estado] || 'bg-gray-100 text-gray-800';
   };
 
   const getEstadoTexto = (oxigeno: number) => {
-    if (oxigeno < 5) return 'Crítico';
-    if (oxigeno < 7) return 'Bajo';
-    if (oxigeno > 12) return 'Alto';
-    return 'Óptimo';
+    const estado = evaluarEstadoSensor('oxigeno', oxigeno);
+    return estado.charAt(0).toUpperCase() + estado.slice(1);
   };
 
   if (loading) {
