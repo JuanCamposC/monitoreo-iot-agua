@@ -266,6 +266,16 @@ def home():
         "last_message": last_message_time.isoformat() if last_message_time else None
     })
 
+# Endpoint de health check simple (para Docker healthcheck)
+@app.route('/health')
+def simple_health():
+    """Health check simple sin autenticación"""
+    return jsonify({
+        "status": "healthy",
+        "mongodb": "connected" if client else "disconnected",
+        "mqtt": "connected" if mqtt_connected else "disconnected"
+    })
+
 @sensores_ns.route('')
 class SensoresResource(Resource):
     @sensores_ns.doc('get_all_sensors')

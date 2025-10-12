@@ -1,0 +1,188 @@
+2025-10-11 23:40:54,385 - SimuladorCIMARQ - INFO - ⚙️ Configuración cargada - Intervalo: 300.0s, Sensores: 3
+2025-10-11 23:40:54,386 - SimuladorCIMARQ - INFO - 🚀 Simulador CIMARQ inicializado
+2025-10-11 23:40:54,386 - SimuladorCIMARQ - INFO - 🚀 Iniciando simulador continuo CIMARQ
+2025-10-11 23:40:54,387 - SimuladorCIMARQ - INFO - 📍 Zona: Central Chile (Valparaíso/Quintay)
+2025-10-11 23:40:54,387 - SimuladorCIMARQ - INFO - ⏱️ Intervalo: 300.0s (5.0 min)
+2025-10-11 23:40:54,388 - SimuladorCIMARQ - INFO - 🔢 Sensores: 3
+2025-10-11 23:40:55,982 - SimuladorCIMARQ - INFO - ✅ MongoDB conectado: cimarq
+2025-10-11 23:40:56,758 - SimuladorCIMARQ - INFO - 📡 MQTT conectado: test.mosquitto.org:1883
+2025-10-11 23:40:56,767 - SimuladorCIMARQ - INFO - ✅ Simulador iniciado correctamente - Modo 24/7 activo
+2025-10-11 23:40:56,767 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores
+2025-10-11 23:40:56,962 - SimuladorCIMARQ - INFO - 📊 sensor_001: T=13.56°C, pH=8.009, O2=6.68mg/L | MongoDB=✅ | MQTT=❌
+2025-10-11 23:40:56,968 - SimuladorCIMARQ - INFO - ✅ MQTT broker conectado exitosamente
+2025-10-11 23:40:57,140 - SimuladorCIMARQ - INFO - 📊 sensor_002: T=12.58°C, pH=7.963, O2=6.71mg/L | MongoDB=✅ | MQTT=✅
+2025-10-11 23:40:57,380 - SimuladorCIMARQ - INFO - 📊 sensor_003: T=13.39°C, pH=7.992, O2=6.49mg/L | MongoDB=✅ | MQTT=✅
+2025-10-11 23:40:57,380 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.61s | Éxito: 83.3% (15/18)
+2025-10-11 23:40:57,381 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 23:45:56
+2025-10-11 23:45:19,716 - SimuladorCIMARQ - INFO - 🛑 Señal de parada recibida, cerrando simulador...
+2025-10-11 23:45:20,422 - SimuladorCIMARQ - INFO - 🧹 Cerrando conexiones...
+2025-10-11 23:45:20,763 - SimuladorCIMARQ - WARNING - ⚠️ MQTT desconectado, código: 0
+2025-10-11 23:45:20,764 - SimuladorCIMARQ - INFO - 📡 MQTT desconectado
+2025-10-11 23:45:20,821 - SimuladorCIMARQ - INFO - 💾 MongoDB desconectado
+2025-10-11 23:45:20,822 - SimuladorCIMARQ - INFO - ✅ Simulador cerrado correctamente
+2025-10-11 23:45:44,557 - SimuladorCIMARQ - INFO - ⚙️ Configuración cargada - Intervalo: 300.0s, Sensores especializados: 3
+2025-10-11 23:45:44,558 - SimuladorCIMARQ - INFO - 🚀 Simulador CIMARQ inicializado
+2025-10-11 23:45:44,559 - SimuladorCIMARQ - INFO - 🚀 Iniciando simulador continuo CIMARQ
+2025-10-11 23:45:44,560 - SimuladorCIMARQ - INFO - 📍 Zona: Central Chile (Valparaíso/Quintay)
+2025-10-11 23:45:44,560 - SimuladorCIMARQ - INFO - ⏱️ Intervalo: 300.0s (5.0 min)
+2025-10-11 23:45:44,561 - SimuladorCIMARQ - ERROR - 💥 Error fatal: 'SensorSimulator' object has no attribute 'num_sensors'
+2025-10-11 23:45:46,283 - SimuladorCIMARQ - INFO - ⚙️ Configuración cargada - Intervalo: 300.0s, Sensores especializados: 3
+2025-10-11 23:45:46,284 - SimuladorCIMARQ - INFO - 🚀 Simulador CIMARQ inicializado
+2025-10-11 23:45:46,285 - SimuladorCIMARQ - INFO - 🚀 Iniciando simulador continuo CIMARQ
+2025-10-11 23:45:46,285 - SimuladorCIMARQ - INFO - 📍 Zona: Central Chile (Valparaíso/Quintay)
+2025-10-11 23:45:46,285 - SimuladorCIMARQ - INFO - ⏱️ Intervalo: 300.0s (5.0 min)
+2025-10-11 23:45:46,286 - SimuladorCIMARQ - ERROR - 💥 Error fatal: 'SensorSimulator' object has no attribute 'num_sensors'
+2025-10-11 23:45:47,969 - SimuladorCIMARQ - INFO - ⚙️ Configuración cargada - Intervalo: 300.0s, Sensores especializados: 3
+2025-10-11 23:45:47,970 - SimuladorCIMARQ - INFO - 🚀 Simulador CIMARQ inicializado
+2025-10-11 23:45:47,971 - SimuladorCIMARQ - INFO - 🚀 Iniciando simulador continuo CIMARQ
+2025-10-11 23:45:47,972 - SimuladorCIMARQ - INFO - 📍 Zona: Central Chile (Valparaíso/Quintay)
+2025-10-11 23:45:47,973 - SimuladorCIMARQ - INFO - ⏱️ Intervalo: 300.0s (5.0 min)
+2025-10-11 23:45:47,973 - SimuladorCIMARQ - ERROR - 💥 Error fatal: 'SensorSimulator' object has no attribute 'num_sensors'
+2025-10-11 23:45:49,780 - SimuladorCIMARQ - INFO - ⚙️ Configuración cargada - Intervalo: 300.0s, Sensores especializados: 3
+2025-10-11 23:45:49,781 - SimuladorCIMARQ - INFO - 🚀 Simulador CIMARQ inicializado
+2025-10-11 23:45:49,782 - SimuladorCIMARQ - INFO - 🚀 Iniciando simulador continuo CIMARQ
+2025-10-11 23:45:49,782 - SimuladorCIMARQ - INFO - 📍 Zona: Central Chile (Valparaíso/Quintay)
+2025-10-11 23:45:49,782 - SimuladorCIMARQ - INFO - ⏱️ Intervalo: 300.0s (5.0 min)
+2025-10-11 23:45:49,783 - SimuladorCIMARQ - ERROR - 💥 Error fatal: 'SensorSimulator' object has no attribute 'num_sensors'
+2025-10-11 23:45:52,089 - SimuladorCIMARQ - INFO - ⚙️ Configuración cargada - Intervalo: 300.0s, Sensores especializados: 3
+2025-10-11 23:45:52,090 - SimuladorCIMARQ - INFO - 🚀 Simulador CIMARQ inicializado
+2025-10-11 23:45:52,090 - SimuladorCIMARQ - INFO - 🚀 Iniciando simulador continuo CIMARQ
+2025-10-11 23:45:52,090 - SimuladorCIMARQ - INFO - 📍 Zona: Central Chile (Valparaíso/Quintay)
+2025-10-11 23:45:52,091 - SimuladorCIMARQ - INFO - ⏱️ Intervalo: 300.0s (5.0 min)
+2025-10-11 23:45:52,092 - SimuladorCIMARQ - ERROR - 💥 Error fatal: 'SensorSimulator' object has no attribute 'num_sensors'
+2025-10-11 23:45:55,158 - SimuladorCIMARQ - INFO - ⚙️ Configuración cargada - Intervalo: 300.0s, Sensores especializados: 3
+2025-10-11 23:45:55,159 - SimuladorCIMARQ - INFO - 🚀 Simulador CIMARQ inicializado
+2025-10-11 23:45:55,160 - SimuladorCIMARQ - INFO - 🚀 Iniciando simulador continuo CIMARQ
+2025-10-11 23:45:55,160 - SimuladorCIMARQ - INFO - 📍 Zona: Central Chile (Valparaíso/Quintay)
+2025-10-11 23:45:55,161 - SimuladorCIMARQ - INFO - ⏱️ Intervalo: 300.0s (5.0 min)
+2025-10-11 23:45:55,161 - SimuladorCIMARQ - ERROR - 💥 Error fatal: 'SensorSimulator' object has no attribute 'num_sensors'
+2025-10-11 23:45:59,774 - SimuladorCIMARQ - INFO - ⚙️ Configuración cargada - Intervalo: 300.0s, Sensores especializados: 3
+2025-10-11 23:45:59,776 - SimuladorCIMARQ - INFO - 🚀 Simulador CIMARQ inicializado
+2025-10-11 23:45:59,777 - SimuladorCIMARQ - INFO - 🚀 Iniciando simulador continuo CIMARQ
+2025-10-11 23:45:59,778 - SimuladorCIMARQ - INFO - 📍 Zona: Central Chile (Valparaíso/Quintay)
+2025-10-11 23:45:59,779 - SimuladorCIMARQ - INFO - ⏱️ Intervalo: 300.0s (5.0 min)
+2025-10-11 23:45:59,780 - SimuladorCIMARQ - ERROR - 💥 Error fatal: 'SensorSimulator' object has no attribute 'num_sensors'
+2025-10-11 23:46:07,745 - SimuladorCIMARQ - INFO - ⚙️ Configuración cargada - Intervalo: 300.0s, Sensores especializados: 3
+2025-10-11 23:46:07,746 - SimuladorCIMARQ - INFO - 🚀 Simulador CIMARQ inicializado
+2025-10-11 23:46:07,747 - SimuladorCIMARQ - INFO - 🚀 Iniciando simulador continuo CIMARQ
+2025-10-11 23:46:07,747 - SimuladorCIMARQ - INFO - 📍 Zona: Central Chile (Valparaíso/Quintay)
+2025-10-11 23:46:07,748 - SimuladorCIMARQ - INFO - ⏱️ Intervalo: 300.0s (5.0 min)
+2025-10-11 23:46:07,748 - SimuladorCIMARQ - ERROR - 💥 Error fatal: 'SensorSimulator' object has no attribute 'num_sensors'
+2025-10-11 23:48:15,943 - SimuladorCIMARQ - INFO - ⚙️ Configuración cargada - Intervalo: 300.0s, Sensores especializados: 3
+2025-10-11 23:48:15,944 - SimuladorCIMARQ - INFO - 🚀 Simulador CIMARQ inicializado
+2025-10-11 23:48:15,945 - SimuladorCIMARQ - INFO - 🚀 Iniciando simulador continuo CIMARQ
+2025-10-11 23:48:15,946 - SimuladorCIMARQ - INFO - 📍 Zona: Central Chile (Valparaíso/Quintay)
+2025-10-11 23:48:15,946 - SimuladorCIMARQ - INFO - ⏱️ Intervalo: 300.0s (5.0 min)
+2025-10-11 23:48:15,947 - SimuladorCIMARQ - INFO - 🔢 Sensores especializados: 3 (Temperatura, pH, Oxígeno)
+2025-10-11 23:48:16,883 - SimuladorCIMARQ - INFO - ✅ MongoDB conectado: cimarq
+2025-10-11 23:48:17,336 - SimuladorCIMARQ - INFO - 📡 MQTT conectado: test.mosquitto.org:1883
+2025-10-11 23:48:17,337 - SimuladorCIMARQ - INFO - ✅ Simulador iniciado correctamente - Modo 24/7 activo
+2025-10-11 23:48:17,338 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-11 23:48:17,338 - SimuladorCIMARQ - ERROR - 💥 Error crítico en simulación: 'NoneType' object is not subscriptable
+2025-10-11 23:48:17,339 - SimuladorCIMARQ - INFO - 🧹 Cerrando conexiones...
+2025-10-11 23:48:17,601 - SimuladorCIMARQ - INFO - ✅ MQTT broker conectado exitosamente
+2025-10-11 23:48:17,604 - SimuladorCIMARQ - WARNING - ⚠️ MQTT desconectado, código: 0
+2025-10-11 23:48:17,605 - SimuladorCIMARQ - INFO - 📡 MQTT desconectado
+2025-10-11 23:48:17,663 - SimuladorCIMARQ - INFO - 💾 MongoDB desconectado
+2025-10-11 23:48:17,663 - SimuladorCIMARQ - INFO - ✅ Simulador cerrado correctamente
+2025-10-11 23:48:19,783 - SimuladorCIMARQ - INFO - ⚙️ Configuración cargada - Intervalo: 300.0s, Sensores especializados: 3
+2025-10-11 23:48:19,784 - SimuladorCIMARQ - INFO - 🚀 Simulador CIMARQ inicializado
+2025-10-11 23:48:19,784 - SimuladorCIMARQ - INFO - 🚀 Iniciando simulador continuo CIMARQ
+2025-10-11 23:48:19,784 - SimuladorCIMARQ - INFO - 📍 Zona: Central Chile (Valparaíso/Quintay)
+2025-10-11 23:48:19,785 - SimuladorCIMARQ - INFO - ⏱️ Intervalo: 300.0s (5.0 min)
+2025-10-11 23:48:19,832 - SimuladorCIMARQ - INFO - 🔢 Sensores especializados: 3 (Temperatura, pH, Oxígeno)
+2025-10-11 23:48:20,561 - SimuladorCIMARQ - INFO - ✅ MongoDB conectado: cimarq
+2025-10-11 23:48:20,786 - SimuladorCIMARQ - INFO - 📡 MQTT conectado: test.mosquitto.org:1883
+2025-10-11 23:48:20,787 - SimuladorCIMARQ - INFO - ✅ Simulador iniciado correctamente - Modo 24/7 activo
+2025-10-11 23:48:20,787 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-11 23:48:20,788 - SimuladorCIMARQ - ERROR - 💥 Error crítico en simulación: 'NoneType' object is not subscriptable
+2025-10-11 23:48:20,789 - SimuladorCIMARQ - INFO - 🧹 Cerrando conexiones...
+2025-10-11 23:48:21,017 - SimuladorCIMARQ - INFO - ✅ MQTT broker conectado exitosamente
+2025-10-11 23:48:21,018 - SimuladorCIMARQ - WARNING - ⚠️ MQTT desconectado, código: 0
+2025-10-11 23:48:21,019 - SimuladorCIMARQ - INFO - 📡 MQTT desconectado
+2025-10-11 23:48:21,076 - SimuladorCIMARQ - INFO - 💾 MongoDB desconectado
+2025-10-11 23:48:21,077 - SimuladorCIMARQ - INFO - ✅ Simulador cerrado correctamente
+2025-10-11 23:48:23,266 - SimuladorCIMARQ - INFO - ⚙️ Configuración cargada - Intervalo: 300.0s, Sensores especializados: 3
+2025-10-11 23:48:23,267 - SimuladorCIMARQ - INFO - 🚀 Simulador CIMARQ inicializado
+2025-10-11 23:48:23,267 - SimuladorCIMARQ - INFO - 🚀 Iniciando simulador continuo CIMARQ
+2025-10-11 23:48:23,268 - SimuladorCIMARQ - INFO - 📍 Zona: Central Chile (Valparaíso/Quintay)
+2025-10-11 23:48:23,269 - SimuladorCIMARQ - INFO - ⏱️ Intervalo: 300.0s (5.0 min)
+2025-10-11 23:48:23,269 - SimuladorCIMARQ - INFO - 🔢 Sensores especializados: 3 (Temperatura, pH, Oxígeno)
+2025-10-11 23:48:24,139 - SimuladorCIMARQ - INFO - ✅ MongoDB conectado: cimarq
+2025-10-11 23:48:24,370 - SimuladorCIMARQ - INFO - 📡 MQTT conectado: test.mosquitto.org:1883
+2025-10-11 23:48:24,374 - SimuladorCIMARQ - INFO - ✅ Simulador iniciado correctamente - Modo 24/7 activo
+2025-10-11 23:48:24,375 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-11 23:48:24,376 - SimuladorCIMARQ - ERROR - 💥 Error crítico en simulación: 'NoneType' object is not subscriptable
+2025-10-11 23:48:24,376 - SimuladorCIMARQ - INFO - 🧹 Cerrando conexiones...
+2025-10-11 23:48:24,591 - SimuladorCIMARQ - INFO - ✅ MQTT broker conectado exitosamente
+2025-10-11 23:48:24,593 - SimuladorCIMARQ - WARNING - ⚠️ MQTT desconectado, código: 0
+2025-10-11 23:48:24,593 - SimuladorCIMARQ - INFO - 📡 MQTT desconectado
+2025-10-11 23:48:24,650 - SimuladorCIMARQ - INFO - 💾 MongoDB desconectado
+2025-10-11 23:48:24,650 - SimuladorCIMARQ - INFO - ✅ Simulador cerrado correctamente
+2025-10-11 23:48:26,851 - SimuladorCIMARQ - INFO - ⚙️ Configuración cargada - Intervalo: 300.0s, Sensores especializados: 3
+2025-10-11 23:48:26,851 - SimuladorCIMARQ - INFO - 🚀 Simulador CIMARQ inicializado
+2025-10-11 23:48:26,852 - SimuladorCIMARQ - INFO - 🚀 Iniciando simulador continuo CIMARQ
+2025-10-11 23:48:26,853 - SimuladorCIMARQ - INFO - 📍 Zona: Central Chile (Valparaíso/Quintay)
+2025-10-11 23:48:26,853 - SimuladorCIMARQ - INFO - ⏱️ Intervalo: 300.0s (5.0 min)
+2025-10-11 23:48:26,854 - SimuladorCIMARQ - INFO - 🔢 Sensores especializados: 3 (Temperatura, pH, Oxígeno)
+2025-10-11 23:48:27,574 - SimuladorCIMARQ - INFO - ✅ MongoDB conectado: cimarq
+2025-10-11 23:48:27,807 - SimuladorCIMARQ - INFO - 📡 MQTT conectado: test.mosquitto.org:1883
+2025-10-11 23:48:27,808 - SimuladorCIMARQ - INFO - ✅ Simulador iniciado correctamente - Modo 24/7 activo
+2025-10-11 23:48:27,809 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-11 23:48:27,809 - SimuladorCIMARQ - ERROR - 💥 Error crítico en simulación: 'NoneType' object is not subscriptable
+2025-10-11 23:48:27,810 - SimuladorCIMARQ - INFO - 🧹 Cerrando conexiones...
+2025-10-11 23:48:28,029 - SimuladorCIMARQ - INFO - ✅ MQTT broker conectado exitosamente
+2025-10-11 23:48:28,031 - SimuladorCIMARQ - WARNING - ⚠️ MQTT desconectado, código: 0
+2025-10-11 23:48:28,031 - SimuladorCIMARQ - INFO - 📡 MQTT desconectado
+2025-10-11 23:48:28,090 - SimuladorCIMARQ - INFO - 💾 MongoDB desconectado
+2025-10-11 23:48:28,091 - SimuladorCIMARQ - INFO - ✅ Simulador cerrado correctamente
+2025-10-11 23:48:30,631 - SimuladorCIMARQ - INFO - ⚙️ Configuración cargada - Intervalo: 300.0s, Sensores especializados: 3
+2025-10-11 23:48:30,632 - SimuladorCIMARQ - INFO - 🚀 Simulador CIMARQ inicializado
+2025-10-11 23:48:30,633 - SimuladorCIMARQ - INFO - 🚀 Iniciando simulador continuo CIMARQ
+2025-10-11 23:48:30,634 - SimuladorCIMARQ - INFO - 📍 Zona: Central Chile (Valparaíso/Quintay)
+2025-10-11 23:48:30,634 - SimuladorCIMARQ - INFO - ⏱️ Intervalo: 300.0s (5.0 min)
+2025-10-11 23:48:30,635 - SimuladorCIMARQ - INFO - 🔢 Sensores especializados: 3 (Temperatura, pH, Oxígeno)
+2025-10-11 23:48:31,812 - SimuladorCIMARQ - INFO - ✅ MongoDB conectado: cimarq
+2025-10-11 23:48:32,032 - SimuladorCIMARQ - INFO - 📡 MQTT conectado: test.mosquitto.org:1883
+2025-10-11 23:48:32,035 - SimuladorCIMARQ - INFO - ✅ Simulador iniciado correctamente - Modo 24/7 activo
+2025-10-11 23:48:32,037 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-11 23:48:32,038 - SimuladorCIMARQ - ERROR - 💥 Error crítico en simulación: 'NoneType' object is not subscriptable
+2025-10-11 23:48:32,040 - SimuladorCIMARQ - INFO - 🧹 Cerrando conexiones...
+2025-10-11 23:48:32,245 - SimuladorCIMARQ - INFO - ✅ MQTT broker conectado exitosamente
+2025-10-11 23:48:32,247 - SimuladorCIMARQ - WARNING - ⚠️ MQTT desconectado, código: 0
+2025-10-11 23:48:32,248 - SimuladorCIMARQ - INFO - 📡 MQTT desconectado
+2025-10-11 23:48:32,314 - SimuladorCIMARQ - INFO - 💾 MongoDB desconectado
+2025-10-11 23:48:32,315 - SimuladorCIMARQ - INFO - ✅ Simulador cerrado correctamente
+2025-10-11 23:48:35,842 - SimuladorCIMARQ - INFO - ⚙️ Configuración cargada - Intervalo: 300.0s, Sensores especializados: 3
+2025-10-11 23:48:35,842 - SimuladorCIMARQ - INFO - 🚀 Simulador CIMARQ inicializado
+2025-10-11 23:48:35,843 - SimuladorCIMARQ - INFO - 🚀 Iniciando simulador continuo CIMARQ
+2025-10-11 23:48:35,843 - SimuladorCIMARQ - INFO - 📍 Zona: Central Chile (Valparaíso/Quintay)
+2025-10-11 23:48:35,844 - SimuladorCIMARQ - INFO - ⏱️ Intervalo: 300.0s (5.0 min)
+2025-10-11 23:48:35,844 - SimuladorCIMARQ - INFO - 🔢 Sensores especializados: 3 (Temperatura, pH, Oxígeno)
+2025-10-11 23:48:36,923 - SimuladorCIMARQ - INFO - ✅ MongoDB conectado: cimarq
+2025-10-11 23:48:37,164 - SimuladorCIMARQ - INFO - 📡 MQTT conectado: test.mosquitto.org:1883
+2025-10-11 23:48:37,165 - SimuladorCIMARQ - INFO - ✅ Simulador iniciado correctamente - Modo 24/7 activo
+2025-10-11 23:48:37,165 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-11 23:48:37,166 - SimuladorCIMARQ - ERROR - 💥 Error crítico en simulación: 'NoneType' object is not subscriptable
+2025-10-11 23:48:37,168 - SimuladorCIMARQ - INFO - 🧹 Cerrando conexiones...
+2025-10-11 23:48:37,388 - SimuladorCIMARQ - INFO - ✅ MQTT broker conectado exitosamente
+2025-10-11 23:48:37,389 - SimuladorCIMARQ - WARNING - ⚠️ MQTT desconectado, código: 0
+2025-10-11 23:48:37,390 - SimuladorCIMARQ - INFO - 📡 MQTT desconectado
+2025-10-11 23:48:37,446 - SimuladorCIMARQ - INFO - 💾 MongoDB desconectado
+2025-10-11 23:48:37,447 - SimuladorCIMARQ - INFO - ✅ Simulador cerrado correctamente
+2025-10-11 23:49:07,876 - SimuladorCIMARQ - INFO - ⚙️ Configuración cargada - Intervalo: 300.0s, Sensores especializados: 3
+2025-10-11 23:49:07,876 - SimuladorCIMARQ - INFO - 🚀 Simulador CIMARQ inicializado
+2025-10-11 23:49:07,877 - SimuladorCIMARQ - INFO - 🚀 Iniciando simulador continuo CIMARQ
+2025-10-11 23:49:07,878 - SimuladorCIMARQ - INFO - 📍 Zona: Central Chile (Valparaíso/Quintay)
+2025-10-11 23:49:07,879 - SimuladorCIMARQ - INFO - ⏱️ Intervalo: 300.0s (5.0 min)
+2025-10-11 23:49:07,879 - SimuladorCIMARQ - INFO - 🔢 Sensores especializados: 3 (Temperatura, pH, Oxígeno)
+2025-10-11 23:49:08,685 - SimuladorCIMARQ - INFO - ✅ MongoDB conectado: cimarq
+2025-10-11 23:49:08,916 - SimuladorCIMARQ - INFO - 📡 MQTT conectado: test.mosquitto.org:1883
+2025-10-11 23:49:08,917 - SimuladorCIMARQ - INFO - ✅ Simulador iniciado correctamente - Modo 24/7 activo
+2025-10-11 23:49:08,918 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-11 23:49:09,097 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.6°C | MongoDB=✅ | MQTT=❌
+2025-10-11 23:49:09,098 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.938 | MongoDB=✅ | MQTT=❌
+2025-10-11 23:49:09,099 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 6.24 mg/L | MongoDB=✅ | MQTT=❌
+2025-10-11 23:49:09,101 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.18s | Éxito: 50.0% (3/6)
+2025-10-11 23:49:09,102 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 23:54:08
+2025-10-11 23:49:09,141 - SimuladorCIMARQ - INFO - ✅ MQTT broker conectado exitosamente
