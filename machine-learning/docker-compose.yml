@@ -1,0 +1,9 @@
+services:
+  ml-analysis:
+    build: .
+    container_name: cimarq-ml-prediccion
+    volumes:
+      - ./resultados:/app/resultados
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: no

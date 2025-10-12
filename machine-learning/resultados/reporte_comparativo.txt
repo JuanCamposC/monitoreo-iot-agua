@@ -1,0 +1,53 @@
+🐟 CIMARQ - REPORTE COMPARATIVO DE MODELOS ML
+============================================================
+📅 Fecha: 2025-10-12 05:36:57
+🎯 Horizonte: 24 horas
+📊 Dataset: brisbane_water_quality.csv
+
+🌡️ SENSOR: TEMPERATURA
+----------------------------------------
+🏆 RANKING DE MODELOS (Mejor → Peor):
+1. LSTM         | R²=0.996 | MAE=0.057 | RMSE=0.089 | MAPE=0.3%
+2. Perceptron   | R²=0.935 | MAE=0.238 | RMSE=0.354 | MAPE=1.3%
+3. SARIMA       | R²=-0.090 | MAE=1.251 | RMSE=1.447 | MAPE=6.7%
+4. ARIMA        | R²=-0.100 | MAE=1.255 | RMSE=1.454 | MAPE=6.7%
+
+✅ RECOMENDADO: LSTM (R²=0.996)
+📈 Calidad predicción: EXCELENTE 🟢
+
+🌡️ SENSOR: PH
+----------------------------------------
+🏆 RANKING DE MODELOS (Mejor → Peor):
+1. LSTM         | R²=0.826 | MAE=0.010 | RMSE=0.014 | MAPE=0.1%
+2. Perceptron   | R²=0.825 | MAE=0.011 | RMSE=0.014 | MAPE=0.1%
+3. SARIMA       | R²=0.000 | MAE=0.027 | RMSE=0.034 | MAPE=0.3%
+4. ARIMA        | R²=-0.000 | MAE=0.027 | RMSE=0.034 | MAPE=0.3%
+
+✅ RECOMENDADO: LSTM (R²=0.826)
+📈 Calidad predicción: EXCELENTE 🟢
+
+🌡️ SENSOR: OXIGENO
+----------------------------------------
+🏆 RANKING DE MODELOS (Mejor → Peor):
+1. Perceptron   | R²=0.778 | MAE=0.176 | RMSE=0.238 | MAPE=2.5%
+2. LSTM         | R²=0.775 | MAE=0.177 | RMSE=0.240 | MAPE=2.6%
+3. SARIMA       | R²=-0.015 | MAE=0.415 | RMSE=0.510 | MAPE=5.9%
+4. ARIMA        | R²=-0.031 | MAE=0.420 | RMSE=0.514 | MAPE=6.0%
+
+✅ RECOMENDADO: Perceptron (R²=0.778)
+📈 Calidad predicción: BUENA 🟡
+
+🎯 RECOMENDACIONES FINALES
+==============================
+• Temperatura: LSTM (R²=0.996)
+• Ph: LSTM (R²=0.826)
+• Oxigeno: Perceptron (R²=0.778)
+
+🏅 Modelo más consistente: LSTM (R² promedio: 0.866)
+
+============================================================
+📋 MÉTRICAS EXPLICADAS:
+• R² (0-1): Porcentaje de varianza explicada. >0.8=Excelente, >0.6=Bueno
+• MAE: Error absoluto promedio (unidades originales)
+• RMSE: Error cuadrático (penaliza errores grandes)
+• MAPE: Error porcentual promedio

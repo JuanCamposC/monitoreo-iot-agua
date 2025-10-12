@@ -1,0 +1,169 @@
+{
+  "metadata": {
+    "fecha_analisis": "2025-10-12T06:10:56.452778",
+    "dataset": "brisbane_water_quality.csv",
+    "horizonte_prediccion": "24 horas",
+    "total_registros": 22716,
+    "sensores_analizados": [
+      "temperatura",
+      "ph",
+      "oxigeno"
+    ],
+    "metricas": [
+      "MAE",
+      "RMSE",
+      "R2",
+      "MAPE",
+      "tiempo_entrenamiento",
+      "tiempo_prediccion",
+      "tiempo_total",
+      "score_eficiencia"
+    ]
+  },
+  "resultados": [
+    {
+      "modelo": "ARIMA",
+      "sensor": "temperatura",
+      "MAE": 1.2554451087337533,
+      "RMSE": 1.4536212949743026,
+      "R2": -0.09982952810060386,
+      "MAPE": 6.693728309022509,
+      "tiempo_entrenamiento": 1.2666213512420654,
+      "tiempo_prediccion": 0.08890581130981445,
+      "tiempo_total": 1.3555271625518799,
+      "score_eficiencia": -0.07359198610723428
+    },
+    {
+      "modelo": "SARIMA",
+      "sensor": "temperatura",
+      "MAE": 1.2510675014068346,
+      "RMSE": 1.4467855965848866,
+      "R2": -0.08950988583084873,
+      "MAPE": 6.663598008927918,
+      "tiempo_entrenamiento": 34.12188982963562,
+      "tiempo_prediccion": 0.6646382808685303,
+      "tiempo_total": 34.78652811050415,
+      "score_eficiencia": -0.0025730453036650535
+    },
+    {
+      "modelo": "LSTM",
+      "sensor": "temperatura",
+      "MAE": 0.07916364231012969,
+      "RMSE": 0.10711608307848297,
+      "R2": 0.9940278296222559,
+      "MAPE": 0.41938186659840165,
+      "tiempo_entrenamiento": 576.2138946056366,
+      "tiempo_prediccion": 2.5854547023773193,
+      "tiempo_total": 578.7993493080139,
+      "score_eficiencia": 0.0017173932787198007
+    },
+    {
+      "modelo": "Perceptron",
+      "sensor": "temperatura",
+      "MAE": 0.23758451664670774,
+      "RMSE": 0.354412402007212,
+      "R2": 0.93462064317689,
+      "MAPE": 1.321090408195585,
+      "tiempo_entrenamiento": 14.407164096832275,
+      "tiempo_prediccion": 0.005186557769775391,
+      "tiempo_total": 14.41235065460205,
+      "score_eficiencia": 0.06484409250658689
+    },
+    {
+      "modelo": "ARIMA",
+      "sensor": "ph",
+      "MAE": 0.02700574372535653,
+      "RMSE": 0.03359564729124745,
+      "R2": -3.9834018481288425e-05,
+      "MAPE": 0.33067717032301686,
+      "tiempo_entrenamiento": 0.5374951362609863,
+      "tiempo_prediccion": 0.09576678276062012,
+      "tiempo_total": 0.6332619190216064,
+      "score_eficiencia": -6.2803736574214e-05
+    },
+    {
+      "modelo": "SARIMA",
+      "sensor": "ph",
+      "MAE": 0.02699822338588146,
+      "RMSE": 0.033594940961788805,
+      "R2": 2.2160818233807333e-06,
+      "MAPE": 0.33059222000905175,
+      "tiempo_entrenamiento": 8.018163681030273,
+      "tiempo_prediccion": 2.635878801345825,
+      "tiempo_total": 10.654042482376099,
+      "score_eficiencia": 2.0798432545400252e-07
+    },
+    {
+      "modelo": "LSTM",
+      "sensor": "ph",
+      "MAE": 0.010341927650453343,
+      "RMSE": 0.013903903824330486,
+      "R2": 0.8287128500530317,
+      "MAPE": 0.12668137896218987,
+      "tiempo_entrenamiento": 274.2452244758606,
+      "tiempo_prediccion": 2.345123291015625,
+      "tiempo_total": 276.5903477668762,
+      "score_eficiencia": 0.0029961633172687265
+    },
+    {
+      "modelo": "Perceptron",
+      "sensor": "ph",
+      "MAE": 0.010582190558767742,
+      "RMSE": 0.014070993474674687,
+      "R2": 0.824571238874522,
+      "MAPE": 0.12958489044679833,
+      "tiempo_entrenamiento": 17.5302414894104,
+      "tiempo_prediccion": 0.015314817428588867,
+      "tiempo_total": 17.54555630683899,
+      "score_eficiencia": 0.046993337293947245
+    },
+    {
+      "modelo": "ARIMA",
+      "sensor": "oxigeno",
+      "MAE": 0.41993207151715856,
+      "RMSE": 0.5142258065411103,
+      "R2": -0.031176249848199555,
+      "MAPE": 5.9743300024699355,
+      "tiempo_entrenamiento": 0.48349976539611816,
+      "tiempo_prediccion": 0.09437370300292969,
+      "tiempo_total": 0.5778734683990479,
+      "score_eficiencia": -0.053856760674179195
+    },
+    {
+      "modelo": "SARIMA",
+      "sensor": "oxigeno",
+      "MAE": 0.4149268174826987,
+      "RMSE": 0.5101729299860867,
+      "R2": -0.01498584995176766,
+      "MAPE": 5.9281601207064485,
+      "tiempo_entrenamiento": 28.79513382911682,
+      "tiempo_prediccion": 1.1480896472930908,
+      "tiempo_total": 29.943223476409912,
+      "score_eficiencia": -0.0005004587934488776
+    },
+    {
+      "modelo": "LSTM",
+      "sensor": "oxigeno",
+      "MAE": 0.17863293203474484,
+      "RMSE": 0.24224272057332435,
+      "R2": 0.7711627941375688,
+      "MAPE": 2.573230240520429,
+      "tiempo_entrenamiento": 412.6264910697937,
+      "tiempo_prediccion": 2.4681015014648438,
+      "tiempo_total": 415.09459257125854,
+      "score_eficiencia": 0.0018577956690908133
+    },
+    {
+      "modelo": "Perceptron",
+      "sensor": "oxigeno",
+      "MAE": 0.17556741304444323,
+      "RMSE": 0.23844807065603046,
+      "R2": 0.7782759558697958,
+      "MAPE": 2.5281425760565925,
+      "tiempo_entrenamiento": 19.481175184249878,
+      "tiempo_prediccion": 0.0059926509857177734,
+      "tiempo_total": 19.487167835235596,
+      "score_eficiencia": 0.039935819644504156
+    }
+  ]
+}

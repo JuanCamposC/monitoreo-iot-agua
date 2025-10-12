@@ -186,3 +186,277 @@
 2025-10-11 23:49:09,101 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.18s | Éxito: 50.0% (3/6)
 2025-10-11 23:49:09,102 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 23:54:08
 2025-10-11 23:49:09,141 - SimuladorCIMARQ - INFO - ✅ MQTT broker conectado exitosamente
+2025-10-11 23:54:09,158 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-11 23:54:09,338 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.58°C | MongoDB=✅ | MQTT=✅
+2025-10-11 23:54:09,339 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.94 | MongoDB=✅ | MQTT=✅
+2025-10-11 23:54:09,340 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 6.27 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-11 23:54:09,340 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.18s | Éxito: 100.0% (6/6)
+2025-10-11 23:54:09,341 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 23:59:09
+2025-10-11 23:59:09,405 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-11 23:59:09,589 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.42°C | MongoDB=✅ | MQTT=✅
+2025-10-11 23:59:09,590 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.932 | MongoDB=✅ | MQTT=✅
+2025-10-11 23:59:09,592 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 6.27 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-11 23:59:09,593 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-11 23:59:09,594 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:04:09
+2025-10-12 00:04:09,669 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 00:04:09,851 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.44°C | MongoDB=✅ | MQTT=✅
+2025-10-12 00:04:09,852 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.897 | MongoDB=✅ | MQTT=✅
+2025-10-12 00:04:09,853 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.91 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 00:04:09,853 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.18s | Éxito: 100.0% (6/6)
+2025-10-12 00:04:09,854 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:09:09
+2025-10-12 00:09:09,910 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 00:09:10,094 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.31°C | MongoDB=✅ | MQTT=✅
+2025-10-12 00:09:10,095 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.885 | MongoDB=✅ | MQTT=✅
+2025-10-12 00:09:10,095 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.95 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 00:09:10,096 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-12 00:09:10,097 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:14:09
+2025-10-12 00:14:10,155 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 00:14:10,344 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.37°C | MongoDB=✅ | MQTT=✅
+2025-10-12 00:14:10,345 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.892 | MongoDB=✅ | MQTT=✅
+2025-10-12 00:14:10,346 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.93 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 00:14:10,346 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-12 00:14:10,347 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:19:10
+2025-10-12 00:19:10,399 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 00:19:10,582 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.49°C | MongoDB=✅ | MQTT=✅
+2025-10-12 00:19:10,583 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.9 | MongoDB=✅ | MQTT=✅
+2025-10-12 00:19:10,583 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.9 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 00:19:10,584 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.18s | Éxito: 100.0% (6/6)
+2025-10-12 00:19:10,584 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:24:10
+2025-10-12 00:24:10,639 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 00:24:10,826 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.45°C | MongoDB=✅ | MQTT=✅
+2025-10-12 00:24:10,829 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.889 | MongoDB=✅ | MQTT=✅
+2025-10-12 00:24:10,830 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.93 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 00:24:10,830 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-12 00:24:10,831 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:29:10
+2025-10-12 00:29:10,885 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 00:29:11,068 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.5°C | MongoDB=✅ | MQTT=✅
+2025-10-12 00:29:11,069 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.896 | MongoDB=✅ | MQTT=✅
+2025-10-12 00:29:11,070 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.95 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 00:29:11,071 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-12 00:29:11,072 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:34:10
+2025-10-12 00:34:11,128 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 00:34:11,315 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.43°C | MongoDB=✅ | MQTT=✅
+2025-10-12 00:34:11,316 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.904 | MongoDB=✅ | MQTT=✅
+2025-10-12 00:34:11,317 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.95 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 00:34:11,317 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-12 00:34:11,318 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:39:11
+2025-10-12 00:39:11,364 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 00:39:11,550 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.47°C | MongoDB=✅ | MQTT=✅
+2025-10-12 00:39:11,551 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.906 | MongoDB=✅ | MQTT=✅
+2025-10-12 00:39:11,552 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.98 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 00:39:11,552 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-12 00:39:11,553 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:44:11
+2025-10-12 00:44:11,596 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 00:44:11,821 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.42°C | MongoDB=✅ | MQTT=✅
+2025-10-12 00:44:11,822 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.909 | MongoDB=✅ | MQTT=✅
+2025-10-12 00:44:11,823 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.96 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 00:44:11,825 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.23s | Éxito: 100.0% (6/6)
+2025-10-12 00:44:11,826 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:49:11
+2025-10-12 00:49:11,903 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 00:49:12,086 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.34°C | MongoDB=✅ | MQTT=✅
+2025-10-12 00:49:12,087 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.916 | MongoDB=✅ | MQTT=✅
+2025-10-12 00:49:12,088 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.94 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 00:49:12,089 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-12 00:49:12,089 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:54:11
+2025-10-12 00:54:12,170 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 00:54:12,361 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.4°C | MongoDB=✅ | MQTT=✅
+2025-10-12 00:54:12,362 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.913 | MongoDB=✅ | MQTT=✅
+2025-10-12 00:54:12,363 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.94 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 00:54:12,364 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-12 00:54:12,364 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:59:12
+2025-10-12 00:59:12,443 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 00:59:12,628 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.42°C | MongoDB=✅ | MQTT=✅
+2025-10-12 00:59:12,630 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.913 | MongoDB=✅ | MQTT=✅
+2025-10-12 00:59:12,630 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.99 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 00:59:12,631 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-12 00:59:12,632 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:04:12
+2025-10-12 01:04:12,706 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 01:04:12,888 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.54°C | MongoDB=✅ | MQTT=✅
+2025-10-12 01:04:12,889 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.871 | MongoDB=✅ | MQTT=✅
+2025-10-12 01:04:12,890 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.74 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 01:04:12,890 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.18s | Éxito: 100.0% (6/6)
+2025-10-12 01:04:12,891 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:09:12
+2025-10-12 01:09:12,951 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 01:09:13,133 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.53°C | MongoDB=✅ | MQTT=✅
+2025-10-12 01:09:13,134 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.882 | MongoDB=✅ | MQTT=✅
+2025-10-12 01:09:13,134 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.72 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 01:09:13,135 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.18s | Éxito: 100.0% (6/6)
+2025-10-12 01:09:13,135 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:14:12
+2025-10-12 01:14:13,221 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 01:14:13,410 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.53°C | MongoDB=✅ | MQTT=✅
+2025-10-12 01:14:13,411 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.886 | MongoDB=✅ | MQTT=✅
+2025-10-12 01:14:13,412 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.7 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 01:14:13,413 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-12 01:14:13,413 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:19:13
+2025-10-12 01:14:19,987 - SimuladorCIMARQ - INFO - 🛑 Señal de parada recibida, cerrando simulador...
+2025-10-12 01:14:20,416 - SimuladorCIMARQ - INFO - 🧹 Cerrando conexiones...
+2025-10-12 01:14:20,648 - SimuladorCIMARQ - WARNING - ⚠️ MQTT desconectado, código: 0
+2025-10-12 01:14:20,650 - SimuladorCIMARQ - INFO - 📡 MQTT desconectado
+2025-10-12 01:14:20,720 - SimuladorCIMARQ - INFO - 💾 MongoDB desconectado
+2025-10-12 01:14:20,720 - SimuladorCIMARQ - INFO - ✅ Simulador cerrado correctamente
+2025-10-12 01:16:12,613 - SimuladorCIMARQ - INFO - ⚙️ Configuración cargada - Intervalo: 300.0s, Sensores especializados: 3
+2025-10-12 01:16:12,614 - SimuladorCIMARQ - INFO - 🚀 Simulador CIMARQ inicializado
+2025-10-12 01:16:12,615 - SimuladorCIMARQ - INFO - 🚀 Iniciando simulador continuo CIMARQ
+2025-10-12 01:16:12,615 - SimuladorCIMARQ - INFO - 📍 Zona: Central Chile (Valparaíso/Quintay)
+2025-10-12 01:16:12,616 - SimuladorCIMARQ - INFO - ⏱️ Intervalo: 300.0s (5.0 min)
+2025-10-12 01:16:12,617 - SimuladorCIMARQ - INFO - 🔢 Sensores especializados: 3 (Temperatura, pH, Oxígeno)
+2025-10-12 01:16:13,438 - SimuladorCIMARQ - INFO - ✅ MongoDB conectado: cimarq
+2025-10-12 01:16:14,089 - SimuladorCIMARQ - INFO - 📡 MQTT conectado: test.mosquitto.org:1883
+2025-10-12 01:16:14,090 - SimuladorCIMARQ - INFO - ✅ Simulador iniciado correctamente - Modo 24/7 activo
+2025-10-12 01:16:14,090 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 01:16:14,273 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 12.88°C | MongoDB=✅ | MQTT=❌
+2025-10-12 01:16:14,274 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.884 | MongoDB=✅ | MQTT=❌
+2025-10-12 01:16:14,274 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 6.09 mg/L | MongoDB=✅ | MQTT=❌
+2025-10-12 01:16:14,275 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.18s | Éxito: 50.0% (3/6)
+2025-10-12 01:16:14,276 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:21:14
+2025-10-12 01:16:14,317 - SimuladorCIMARQ - INFO - ✅ MQTT broker conectado exitosamente
+2025-10-12 01:21:14,332 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 01:21:14,525 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 12.79°C | MongoDB=✅ | MQTT=✅
+2025-10-12 01:21:14,527 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.889 | MongoDB=✅ | MQTT=✅
+2025-10-12 01:21:14,527 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 6.13 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 01:21:14,528 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.20s | Éxito: 100.0% (6/6)
+2025-10-12 01:21:14,529 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:26:14
+2025-10-12 01:26:14,560 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 01:26:14,775 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 12.86°C | MongoDB=✅ | MQTT=✅
+2025-10-12 01:26:14,776 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.898 | MongoDB=✅ | MQTT=✅
+2025-10-12 01:26:14,776 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 6.11 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 01:26:14,777 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.22s | Éxito: 100.0% (6/6)
+2025-10-12 01:26:14,778 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:31:14
+2025-10-12 01:31:14,809 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 01:31:15,002 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 12.84°C | MongoDB=✅ | MQTT=✅
+2025-10-12 01:31:15,003 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.906 | MongoDB=✅ | MQTT=✅
+2025-10-12 01:31:15,004 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 6.1 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 01:31:15,004 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.20s | Éxito: 100.0% (6/6)
+2025-10-12 01:31:15,005 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:36:14
+2025-10-12 01:36:15,036 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 01:36:15,226 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 12.79°C | MongoDB=✅ | MQTT=✅
+2025-10-12 01:36:15,227 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.906 | MongoDB=✅ | MQTT=✅
+2025-10-12 01:36:15,228 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 6.11 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 01:36:15,228 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-12 01:36:15,229 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:41:15
+2025-10-12 01:41:15,262 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 01:41:15,443 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 12.81°C | MongoDB=✅ | MQTT=✅
+2025-10-12 01:41:15,444 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.915 | MongoDB=✅ | MQTT=✅
+2025-10-12 01:41:15,444 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 6.14 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 01:41:15,445 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.18s | Éxito: 100.0% (6/6)
+2025-10-12 01:41:15,445 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:46:15
+2025-10-12 01:46:15,471 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 01:46:15,655 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 12.75°C | MongoDB=✅ | MQTT=✅
+2025-10-12 01:46:15,656 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.917 | MongoDB=✅ | MQTT=✅
+2025-10-12 01:46:15,656 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 6.12 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 01:46:15,656 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-12 01:46:15,657 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:51:15
+2025-10-12 01:51:15,706 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 01:51:15,891 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 12.79°C | MongoDB=✅ | MQTT=✅
+2025-10-12 01:51:15,892 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.922 | MongoDB=✅ | MQTT=✅
+2025-10-12 01:51:15,892 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 6.13 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 01:51:15,893 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-12 01:51:15,893 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:56:15
+2025-10-12 01:56:15,924 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 01:56:16,109 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 12.8°C | MongoDB=✅ | MQTT=✅
+2025-10-12 01:56:16,110 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.919 | MongoDB=✅ | MQTT=✅
+2025-10-12 01:56:16,111 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 6.11 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 01:56:16,112 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-12 01:56:16,113 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 02:01:15
+2025-10-12 02:01:16,160 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 02:01:16,358 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.0°C | MongoDB=✅ | MQTT=✅
+2025-10-12 02:01:16,359 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.895 | MongoDB=✅ | MQTT=✅
+2025-10-12 02:01:16,360 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.96 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 02:01:16,361 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.20s | Éxito: 100.0% (6/6)
+2025-10-12 02:01:16,361 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 02:06:16
+2025-10-12 02:06:16,409 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 02:06:16,600 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.05°C | MongoDB=✅ | MQTT=✅
+2025-10-12 02:06:16,600 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.887 | MongoDB=✅ | MQTT=✅
+2025-10-12 02:06:16,601 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.95 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 02:06:16,601 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-12 02:06:16,602 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 02:11:16
+2025-10-12 02:11:16,644 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 02:11:16,861 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.07°C | MongoDB=✅ | MQTT=✅
+2025-10-12 02:11:16,862 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.887 | MongoDB=✅ | MQTT=✅
+2025-10-12 02:11:16,862 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.95 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 02:11:16,863 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.22s | Éxito: 100.0% (6/6)
+2025-10-12 02:11:16,864 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 02:16:16
+2025-10-12 02:16:16,892 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 02:16:17,087 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 12.99°C | MongoDB=✅ | MQTT=✅
+2025-10-12 02:16:17,088 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.886 | MongoDB=✅ | MQTT=✅
+2025-10-12 02:16:17,088 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 6.0 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 02:16:17,089 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.20s | Éxito: 100.0% (6/6)
+2025-10-12 02:16:17,089 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 02:21:16
+2025-10-12 02:21:17,118 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 02:21:17,304 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.05°C | MongoDB=✅ | MQTT=✅
+2025-10-12 02:21:17,305 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.885 | MongoDB=✅ | MQTT=✅
+2025-10-12 02:21:17,306 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 6.04 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 02:21:17,307 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-12 02:21:17,307 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 02:26:17
+2025-10-12 02:26:17,337 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 02:26:17,543 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.05°C | MongoDB=✅ | MQTT=✅
+2025-10-12 02:26:17,543 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.884 | MongoDB=✅ | MQTT=✅
+2025-10-12 02:26:17,544 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.97 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 02:26:17,544 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.21s | Éxito: 100.0% (6/6)
+2025-10-12 02:26:17,545 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 02:31:17
+2025-10-12 02:31:17,578 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 02:31:17,790 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.01°C | MongoDB=✅ | MQTT=✅
+2025-10-12 02:31:17,791 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.885 | MongoDB=✅ | MQTT=✅
+2025-10-12 02:31:17,792 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.94 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 02:31:17,792 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.21s | Éxito: 100.0% (6/6)
+2025-10-12 02:31:17,793 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 02:36:17
+2025-10-12 02:36:17,824 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 02:36:18,018 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.0°C | MongoDB=✅ | MQTT=✅
+2025-10-12 02:36:18,019 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.884 | MongoDB=✅ | MQTT=✅
+2025-10-12 02:36:18,020 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.94 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 02:36:18,020 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.20s | Éxito: 100.0% (6/6)
+2025-10-12 02:36:18,020 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 02:41:17
+2025-10-12 02:41:18,076 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 02:41:18,259 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 12.95°C | MongoDB=✅ | MQTT=✅
+2025-10-12 02:41:18,259 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.879 | MongoDB=✅ | MQTT=✅
+2025-10-12 02:41:18,260 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.94 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 02:41:18,261 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-12 02:41:18,263 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 02:46:18
+2025-10-12 02:46:18,327 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 02:46:18,561 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 12.98°C | MongoDB=✅ | MQTT=✅
+2025-10-12 02:46:18,562 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.89 | MongoDB=✅ | MQTT=✅
+2025-10-12 02:46:18,562 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.96 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 02:46:18,563 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.24s | Éxito: 100.0% (6/6)
+2025-10-12 02:46:18,563 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 02:51:18
+2025-10-12 02:51:18,607 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 02:51:18,789 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 12.94°C | MongoDB=✅ | MQTT=✅
+2025-10-12 02:51:18,789 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.895 | MongoDB=✅ | MQTT=✅
+2025-10-12 02:51:18,790 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.95 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 02:51:18,790 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.18s | Éxito: 100.0% (6/6)
+2025-10-12 02:51:18,791 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 02:56:18
+2025-10-12 02:56:18,818 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 02:56:19,005 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 12.94°C | MongoDB=✅ | MQTT=✅
+2025-10-12 02:56:19,006 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.894 | MongoDB=✅ | MQTT=✅
+2025-10-12 02:56:19,006 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.92 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 02:56:19,007 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-12 02:56:19,007 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 03:01:18
+2025-10-12 03:01:19,035 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 03:01:19,220 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.16°C | MongoDB=✅ | MQTT=✅
+2025-10-12 03:01:19,220 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.864 | MongoDB=✅ | MQTT=✅
+2025-10-12 03:01:19,221 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.81 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 03:01:19,221 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-12 03:01:19,221 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 03:06:19
+2025-10-12 03:06:19,254 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 03:06:19,436 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.12°C | MongoDB=✅ | MQTT=✅
+2025-10-12 03:06:19,437 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.859 | MongoDB=✅ | MQTT=✅
+2025-10-12 03:06:19,438 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.81 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 03:06:19,439 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-12 03:06:19,439 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 03:11:19
+2025-10-12 03:11:19,468 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 03:11:19,677 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.11°C | MongoDB=✅ | MQTT=✅
+2025-10-12 03:11:19,688 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.855 | MongoDB=✅ | MQTT=✅
+2025-10-12 03:11:19,690 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.81 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 03:11:19,691 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.22s | Éxito: 100.0% (6/6)
+2025-10-12 03:11:19,692 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 03:16:19
+2025-10-12 03:16:19,737 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - 3 sensores especializados
+2025-10-12 03:16:19,921 - SimuladorCIMARQ - INFO - 🌡️ TEMP Sensor (CIMARQ_TEMP_001): 13.17°C | MongoDB=✅ | MQTT=✅
+2025-10-12 03:16:19,922 - SimuladorCIMARQ - INFO - ⚗️ pH Sensor (CIMARQ_PH_001): 7.855 | MongoDB=✅ | MQTT=✅
+2025-10-12 03:16:19,922 - SimuladorCIMARQ - INFO - 🫧 O2 Sensor (CIMARQ_O2_001): 5.8 mg/L | MongoDB=✅ | MQTT=✅
+2025-10-12 03:16:19,923 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.19s | Éxito: 100.0% (6/6)
+2025-10-12 03:16:19,923 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 03:21:19
+2025-10-12 03:17:48,552 - SimuladorCIMARQ - INFO - 🛑 Señal de parada recibida, cerrando simulador...
+2025-10-12 03:17:48,938 - SimuladorCIMARQ - INFO - 🧹 Cerrando conexiones...
+2025-10-12 03:17:49,698 - SimuladorCIMARQ - WARNING - ⚠️ MQTT desconectado, código: 0
+2025-10-12 03:17:49,701 - SimuladorCIMARQ - INFO - 📡 MQTT desconectado
+2025-10-12 03:17:49,791 - SimuladorCIMARQ - INFO - 💾 MongoDB desconectado
+2025-10-12 03:17:49,792 - SimuladorCIMARQ - INFO - ✅ Simulador cerrado correctamente
