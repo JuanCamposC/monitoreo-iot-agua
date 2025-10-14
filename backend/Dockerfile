@@ -19,6 +19,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar el código de la aplicación
 COPY src/ .
 
+# Crear directorios necesarios para ML
+RUN mkdir -p /app/modelos_ml
+
 # Crear usuario no-root para mayor seguridad
 RUN useradd --create-home --shell /bin/bash appuser && chown -R appuser:appuser /app
 USER appuser

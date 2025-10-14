@@ -16,6 +16,13 @@ services:
       - MQTT_PORT=${MQTT_PORT}
       - MQTT_USERNAME=${MQTT_USERNAME}
       - MQTT_PASSWORD=${MQTT_PASSWORD}
+      # Variables de entorno para notificaciones por email
+      - SMTP_SERVER=${SMTP_SERVER}
+      - SMTP_PORT=${SMTP_PORT}
+      - EMAIL_REMITENTE=${EMAIL_REMITENTE}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      - EMAIL_OPERADOR=${EMAIL_OPERADOR}
+      - EMAIL_SUPERVISOR=${EMAIL_SUPERVISOR}
     volumes:
       # Solo para desarrollo - permite hot reload
       - ./src:/app

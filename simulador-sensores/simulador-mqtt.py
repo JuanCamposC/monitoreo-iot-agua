@@ -21,6 +21,7 @@ import signal
 import random
 from datetime import datetime, timedelta
 from math import sin, cos, pi
+import pytz
 from typing import Dict, Any, List, Optional
 import threading
 from pathlib import Path
@@ -35,6 +36,9 @@ except ImportError as e:
     print("💡 Instala con: pip install paho-mqtt pymongo python-dotenv")
     sys.exit(1)
 
+# Configuración de zona horaria Chile (GMT-3)
+CHILE_TZ = pytz.timezone('America/Santiago')
+
 # Configuración de logging
 logging.basicConfig(
     level=logging.INFO,
@@ -45,6 +49,10 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger('SimuladorCIMARQ')
+
+def get_chile_time():
+    """Obtiene la hora actual en zona horaria de Chile (America/Santiago)"""
+    return datetime.now(CHILE_TZ)
 
 class SensorSimulator:
     """Simulador principal de sensores IoT para acuicultura marina"""
@@ -65,7 +73,7 @@ class SensorSimulator:
         
         # Estado de simulación
         self.simulation_time = 0
-        self.last_execution = datetime.now()
+        self.last_execution = get_chile_time()
         
         # Configuración de sensores especializados (zona central Chile)
         self.specialized_sensors = self.setup_sensor_parameters()
@@ -99,7 +107,7 @@ class SensorSimulator:
             
         # Configuración MongoDB (idéntica al backend)
         self.mongo_uri = os.getenv("MONGO_URI", "mongodb+srv://cimarq:eGEr87FyYHIadm4p@proyectotitulo.idqwtmo.mongodb.net/")
-        self.db_name = os.getenv("DB_NAME", "cimarq")
+        self.db_name = os.getenv("DB_NAME", "cimarqdb")
         
         # Configuración MQTT (idéntica al backend)
         self.mqtt_broker = os.getenv("MQTT_BROKER", "test.mosquitto.org")
@@ -113,7 +121,7 @@ class SensorSimulator:
         self.oxigeno_topic = os.getenv("OXIGENO_TOPIC", "cimarq/oxigeno/update")
         
         # Configuración del simulador
-        self.interval = float(os.getenv("SIMULATION_INTERVAL", 300))  # 5 minutos por defecto
+        self.interval = float(os.getenv("SIMULATION_INTERVAL", 30))  # 30 segundos para pruebas
         
         logger.info(f"⚙️ Configuración cargada - Intervalo: {self.interval}s, Sensores especializados: 3")
         
@@ -201,13 +209,10 @@ class SensorSimulator:
             self.mongo_client.admin.command('ping')
             self.db = self.mongo_client[self.db_name]
             
-            # Verificar que las colecciones existan
+            # Verificar que la colección unificada exista
             collections = self.db.list_collection_names()
-            required_collections = ['temperatura', 'ph', 'oxigeno']
-            
-            for collection in required_collections:
-                if collection not in collections:
-                    logger.warning(f"⚠️ Colección '{collection}' no existe, se creará automáticamente")
+            if 'datos' not in collections:
+                logger.warning(f"⚠️ Colección 'datos' no existe, se creará automáticamente")
                     
             logger.info(f"✅ MongoDB conectado: {self.db_name}")
             return True
@@ -267,11 +272,11 @@ class SensorSimulator:
         config = self.base_conditions['temperatura']
         
         # Ciclo diario (máximo a las 15:00, mínimo a las 6:00)
-        hour = datetime.now().hour
+        hour = get_chile_time().hour
         daily_cycle = config['daily_amplitude'] * sin(2 * pi * (hour - 6) / 24)
         
         # Ciclo estacional (verano más caliente)
-        day_of_year = datetime.now().timetuple().tm_yday
+        day_of_year = get_chile_time().timetuple().tm_yday
         seasonal_cycle = config['seasonal_amplitude'] * sin(2 * pi * (day_of_year - 80) / 365)
         
         # Tendencia gradual (simula cambios climáticos lentos)
@@ -306,11 +311,11 @@ class SensorSimulator:
         config = self.base_conditions['ph']
         
         # Ciclo diario (fotosíntesis/respiración del fitoplancton)
-        hour = datetime.now().hour
+        hour = get_chile_time().hour
         daily_cycle = config['daily_amplitude'] * sin(2 * pi * (hour - 12) / 24)
         
         # Variación estacional menor
-        day_of_year = datetime.now().timetuple().tm_yday
+        day_of_year = get_chile_time().timetuple().tm_yday
         seasonal_cycle = config['seasonal_amplitude'] * cos(2 * pi * day_of_year / 365)
         
         # Tendencia gradual
@@ -347,11 +352,11 @@ class SensorSimulator:
         temp_effect = -0.1 * (current_temp - 16.0)  # Efecto solubilidad
         
         # Ciclo diario (fotosíntesis máxima al mediodía)
-        hour = datetime.now().hour
+        hour = get_chile_time().hour
         daily_cycle = config['daily_amplitude'] * sin(2 * pi * (hour - 9) / 24)
         
         # Variación estacional
-        day_of_year = datetime.now().timetuple().tm_yday
+        day_of_year = get_chile_time().timetuple().tm_yday
         seasonal_cycle = config['seasonal_amplitude'] * sin(2 * pi * (day_of_year - 100) / 365)
         
         # Tendencia gradual
@@ -379,14 +384,28 @@ class SensorSimulator:
         
         return round(oxygen, 2)
         
+    def create_unified_sensor_data(self, temperatura: float, ph: float, oxigeno: float) -> Dict[str, Any]:
+        """Crea datos unificados simplificados para la nueva colección 'datos'"""
+        now = get_chile_time()
+        
+        # Estructura simplificada con valores de sensores y timestamp
+        data = {
+            "temperatura": temperatura,
+            "ph": ph,
+            "oxigeno": oxigeno,
+            "fecha": int(now.timestamp() * 1000)  # Timestamp en milliseconds
+        }
+        
+        return data
+    
     def create_sensor_data(self, sensor_type: str, value: float) -> Dict[str, Any]:
-        """Crea datos con formato idéntico al backend"""
-        now = datetime.now()
+        """Crea datos individuales para MQTT (mantiene compatibilidad)"""
+        now = get_chile_time()
         
         # Obtener información del sensor especializado
         sensor_info = self.specialized_sensors[f"{sensor_type}_sensor"]
         
-        # Formato base idéntico al que usa el backend
+        # Formato base para MQTT
         data = {
             "device_id": sensor_info['device_id'],
             "fecha": now.isoformat(),
@@ -414,15 +433,15 @@ class SensorSimulator:
             
         return data
         
-    def save_to_mongodb(self, collection_name: str, data: Dict[str, Any]) -> bool:
-        """Inserta datos en colecciones existentes"""
+    def save_to_mongodb(self, data: Dict[str, Any]) -> bool:
+        """Inserta datos en la colección unificada 'datos'"""
         try:
             if self.db is not None:
-                result = self.db[collection_name].insert_one(data)
-                logger.debug(f"💾 Guardado en {collection_name}: {result.inserted_id}")
+                result = self.db.datos.insert_one(data)
+                logger.debug(f"💾 Guardado en datos: {result.inserted_id}")
                 return True
         except Exception as e:
-            logger.error(f"❌ Error guardando en MongoDB ({collection_name}): {e}")
+            logger.error(f"❌ Error guardando en MongoDB: {e}")
             
         return False
         
@@ -443,60 +462,57 @@ class SensorSimulator:
         return False
         
     def run_simulation_cycle(self):
-        """Ejecuta un ciclo completo de simulación para sensores especializados"""
-        cycle_start = datetime.now()
+        """Ejecuta un ciclo completo de simulación con estructura unificada"""
+        cycle_start = get_chile_time()
         successful_operations = 0
         total_operations = 0
         
-        logger.info(f"🔄 Iniciando ciclo de simulación - 3 sensores especializados")
+        logger.info(f"🔄 Iniciando ciclo de simulación - Sistema unificado")
         
         # Simular cada sensor especializado
         temperatura = self.simulate_temperature()
         ph = self.simulate_ph() 
         oxigeno = self.simulate_oxygen(temperatura)  # O2 depende de temperatura
         
-        # Crear datos estructurados para cada sensor especializado
+        # Crear datos unificados para MongoDB
+        unified_data = self.create_unified_sensor_data(temperatura, ph, oxigeno)
+        
+        # Crear datos individuales para MQTT (compatibilidad)
         temp_data = self.create_sensor_data("temperatura", temperatura)
         ph_data = self.create_sensor_data("ph", ph)
         oxigeno_data = self.create_sensor_data("oxigeno", oxigeno)
         
-        # Guardar en MongoDB
-        mongo_results = [
-            self.save_to_mongodb("temperatura", temp_data),
-            self.save_to_mongodb("ph", ph_data),
-            self.save_to_mongodb("oxigeno", oxigeno_data)
-        ]
+        # NO guardar directamente en MongoDB - usar MQTT para comunicación
+        # mongo_success = self.save_to_mongodb(unified_data)
         
-        # Publicar a MQTT
-        mqtt_results = [
-            self.publish_to_mqtt(self.temperatura_topic, temp_data),
-            self.publish_to_mqtt(self.ph_topic, ph_data),
-            self.publish_to_mqtt(self.oxigeno_topic, oxigeno_data)
-        ]
+        # Publicar datos unificados por MQTT solo si está conectado
+        unified_topic = "cimarq/sensores/unified"
+        if self.mqtt_connected:
+            mqtt_unified_success = self.publish_to_mqtt(unified_topic, unified_data)
+        else:
+            mqtt_unified_success = False
+            logger.warning("⚠️ MQTT no conectado, no se puede enviar datos unificados")
         
-        # Contabilizar operaciones exitosas
-        successful_operations += sum(mongo_results) + sum(mqtt_results)
-        total_operations += len(mongo_results) + len(mqtt_results)
+        # Contabilizar operaciones exitosas (solo MQTT unificado)
+        successful_operations += (1 if mqtt_unified_success else 0)
+        total_operations += 1
         
-        # Log de cada sensor especializado
-        logger.info(f"🌡️ TEMP Sensor ({self.specialized_sensors['temperatura_sensor']['device_id']}): {temperatura}°C | "
-                   f"MongoDB={'✅' if mongo_results[0] else '❌'} | MQTT={'✅' if mqtt_results[0] else '❌'}")
-                   
-        logger.info(f"⚗️ pH Sensor ({self.specialized_sensors['ph_sensor']['device_id']}): {ph} | "
-                   f"MongoDB={'✅' if mongo_results[1] else '❌'} | MQTT={'✅' if mqtt_results[1] else '❌'}")
-                   
-        logger.info(f"🫧 O2 Sensor ({self.specialized_sensors['oxigeno_sensor']['device_id']}): {oxigeno} mg/L | "
-                   f"MongoDB={'✅' if mongo_results[2] else '❌'} | MQTT={'✅' if mqtt_results[2] else '❌'}")
+        # Log consolidado del sistema unificado (MQTT Unificado - sin nulos)
+        logger.info(f"📊 Datos Completos sin Nulos: T={temperatura}°C, pH={ph}, O2={oxigeno}mg/L | "
+                   f"MQTT={'✅' if mqtt_unified_success else '❌'} | MongoDB=Via Backend")
+        
+        # Log detallado de la estructura enviada
+        logger.info(f"� MQTT Unificado: {{temperatura: {temperatura}, ph: {ph}, oxigeno: {oxigeno}, fecha: {int(get_chile_time().timestamp() * 1000)}}}")
         
         # Estadísticas del ciclo
-        cycle_duration = (datetime.now() - cycle_start).total_seconds()
+        cycle_duration = (get_chile_time() - cycle_start).total_seconds()
         success_rate = (successful_operations / total_operations * 100) if total_operations > 0 else 0
         
         logger.info(f"✅ Ciclo completado en {cycle_duration:.2f}s | "
                    f"Éxito: {success_rate:.1f}% ({successful_operations}/{total_operations})")
         
         self.simulation_time += 1
-        self.last_execution = datetime.now()
+        self.last_execution = get_chile_time()
         
     def run_continuous(self):
         """Ejecuta el simulador en modo continuo 24/7"""
@@ -520,11 +536,11 @@ class SensorSimulator:
             
         logger.info("✅ Simulador iniciado correctamente - Modo 24/7 activo")
         
-        next_execution = datetime.now()
+        next_execution = get_chile_time()
         
         try:
             while self.running:
-                current_time = datetime.now()
+                current_time = get_chile_time()
                 
                 # Verificar si es tiempo de ejecutar
                 if current_time >= next_execution:
