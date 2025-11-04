@@ -213,8 +213,54 @@ export default function SensoresPage() {
   // Funciones auxiliares
   const getLatestValue = (sensorData: SensorData[], field: string) => {
     if (sensorData.length === 0) return null;
-    const latest = sensorData[0];
-    return latest[field as keyof SensorData] || latest.valor || null;
+    
+    // Ordenar por fecha para asegurar que obtenemos el más reciente
+    const sortedData = [...sensorData].sort((a, b) => {
+      const fechaA = new Date(a.fecha || 0);
+      const fechaB = new Date(b.fecha || 0);
+      return fechaB.getTime() - fechaA.getTime(); // Más reciente primero
+    });
+    
+    const latest = sortedData[0];
+    const value = latest[field as keyof SensorData] || latest.valor || null;
+    
+    // Debug: console para verificar qué datos se están obteniendo
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Dashboard - ${field}:`, {
+        totalRecords: sensorData.length,
+        latestDate: latest.fecha,
+        latestValue: value,
+        allDates: sensorData.map(item => item.fecha).slice(0, 3) // Primeras 3 fechas
+      });
+    }
+    
+    return value;
+  };
+
+  // Función para obtener la fecha del último registro
+  const getLatestDate = (sensorData: SensorData[]) => {
+    if (sensorData.length === 0) return null;
+    
+    const sortedData = [...sensorData].sort((a, b) => {
+      const fechaA = new Date(a.fecha || 0);
+      const fechaB = new Date(b.fecha || 0);
+      return fechaB.getTime() - fechaA.getTime();
+    });
+    
+    return sortedData[0].fecha;
+  };
+
+  const formatFecha = (fecha: string) => {
+    if (!fecha) return '';
+    const date = new Date(fecha);
+    if (isNaN(date.getTime())) return '';
+    
+    return date.toLocaleString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   const getTemperaturaEstado = (temp: number) => {
@@ -374,6 +420,11 @@ export default function SensoresPage() {
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                   Período: {filterDataByTime(data.temperatura, timeFilter).length} | Total: {data.temperatura.length}
                 </Typography>
+                {getLatestDate(data.temperatura) && (
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                    Último: {formatFecha(getLatestDate(data.temperatura) || '')}
+                  </Typography>
+                )}
               </CardContent>
             </CardActionArea>
           </Card>
@@ -402,6 +453,11 @@ export default function SensoresPage() {
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                   Período: {filterDataByTime(data.ph, timeFilter).length} | Total: {data.ph.length}
                 </Typography>
+                {getLatestDate(data.ph) && (
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                    Último: {formatFecha(getLatestDate(data.ph) || '')}
+                  </Typography>
+                )}
               </CardContent>
             </CardActionArea>
           </Card>
@@ -430,6 +486,11 @@ export default function SensoresPage() {
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                   Período: {filterDataByTime(data.oxigeno, timeFilter).length} | Total: {data.oxigeno.length}
                 </Typography>
+                {getLatestDate(data.oxigeno) && (
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                    Último: {formatFecha(getLatestDate(data.oxigeno) || '')}
+                  </Typography>
+                )}
               </CardContent>
             </CardActionArea>
           </Card>

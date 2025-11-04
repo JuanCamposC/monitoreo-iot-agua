@@ -3,6 +3,7 @@
 import { LineChart } from '@mui/x-charts/LineChart';
 import { Box, Typography, Card, CardContent, Chip, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { useState } from 'react';
+import { useConfiguracionRangos } from '../../hooks/useConfiguracionRangos';
 
 interface SensorData {
   _id: string;
@@ -24,6 +25,7 @@ export default function TemperatureChart({
 }: TemperatureChartProps) {
   // Estado para controlar el filtro de tiempo
   const [timeFilter, setTimeFilter] = useState('24h'); // 1h, 6h, 24h, 7d, todo
+  const { configuracion } = useConfiguracionRangos();
 
   // Función para filtrar datos por tiempo
   const filterDataByTime = (data: SensorData[], filter: string) => {
@@ -291,12 +293,24 @@ export default function TemperatureChart({
           <Card variant="outlined" sx={{ flex: '1 1 300px' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Rangos de Temperatura
+                Rangos Configurados
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Chip label="Frío: < 18°C" color="info" variant="outlined" size="small" />
-                <Chip label="Normal: 18°C - 25°C" color="success" variant="outlined" size="small" />
-                <Chip label="Caliente: > 25°C" color="error" variant="outlined" size="small" />
+                <Chip 
+                  label={`Crítico: ${configuracion.temperatura.minimo}°C - ${configuracion.temperatura.maximo}°C`} 
+                  color="warning" 
+                  variant="outlined" 
+                  size="small" 
+                />
+                <Chip 
+                  label={`Óptimo: ${configuracion.temperatura.minimoOptimo}°C - ${configuracion.temperatura.maximoOptimo}°C`} 
+                  color="success" 
+                  variant="outlined" 
+                  size="small" 
+                />
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+                  Configurados desde la página de ajustes
+                </Typography>
               </Box>
             </CardContent>
           </Card>

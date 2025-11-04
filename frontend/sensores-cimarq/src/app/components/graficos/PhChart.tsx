@@ -3,6 +3,7 @@
 import { LineChart } from '@mui/x-charts/LineChart';
 import { Box, Typography, Card, CardContent, Chip, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { useState } from 'react';
+import { useConfiguracionRangos } from '../../hooks/useConfiguracionRangos';
 
 interface SensorData {
   _id: string;
@@ -21,6 +22,7 @@ interface PhChartProps {
 export default function PhChart({ data, title = "Análisis de pH" }: PhChartProps) {
   // Estado para controlar el filtro de tiempo
   const [timeFilter, setTimeFilter] = useState('24h'); // 1h, 6h, 24h, 7d, todo
+  const { configuracion } = useConfiguracionRangos();
 
   // Función para filtrar datos por tiempo
   const filterDataByTime = (data: SensorData[], filter: string) => {
@@ -256,13 +258,23 @@ export default function PhChart({ data, title = "Análisis de pH" }: PhChartProp
         <Box sx={{ mt: 3, display: 'flex', flexWrap: 'wrap', gap: 2 }}>
           <Card variant="outlined" sx={{ flex: '1 1 300px' }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>Rangos de pH</Typography>
+              <Typography variant="h6" gutterBottom>Rangos Configurados</Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Chip label="Muy Ácido: < 6.5" color="error" variant="outlined" size="small" />
-                <Chip label="Ácido: < 7" color="error" variant="outlined" size="small" />
-                <Chip label="Neutro: = 7" color="success" variant="outlined" size="small" />
-                <Chip label="Alcalino: > 7.5" color="warning" variant="outlined" size="small" />
-                <Chip label="Muy Alcalino: > 8.5" color="warning" variant="outlined" size="small" />
+                <Chip 
+                  label={`Crítico: ${configuracion.ph.minimo} - ${configuracion.ph.maximo} pH`} 
+                  color="warning" 
+                  variant="outlined" 
+                  size="small" 
+                />
+                <Chip 
+                  label={`Óptimo: ${configuracion.ph.minimoOptimo} - ${configuracion.ph.maximoOptimo} pH`} 
+                  color="success" 
+                  variant="outlined" 
+                  size="small" 
+                />
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+                  Configurados desde la página de ajustes
+                </Typography>
               </Box>
             </CardContent>
           </Card>

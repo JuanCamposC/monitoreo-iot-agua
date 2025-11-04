@@ -3,6 +3,7 @@
 import { LineChart } from '@mui/x-charts/LineChart';
 import { Box, Typography, Card, CardContent, Chip, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { useState } from 'react';
+import { useConfiguracionRangos } from '../../hooks/useConfiguracionRangos';
 
 interface SensorData {
   _id: string;
@@ -21,6 +22,7 @@ interface OxygenChartProps {
 export default function OxygenChart({ data, title = "Análisis de Oxígeno Disuelto" }: OxygenChartProps) {
   // Estado para controlar el filtro de tiempo
   const [timeFilter, setTimeFilter] = useState('24h'); // 1h, 6h, 24h, 7d, todo
+  const { configuracion } = useConfiguracionRangos();
 
   // Función para filtrar datos por tiempo
   const filterDataByTime = (data: SensorData[], filter: string) => {
@@ -257,12 +259,23 @@ export default function OxygenChart({ data, title = "Análisis de Oxígeno Disue
         <Box sx={{ mt: 3, display: 'flex', flexWrap: 'wrap', gap: 2 }}>
           <Card variant="outlined" sx={{ flex: '1 1 300px' }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>Rangos de Oxígeno</Typography>
+              <Typography variant="h6" gutterBottom>Rangos Configurados</Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Chip label="Crítico: < 4 mg/L" color="error" variant="outlined" size="small" />
-                <Chip label="Bajo: 4-6 mg/L" color="warning" variant="outlined" size="small" />
-                <Chip label="Óptimo: 6-12 mg/L" color="success" variant="outlined" size="small" />
-                <Chip label="Alto: > 12 mg/L" color="info" variant="outlined" size="small" />
+                <Chip 
+                  label={`Crítico: ${configuracion.oxigeno.minimo} - ${configuracion.oxigeno.maximo} mg/L`} 
+                  color="warning" 
+                  variant="outlined" 
+                  size="small" 
+                />
+                <Chip 
+                  label={`Óptimo: ${configuracion.oxigeno.minimoOptimo} - ${configuracion.oxigeno.maximoOptimo} mg/L`} 
+                  color="success" 
+                  variant="outlined" 
+                  size="small" 
+                />
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+                  Configurados desde la página de ajustes
+                </Typography>
               </Box>
             </CardContent>
           </Card>

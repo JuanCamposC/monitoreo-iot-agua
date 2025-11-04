@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import PHChart from '../../components/graficos/PhChart';
 import { useConfiguracionRangos } from '../../hooks/useConfiguracionRangos';
+import InfoRangos from '../../components/InfoRangos';
+import { MdScience } from 'react-icons/md';
 
 interface PHData {
   _id: string;
@@ -17,7 +19,7 @@ export default function PHPage() {
   const [historial, setHistorial] = useState<PHData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { evaluarEstadoSensor } = useConfiguracionRangos();
+  const { evaluarEstadoSensor, configuracion } = useConfiguracionRangos();
 
   useEffect(() => {
     const fetchPH = async () => {
@@ -27,11 +29,19 @@ export default function PHPage() {
         
         if (data.success) {
           const phs = data.data;
-          setHistorial(phs);
+          
+          // Ordenar por fecha descendente (más reciente primero)
+          const phsOrdenados = phs.sort((a: PHData, b: PHData) => {
+            const fechaA = new Date(a.fecha || a.timestamp || 0);
+            const fechaB = new Date(b.fecha || b.timestamp || 0);
+            return fechaB.getTime() - fechaA.getTime();
+          });
+          
+          setHistorial(phsOrdenados);
           
           // Obtener el pH más reciente
-          if (phs.length > 0) {
-            const ultimoPH = phs[0];
+          if (phsOrdenados.length > 0) {
+            const ultimoPH = phsOrdenados[0];
             setPhActual(ultimoPH.ph || ultimoPH.valor || 0);
           }
           setError(null);
@@ -56,7 +66,20 @@ export default function PHPage() {
 
   const formatFecha = (fecha: string) => {
     if (!fecha) return 'Fecha no disponible';
-    return new Date(fecha).toLocaleString('es-ES');
+    const date = new Date(fecha);
+    
+    // Verificar si la fecha es válida
+    if (isNaN(date.getTime())) return 'Fecha inválida';
+    
+    return date.toLocaleString('es-ES', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
   };
 
   const getEstadoColor = (ph: number) => {
@@ -106,6 +129,17 @@ export default function PHPage() {
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Sensor de pH</h1>
         
+        {/* Información de rangos configurados */}
+        <InfoRangos
+          titulo="Sensor de pH"
+          valorActual={phActual}
+          rango={configuracion.ph}
+          estado={phActual !== null ? evaluarEstadoSensor('ph', phActual) : 'critico'}
+          unidad="pH"
+          icono={MdScience}
+          colorBase="#2196f3"
+        />
+
         {/* Gráfico histórico (prioridad principal) */}
         <div className="mb-6 bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold text-gray-700 mb-4">Análisis Histórico del pH</h2>
@@ -117,31 +151,53 @@ export default function PHPage() {
           
           {/* Historial detallado (2/3 del espacio) */}
           <div className="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">
-              Registro Histórico Completo ({historial.length} lecturas)
-            </h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-700">
+                Registro Histórico ({historial.length} lecturas)
+              </h3>
+              <div className="text-xs text-gray-500">
+                Ordenado por fecha (más reciente primero)
+              </div>
+            </div>
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {historial.length > 0 ? (
-                historial.map((item, index) => (
-                  <div key={item._id} className="flex justify-between items-center py-3 px-4 border-b hover:bg-gray-50 rounded">
-                    <div className="flex-1">
-                      <span className="text-gray-600 text-sm">
-                        {formatFecha(item.fecha || item.timestamp || '')}
-                      </span>
-                      <div className="text-xs text-gray-400">
-                        Lectura #{historial.length - index}
+                historial.map((item, index) => {
+                  const fechaObj = new Date(item.fecha || item.timestamp || '');
+                  const esReciente = index < 3; // Marcar las 3 más recientes
+                  
+                  return (
+                    <div key={item._id} className={`flex justify-between items-center py-3 px-4 border-b hover:bg-gray-50 rounded ${esReciente ? 'bg-blue-50 border-blue-200' : ''}`}>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-700 text-sm font-medium">
+                            {formatFecha(item.fecha || item.timestamp || '')}
+                          </span>
+                          {index === 0 && (
+                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
+                              MÁS RECIENTE
+                            </span>
+                          )}
+                          {esReciente && index > 0 && (
+                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                              RECIENTE
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-400 mt-1">
+                          Hace {Math.floor((Date.now() - fechaObj.getTime()) / (1000 * 60))} min | Registro #{historial.length - index}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <span className="font-bold text-purple-600 text-lg">
+                          {Number(item.ph || item.valor || 0).toFixed(2)}
+                        </span>
+                        <span className={`${getEstadoColor(Number(item.ph || item.valor || 0))} px-2 py-1 rounded-full text-xs font-medium`}>
+                          {getEstadoTexto(Number(item.ph || item.valor || 0))}
+                        </span>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <span className="font-bold text-purple-600 text-lg">
-                        {Number(item.ph || item.valor || 0).toFixed(2)}
-                      </span>
-                      <span className={`${getEstadoColor(Number(item.ph || item.valor || 0))} px-2 py-1 rounded-full text-xs font-medium`}>
-                        {getEstadoTexto(Number(item.ph || item.valor || 0))}
-                      </span>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="text-center text-gray-500 py-8">
                   No hay datos históricos disponibles
@@ -231,9 +287,9 @@ export default function PHPage() {
           </div>
         </div>
 
-        {/* Información técnica */}
+        {/* Información técnica actualizada con rangos configurados */}
         <div className="mt-6 bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Información Técnica (Texto de prueba)</h3>
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">Información Técnica del Sensor</h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-purple-50 rounded-lg">
               <p className="text-lg font-bold text-purple-600">Electrodo de Vidrio</p>
@@ -243,12 +299,16 @@ export default function PHPage() {
               <p className="text-lg font-bold text-blue-600">±0.01 pH</p>
               <p className="text-sm text-gray-600">Precisión</p>
             </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <p className="text-lg font-bold text-green-600">0-14 pH</p>
-              <p className="text-sm text-gray-600">Rango de Medición</p>
+            <div className="text-center p-4 bg-red-50 rounded-lg">
+              <p className="text-lg font-bold text-red-600">
+                {configuracion.ph.minimo} - {configuracion.ph.maximo} pH
+              </p>
+              <p className="text-sm text-gray-600">Rango Crítico</p>
             </div>
-            <div className="text-center p-4 bg-yellow-50 rounded-lg">
-              <p className="text-lg font-bold text-yellow-600">6.5-7.5 pH</p>
+            <div className="text-center p-4 bg-green-50 rounded-lg">
+              <p className="text-lg font-bold text-green-600">
+                {configuracion.ph.minimoOptimo} - {configuracion.ph.maximoOptimo} pH
+              </p>
               <p className="text-sm text-gray-600">Rango Óptimo</p>
             </div>
           </div>

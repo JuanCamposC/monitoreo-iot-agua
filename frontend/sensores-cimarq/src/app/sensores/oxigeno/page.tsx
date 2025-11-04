@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import OxygenChart from '../../components/graficos/OxigenoChart';
 import { useConfiguracionRangos } from '../../hooks/useConfiguracionRangos';
+import InfoRangos from '../../components/InfoRangos';
+import { MdAir } from 'react-icons/md';
 
 interface OxigenoData {
   _id: string;
@@ -17,7 +19,7 @@ export default function OxigenoPage() {
   const [historial, setHistorial] = useState<OxigenoData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { evaluarEstadoSensor } = useConfiguracionRangos();
+  const { evaluarEstadoSensor, configuracion } = useConfiguracionRangos();
 
   useEffect(() => {
     const fetchOxigeno = async () => {
@@ -27,11 +29,19 @@ export default function OxigenoPage() {
         
         if (data.success) {
           const oxigenos = data.data;
-          setHistorial(oxigenos);
+          
+          // Ordenar por fecha descendente (más reciente primero)
+          const oxigenosOrdenados = oxigenos.sort((a: OxigenoData, b: OxigenoData) => {
+            const fechaA = new Date(a.fecha || a.timestamp || 0);
+            const fechaB = new Date(b.fecha || b.timestamp || 0);
+            return fechaB.getTime() - fechaA.getTime();
+          });
+          
+          setHistorial(oxigenosOrdenados);
           
           // Obtener el oxígeno más reciente
-          if (oxigenos.length > 0) {
-            const ultimoOxigeno = oxigenos[0];
+          if (oxigenosOrdenados.length > 0) {
+            const ultimoOxigeno = oxigenosOrdenados[0];
             setOxigenoActual(ultimoOxigeno.oxigeno || ultimoOxigeno.valor || 0);
           }
           setError(null);
@@ -56,7 +66,20 @@ export default function OxigenoPage() {
 
   const formatFecha = (fecha: string) => {
     if (!fecha) return 'Fecha no disponible';
-    return new Date(fecha).toLocaleString('es-ES');
+    const date = new Date(fecha);
+    
+    // Verificar si la fecha es válida
+    if (isNaN(date.getTime())) return 'Fecha inválida';
+    
+    return date.toLocaleString('es-ES', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
   };
 
   const getEstadoColor = (oxigeno: number) => {
@@ -106,6 +129,17 @@ export default function OxigenoPage() {
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Sensor de Oxígeno Disuelto</h1>
         
+        {/* Información de rangos configurados */}
+        <InfoRangos
+          titulo="Sensor de Oxígeno Disuelto"
+          valorActual={oxigenoActual}
+          rango={configuracion.oxigeno}
+          estado={oxigenoActual !== null ? evaluarEstadoSensor('oxigeno', oxigenoActual) : 'critico'}
+          unidad="mg/L"
+          icono={MdAir}
+          colorBase="#4caf50"
+        />
+
         {/* Gráfico histórico (prioridad principal) */}
         <div className="mb-6 bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold text-gray-700 mb-4">Análisis Histórico de Oxígeno Disuelto</h2>
@@ -117,31 +151,53 @@ export default function OxigenoPage() {
           
           {/* Historial detallado (2/3 del espacio) */}
           <div className="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">
-              Registro Histórico Completo ({historial.length} lecturas)
-            </h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-700">
+                Registro Histórico ({historial.length} lecturas)
+              </h3>
+              <div className="text-xs text-gray-500">
+                Ordenado por fecha (más reciente primero)
+              </div>
+            </div>
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {historial.length > 0 ? (
-                historial.map((item, index) => (
-                  <div key={item._id} className="flex justify-between items-center py-3 px-4 border-b hover:bg-gray-50 rounded">
-                    <div className="flex-1">
-                      <span className="text-gray-600 text-sm">
-                        {formatFecha(item.fecha || item.timestamp || '')}
-                      </span>
-                      <div className="text-xs text-gray-400">
-                        Lectura #{historial.length - index}
+                historial.map((item, index) => {
+                  const fechaObj = new Date(item.fecha || item.timestamp || '');
+                  const esReciente = index < 3; // Marcar las 3 más recientes
+                  
+                  return (
+                    <div key={item._id} className={`flex justify-between items-center py-3 px-4 border-b hover:bg-gray-50 rounded ${esReciente ? 'bg-blue-50 border-blue-200' : ''}`}>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-700 text-sm font-medium">
+                            {formatFecha(item.fecha || item.timestamp || '')}
+                          </span>
+                          {index === 0 && (
+                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
+                              MÁS RECIENTE
+                            </span>
+                          )}
+                          {esReciente && index > 0 && (
+                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                              RECIENTE
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-400 mt-1">
+                          Hace {Math.floor((Date.now() - fechaObj.getTime()) / (1000 * 60))} min | Registro #{historial.length - index}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <span className="font-bold text-green-600 text-lg">
+                          {Number(item.oxigeno || item.valor || 0).toFixed(2)} mg/L
+                        </span>
+                        <span className={`${getEstadoColor(Number(item.oxigeno || item.valor || 0))} px-2 py-1 rounded-full text-xs font-medium`}>
+                          {getEstadoTexto(Number(item.oxigeno || item.valor || 0))}
+                        </span>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <span className="font-bold text-green-600 text-lg">
-                        {Number(item.oxigeno || item.valor || 0).toFixed(2)} mg/L
-                      </span>
-                      <span className={`${getEstadoColor(Number(item.oxigeno || item.valor || 0))} px-2 py-1 rounded-full text-xs font-medium`}>
-                        {getEstadoTexto(Number(item.oxigeno || item.valor || 0))}
-                      </span>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="text-center text-gray-500 py-8">
                   No hay datos históricos disponibles
@@ -213,24 +269,28 @@ export default function OxigenoPage() {
           </div>
         </div>
 
-        {/* Información técnica */}
+        {/* Información técnica actualizada con rangos configurados */}
         <div className="mt-6 bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Información Técnica (Texto de prueba)</h3>
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">Información Técnica del Sensor</h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-green-50 rounded-lg">
-              <p className="text-lg font-bold text-green-600">"MODELO_SENSOR"</p>
+              <p className="text-lg font-bold text-green-600">Sensor Óptico</p>
               <p className="text-sm text-gray-600">Tipo de Sensor</p>
             </div>
             <div className="text-center p-4 bg-blue-50 rounded-lg">
               <p className="text-lg font-bold text-blue-600">±0.1 mg/L</p>
               <p className="text-sm text-gray-600">Precisión</p>
             </div>
-            <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <p className="text-lg font-bold text-purple-600">0-20 mg/L</p>
-              <p className="text-sm text-gray-600">Rango de Medición</p>
+            <div className="text-center p-4 bg-red-50 rounded-lg">
+              <p className="text-lg font-bold text-red-600">
+                {configuracion.oxigeno.minimo} - {configuracion.oxigeno.maximo} mg/L
+              </p>
+              <p className="text-sm text-gray-600">Rango Crítico</p>
             </div>
-            <div className="text-center p-4 bg-yellow-50 rounded-lg">
-              <p className="text-lg font-bold text-yellow-600">7-12 mg/L</p>
+            <div className="text-center p-4 bg-green-50 rounded-lg">
+              <p className="text-lg font-bold text-green-600">
+                {configuracion.oxigeno.minimoOptimo} - {configuracion.oxigeno.maximoOptimo} mg/L
+              </p>
               <p className="text-sm text-gray-600">Rango Óptimo</p>
             </div>
           </div>
