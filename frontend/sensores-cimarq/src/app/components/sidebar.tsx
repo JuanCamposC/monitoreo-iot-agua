@@ -1,8 +1,11 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { HiHome, HiChartBar, HiExclamation, HiCog, HiMenu, HiX, HiChevronDown } from "react-icons/hi";
-import { FaThermometerHalf, FaTint, FaWind } from "react-icons/fa";
+import { HiHome, HiChartBar, HiExclamation, HiCog, HiMenu, HiX, HiChevronDown, HiDownload } from "react-icons/hi";
+import { FaThermometerHalf, FaTint, FaWind, FaPlay } from "react-icons/fa";
+import { useAuth } from "../contexts/AuthContext";
+import { useSidebar } from "../contexts/SidebarContext";
+import ProfileModal from "./ProfileModal";
 
 interface MenuItem {
   icon: React.ReactNode;
@@ -22,26 +25,16 @@ const menuItems: MenuItem[] = [
       { icon: <FaWind className="w-4 h-4" />, label: "Oxígeno", href: "/sensores/oxigeno" },
     ],
   },
+  { icon: <HiCog className="w-4 h-4" />, label: "Ingreso Manual", href: "/sensores/ingreso-manual" },
+  { icon: <FaPlay className="w-5 h-5" />, label: "Simulador", href: "/simulador" },
+  { icon: <HiDownload className="w-5 h-5" />, label: "Exportar Datos", href: "/exportar-datos" },
   { icon: <HiExclamation className="w-5 h-5" />, label: "Alertas", href: "/alertas" },
   { icon: <HiCog className="w-5 h-5" />, label: "Configuración", href: "/configuracion" },
 ];
 
 export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const { isOpen, isMobile, setIsOpen } = useSidebar();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
-
-  // Detecta viewport
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 1024;
-      setIsMobile(mobile);
-      setIsOpen(!mobile); // abierto en desktop, cerrado en mobile
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   // Bloquea scroll cuando el sidebar móvil está abierto
   useEffect(() => {
@@ -58,14 +51,14 @@ export default function Sidebar() {
     (e: KeyboardEvent) => {
       if (e.key === "Escape" && isMobile && isOpen) setIsOpen(false);
     },
-    [isMobile, isOpen]
+    [isMobile, isOpen, setIsOpen]
   );
   useEffect(() => {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [onKeyDown]);
 
-  const toggleSidebar = () => setIsOpen((v) => !v);
+  const toggleSidebar = () => setIsOpen(!isOpen);
 
   const toggleExpanded = (label: string) => {
     setExpandedItems((prev) => (prev.includes(label) ? prev.filter((i) => i !== label) : [...prev, label]));
@@ -106,17 +99,19 @@ export default function Sidebar() {
             id="mobile-sidebar"
             className={`absolute left-0 top-0 h-full w-64 z-[1] pointer-events-auto
                         bg-slate-900 text-white border-r border-slate-700
-                        transition-transform duration-300 ease-in-out
+                        transition-transform duration-300 ease-in-out flex flex-col
                         ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
           >
             {/* --- CONTENIDO --- */}
             <Header isOpen onClose={!isMobile ? toggleSidebar : undefined} />
-            <Nav
-              isOpen
-              expandedItems={expandedItems}
-              toggleExpanded={toggleExpanded}
-              handleLinkClick={handleLinkClick}
-            />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <Nav
+                isOpen
+                expandedItems={expandedItems}
+                toggleExpanded={toggleExpanded}
+                handleLinkClick={handleLinkClick}
+              />
+            </div>
             <Footer isOpen />
           </div>
         </div>
@@ -125,18 +120,20 @@ export default function Sidebar() {
       {/* Sidebar desktop */}
       {!isMobile && (
         <div
-          className={`relative left-0 top-0 h-full bg-slate-900 text-white
+          className={`fixed left-0 top-0 flex flex-col h-screen bg-slate-900 text-white z-50
                       transition-all duration-300 ease-in-out
                       ${isOpen ? "w-64" : "w-16"}
                       border-r border-slate-700 overflow-hidden`}
         >
           <Header isOpen={isOpen} onClose={!isMobile && isOpen ? toggleSidebar : undefined} onToggle={!isMobile && !isOpen ? toggleSidebar : undefined} />
-          <Nav
-            isOpen={isOpen}
-            expandedItems={expandedItems}
-            toggleExpanded={toggleExpanded}
-            handleLinkClick={handleLinkClick}
-          />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <Nav
+              isOpen={isOpen}
+              expandedItems={expandedItems}
+              toggleExpanded={toggleExpanded}
+              handleLinkClick={handleLinkClick}
+            />
+          </div>
           <Footer isOpen={isOpen} />
         </div>
       )}
@@ -155,6 +152,8 @@ function Header({
   onClose?: () => void;
   onToggle?: () => void;
 }) {
+  const { user } = useAuth();
+  
   return (
     <div className="p-4 border-b border-slate-700">
       <div className="flex items-center justify-between">
@@ -202,7 +201,7 @@ function Nav({
   handleLinkClick: () => void;
 }) {
   return (
-    <nav className="flex-1 p-3">
+    <nav className="flex-1 p-3 overflow-y-auto">
       <ul className="space-y-1">
         {menuItems.map((item) => (
           <li key={item.label}>
@@ -270,19 +269,97 @@ function Nav({
 }
 
 function Footer({ isOpen }: { isOpen: boolean }) {
+  const { user, logout } = useAuth();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+
+  if (!user) return null;
+
+  const handleLogout = async () => {
+    await logout();
+    setShowProfileMenu(false);
+  };
+
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  };
+
+  const getRoleDisplay = (role: string) => {
+    return role === 'admin' ? '👑 Administrador' : '👤 Usuario';
+  };
+
+  const getRoleColor = (role: string) => {
+    return role === 'admin' ? 'bg-yellow-600' : 'bg-blue-600';
+  };
+
   return (
-    <div className="p-4 border-t border-slate-700">
-      <div className={`flex items-center space-x-3 ${!isOpen ? "justify-center" : ""}`}>
-        <div className="w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center">
-          <span className="text-xs font-bold">A</span>
+    <>
+      <div className="p-4 border-t border-slate-700">
+        <div className="relative">
+          <button
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+            className={`w-full flex items-center space-x-3 p-2 rounded-lg hover:bg-slate-700 transition-colors ${
+              !isOpen ? "justify-center" : ""
+            }`}
+          >
+            <div className={`w-8 h-8 ${getRoleColor(user.rol)} rounded-full flex items-center justify-center`}>
+              <span className="text-white font-bold text-xs">
+                {getInitials(user.nombre)}
+              </span>
+            </div>
+            {isOpen && (
+              <div className="flex-1 text-left">
+                <p className="text-sm font-medium text-slate-200 truncate">
+                  {user.nombre}
+                </p>
+                <p className="text-xs text-slate-400 truncate">
+                  {getRoleDisplay(user.rol)}
+                </p>
+              </div>
+            )}
+            {isOpen && (
+              <HiChevronDown 
+                className={`w-4 h-4 text-slate-400 transform transition-transform ${
+                  showProfileMenu ? 'rotate-180' : ''
+                }`} 
+              />
+            )}
+          </button>
+
+          {/* Menú desplegable del perfil */}
+          {showProfileMenu && isOpen && (
+            <div className="absolute bottom-full left-0 right-0 mb-1 bg-slate-800 border border-slate-600 rounded-lg shadow-lg z-50">
+              <div className="p-2">
+                <button
+                  onClick={() => {
+                    setShowProfileModal(true);
+                    setShowProfileMenu(false);
+                  }}
+                  className="w-full flex items-center space-x-2 p-2 text-sm text-slate-200 hover:bg-slate-700 rounded-md transition-colors"
+                >
+                  <HiCog className="w-4 h-4" />
+                  <span>Mi Perfil</span>
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center space-x-2 p-2 text-sm text-red-400 hover:bg-slate-700 rounded-md transition-colors"
+                >
+                  <HiX className="w-4 h-4" />
+                  <span>Cerrar Sesión</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-        {isOpen && (
-          <div>
-            <p className="text-sm font-medium">Admin</p>
-            <p className="text-xs text-slate-400">En línea</p>
-          </div>
-        )}
       </div>
-    </div>
+
+      {/* Modal de Perfil */}
+      {showProfileModal && (
+        <ProfileModal 
+          user={user}
+          onClose={() => setShowProfileModal(false)}
+        />
+      )}
+    </>
   );
 }

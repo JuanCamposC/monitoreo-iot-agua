@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Box, Typography, Card, CardContent, Chip, Alert, CircularProgress, Paper, CardActionArea, FormControl, InputLabel, Select, MenuItem, List, ListItem, ListItemIcon, ListItemText, Divider, Button } from '@mui/material';
+import { Box, Typography, Card, CardContent, Chip, Alert, CircularProgress, Paper, CardActionArea, FormControl, InputLabel, Select, MenuItem, List, ListItem, ListItemIcon, ListItemText, Divider, Button, Badge } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import Link from 'next/link';
+import { apiRequestJson, API_ENDPOINTS } from '../config/api';
 import GeneralChart from './graficos/GeneralChart';
 import { useConfiguracionRangos } from '../hooks/useConfiguracionRangos';
 import { useNotificaciones, AlertaNotificacion } from '../hooks/useNotificaciones';
+import { useMonitoreoAutomatico } from '../hooks/useMonitoreoAutomatico';
 import { ModalAlertaEmergencia } from './ModalAlertaEmergencia';
 import ThermostatIcon from '@mui/icons-material/Thermostat';
 import WaterIcon from '@mui/icons-material/Water';
@@ -91,12 +93,24 @@ export default function SensoresPage() {
     probarNotificaciones
   } = useNotificaciones();
 
+  // Hook de monitoreo automático
+  const {
+    alertasAutomaticas,
+    monitoreoActivo,
+    estadisticas,
+    iniciarMonitoreo,
+    detenerMonitoreo,
+    marcarComoLeida,
+    ultimaRevision
+  } = useMonitoreoAutomatico();
+
   // Obtener datos del backend Flask
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/v1/sensores');
-        const result: ApiResponse = await response.json();
+        console.log('🔄 Dashboard - Cargando datos usando API configurado');
+        
+        const result: ApiResponse = await apiRequestJson<ApiResponse>(API_ENDPOINTS.SENSORES);
         
         if (result.success) {
           setData(result.data);
@@ -106,8 +120,14 @@ export default function SensoresPage() {
           setError('Error al cargar datos');
         }
       } catch (err) {
-        setError('Error de conexión con la API');
-        console.error('Error:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+        console.error('🚨 Dashboard - Error completo:', err);
+        
+        if (errorMessage.includes('fetch') || errorMessage === 'Failed to fetch') {
+          setError('🔌 No se pudo conectar al servidor backend. Verifica que esté ejecutándose correctamente');
+        } else {
+          setError(`Error de conexión con la API: ${errorMessage}`);
+        }
       } finally {
         setLoading(false);
       }
@@ -124,7 +144,19 @@ export default function SensoresPage() {
     const fetchAlertas = async () => {
       setLoadingAlertas(true);
       try {
-        const response = await fetch('http://localhost:5000/api/v1/alertas?limite=10');
+        // Configurar URL del backend según el entorno
+        const backendUrl = typeof window !== 'undefined' 
+          ? 'http://localhost:5000' 
+          : process.env.BACKEND_URL || 'http://localhost:5000';
+        
+        console.log('🔄 Dashboard - Cargando alertas desde:', `${backendUrl}/api/v1/alertas?limite=10`);
+        
+        const response = await fetch(`${backendUrl}/api/v1/alertas?limite=10`, {
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        
         const result = await response.json();
         
         if (result.success) {
@@ -507,131 +539,356 @@ export default function SensoresPage() {
         />
       </Box>
 
-      {/* Información adicional */}
-      {/* Alertas Históricas */}
+      {/* Sistema de Alertas Unificado */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {/* Panel de Control de Monitoreo */}
+        <Grid size={{ xs: 12, md: 4 }}>
+          <Paper sx={{ p: 3, height: '100%' }}>
+            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <NotificationsIcon color="primary" />
+              Monitoreo Automático
+            </Typography>
+            
+            {/* Estado del monitoreo */}
+            <Box sx={{ mb: 2 }}>
+              <Chip
+                label={monitoreoActivo ? "Activo" : "Inactivo"}
+                color={monitoreoActivo ? "success" : "default"}
+                icon={monitoreoActivo ? <VisibilityIcon /> : <ErrorIcon />}
+                sx={{ mb: 1 }}
+              />
+              {ultimaRevision && (
+                <Typography variant="caption" display="block" color="text.secondary">
+                  Última revisión: {ultimaRevision.toLocaleTimeString()}
+                </Typography>
+              )}
+            </Box>
+
+            {/* Botones de control */}
+            <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column' }}>
+              <Button
+                variant={monitoreoActivo ? "outlined" : "contained"}
+                color={monitoreoActivo ? "error" : "primary"}
+                size="small"
+                onClick={monitoreoActivo ? detenerMonitoreo : iniciarMonitoreo}
+                startIcon={monitoreoActivo ? <ErrorIcon /> : <VisibilityIcon />}
+              >
+                {monitoreoActivo ? "Detener" : "Iniciar"} Monitoreo
+              </Button>
+              
+              <Link href="/alertas" passHref>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<NotificationsIcon />}
+                  fullWidth
+                >
+                  Gestionar Alertas
+                </Button>
+              </Link>
+              
+              {/* Botón de diagnóstico integrado */}
+              <Button
+                variant="text"
+                size="small"
+                onClick={async () => {
+                  console.log('🔧 Ejecutando diagnóstico completo...');
+                  console.log('📊 Estadísticas de monitoreo:', estadisticas);
+                  console.log('⚡ Estado MQTT:', mqttStatus);
+                  await diagnosticarSistema();
+                  await probarNotificaciones();
+                }}
+                sx={{ mt: 1 }}
+                fullWidth
+              >
+                🔧 Diagnóstico
+              </Button>
+            </Box>
+          </Paper>
+        </Grid>
+
+        {/* Estadísticas de Alertas */}
+        <Grid size={{ xs: 12, md: 8 }}>
+          <Paper sx={{ p: 3, height: '100%' }}>
+            <Typography variant="h6" gutterBottom>
+              Estadísticas de Alertas
+            </Typography>
+            
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 6, sm: 3 }}>
+                <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'primary.light', borderRadius: 2, color: 'white' }}>
+                  <Typography variant="h4">{estadisticas.total}</Typography>
+                  <Typography variant="caption">Total</Typography>
+                </Box>
+              </Grid>
+              <Grid size={{ xs: 6, sm: 3 }}>
+                <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'error.light', borderRadius: 2, color: 'white' }}>
+                  <Typography variant="h4">{estadisticas.criticas}</Typography>
+                  <Typography variant="caption">Críticas</Typography>
+                </Box>
+              </Grid>
+              <Grid size={{ xs: 6, sm: 3 }}>
+                <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'warning.light', borderRadius: 2, color: 'white' }}>
+                  <Typography variant="h4">{estadisticas.aceptables}</Typography>
+                  <Typography variant="caption">Aceptables</Typography>
+                </Box>
+              </Grid>
+              <Grid size={{ xs: 6, sm: 3 }}>
+                <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'info.light', borderRadius: 2, color: 'white' }}>
+                  <Typography variant="h4">{estadisticas.noLeidas}</Typography>
+                  <Typography variant="caption">Sin Leer</Typography>
+                </Box>
+              </Grid>
+            </Grid>
+
+            {/* Alertas por sensor */}
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="subtitle2" gutterBottom>
+                Alertas por Sensor:
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                <Chip
+                  icon={<ThermostatIcon />}
+                  label={`Temperatura: ${estadisticas.porSensor.temperatura}`}
+                  size="small"
+                  variant="outlined"
+                />
+                <Chip
+                  icon={<WaterIcon />}
+                  label={`pH: ${estadisticas.porSensor.ph}`}
+                  size="small"
+                  variant="outlined"
+                />
+                <Chip
+                  icon={<AirIcon />}
+                  label={`Oxígeno: ${estadisticas.porSensor.oxigeno}`}
+                  size="small"
+                  variant="outlined"
+                />
+              </Box>
+            </Box>
+          </Paper>
+        </Grid>
+      </Grid>
+
+      {/* Alertas Recientes Unificadas */}
       <Paper sx={{ p: 3, mb: 3 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
           <Typography variant="h6">
-            Alertas Históricas
+            Alertas Recientes
           </Typography>
-          <Link href="/alertas" passHref>
-            <Button
-              variant="outlined"
-              startIcon={<NotificationsIcon />}
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            {/* Badge con total de alertas no leídas */}
+            <Chip
+              label={`${alertasAutomaticas.filter(a => !a.leida).length + alertasNoRevisadas} sin revisar`}
+              color={alertasAutomaticas.filter(a => !a.leida).length + alertasNoRevisadas > 0 ? "error" : "success"}
               size="small"
-              sx={{ ml: 2 }}
-              color={alertasNoRevisadas > 0 ? "warning" : "primary"}
-            >
-              Ver Todas
-              {alertasNoRevisadas > 0 && (
-                <Chip 
-                  label={alertasNoRevisadas} 
-                  size="small" 
-                  color="error" 
-                  sx={{ ml: 1, height: 20 }} 
-                />
-              )}
-            </Button>
-          </Link>
-          
-          {/* Botón temporal para diagnóstico */}
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={async () => {
-              console.log('🔧 Ejecutando diagnóstico...');
-              await diagnosticarSistema();
-              await probarNotificaciones();
-            }}
-            sx={{ ml: 1 }}
-          >
-            🔧 Diagnosticar
-          </Button>
-        </Box>
-        {loadingAlertas ? (
-          <Box display="flex" justifyContent="center" p={2}>
-            <CircularProgress />
+              variant="filled"
+            />
+            
+            <Link href="/alertas" passHref>
+              <Button
+                variant="outlined"
+                startIcon={<NotificationsIcon />}
+                size="small"
+              >
+                Ver Todas
+              </Button>
+            </Link>
           </Box>
-        ) : alertasHistoricas.length === 0 ? (
+        </Box>
+
+        {/* Combinar alertas automáticas y históricas */}
+        {(loadingAlertas || alertasAutomaticas.length === 0) && alertasHistoricas.length === 0 ? (
           <Box display="flex" justifyContent="center" p={2}>
-            <Typography variant="body2" color="text.secondary">
-              No hay alertas históricas disponibles
-            </Typography>
+            {loadingAlertas ? (
+              <CircularProgress />
+            ) : (
+              <Alert severity="info" sx={{ width: '100%' }}>
+                <Typography variant="body2">
+                  No hay alertas disponibles. El sistema está monitoreando continuamente.
+                </Typography>
+              </Alert>
+            )}
           </Box>
         ) : (
-          <Card variant="outlined" sx={{ maxHeight: 400, overflowY: 'auto' }}>
+          <Card variant="outlined" sx={{ maxHeight: 500, overflowY: 'auto' }}>
             <List dense>
-              {alertasHistoricas.slice(0, 10).map((alerta, index) => (
+              {/* Mostrar primero las alertas automáticas más recientes */}
+              {alertasAutomaticas.slice(0, 5).map((alerta, index) => (
+                <Box key={alerta.id}>
+                  <ListItem
+                    sx={{
+                      bgcolor: !alerta.leida ? 'action.hover' : 'transparent',
+                      borderLeft: `4px solid ${alerta.estado === 'critico' ? '#f44336' : '#ff9800'}`
+                    }}
+                  >
+                    <ListItemIcon>
+                      {alerta.sensor === 'temperatura' && <ThermostatIcon color={alerta.estado === 'critico' ? 'error' : 'warning'} />}
+                      {alerta.sensor === 'ph' && <WaterIcon color={alerta.estado === 'critico' ? 'error' : 'warning'} />}
+                      {alerta.sensor === 'oxigeno' && <AirIcon color={alerta.estado === 'critico' ? 'error' : 'warning'} />}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                          <Typography component="span" variant="subtitle2" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                            {alerta.sensor.toUpperCase()}
+                          </Typography>
+                          <Chip
+                            size="small"
+                            label={alerta.estado === 'critico' ? 'CRÍTICO' : 'ALERTA'}
+                            color={alerta.estado === 'critico' ? 'error' : 'warning'}
+                            variant="filled"
+                          />
+                          <Chip
+                            size="small"
+                            label="AUTOMÁTICA"
+                            color="info"
+                            variant="outlined"
+                          />
+                          {!alerta.leida && (
+                            <Chip
+                              size="small"
+                              label="NUEVA"
+                              color="error"
+                              variant="filled"
+                            />
+                          )}
+                        </Box>
+                      }
+                      secondary={
+                        <Box>
+                          <Typography component="div" variant="body2" sx={{ mb: 0.5, lineHeight: 1.4 }}>
+                            {alerta.mensaje}
+                          </Typography>
+                          <Typography component="span" variant="caption" color="text.secondary">
+                            Valor: {alerta.valor} • {alerta.timestamp.toLocaleString('es-CL')}
+                          </Typography>
+                        </Box>
+                      }
+                      primaryTypographyProps={{ component: 'div' }}
+                      secondaryTypographyProps={{ component: 'div' }}
+                    />
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={() => marcarComoLeida(alerta.id)}
+                      disabled={alerta.leida}
+                      sx={{ ml: 1 }}
+                    >
+                      {alerta.leida ? '✓' : 'Marcar'}
+                    </Button>
+                  </ListItem>
+                  {index < Math.min(alertasAutomaticas.length - 1, 4) && <Divider />}
+                </Box>
+              ))}
+
+              {/* Separador si hay ambos tipos de alertas */}
+              {alertasAutomaticas.length > 0 && alertasHistoricas.length > 0 && (
+                <Divider sx={{ my: 1, borderStyle: 'dashed' }}>
+                  <Chip label="Alertas Históricas" size="small" />
+                </Divider>
+              )}
+
+              {/* Mostrar alertas históricas */}
+              {alertasHistoricas.slice(0, 5).map((alerta, index) => (
                 <Box key={alerta._id}>
-                  <ListItem>
+                  <ListItem sx={{ bgcolor: !alerta.resuelto ? 'action.hover' : 'transparent' }}>
                     <ListItemIcon>
                       {getSensorIcon(alerta.sensor)}
                     </ListItemIcon>
                     <ListItemText
                       primary={
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                          <span style={{ fontWeight: 'bold', fontSize: '0.875rem', color: '#1976d2' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                          <Typography component="span" variant="subtitle2" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
                             {alerta.sensor.toUpperCase()}
-                          </span>
-                          <Chip 
-                            size="small" 
+                          </Typography>
+                          <Chip
+                            size="small"
                             label={alerta.nivel}
                             color={getNivelAlertaColor(alerta.nivel)}
                             variant="outlined"
                           />
+                          <Chip
+                            size="small"
+                            label="HISTÓRICA"
+                            color="default"
+                            variant="outlined"
+                          />
                           {!alerta.resuelto && (
-                            <Chip 
-                              size="small" 
-                              label="Sin revisar"
-                              color="error"
+                            <Chip
+                              size="small"
+                              label="SIN REVISAR"
+                              color="warning"
                               variant="filled"
                             />
                           )}
-                        </span>
+                        </Box>
                       }
                       secondary={
-                        <span>
-                          <span style={{ display: 'block', fontSize: '0.875rem', color: '#555', marginBottom: '4px', lineHeight: '1.4' }}>
+                        <Box>
+                          <Typography component="div" variant="body2" sx={{ mb: 0.5, lineHeight: 1.4 }}>
                             {alerta.mensaje}
-                          </span>
-                          <span style={{ fontSize: '0.75rem', color: '#777', fontWeight: '500' }}>
-                            Valor: {alerta.valor_actual} - {formatFechaAlerta(alerta.fecha_creacion)}
-                          </span>
-                        </span>
+                          </Typography>
+                          <Typography component="span" variant="caption" color="text.secondary">
+                            Valor: {alerta.valor_actual} • {formatFechaAlerta(alerta.fecha_creacion)}
+                          </Typography>
+                        </Box>
                       }
+                      primaryTypographyProps={{ component: 'div' }}
+                      secondaryTypographyProps={{ component: 'div' }}
                     />
                   </ListItem>
-                  {index < Math.min(alertasHistoricas.length - 1, 9) && <Divider />}
+                  {index < Math.min(alertasHistoricas.length - 1, 4) && <Divider />}
                 </Box>
               ))}
             </List>
+
+            {/* Mostrar más alertas disponibles */}
+            {(alertasAutomaticas.length + alertasHistoricas.length) > 10 && (
+              <Box sx={{ p: 2, textAlign: 'center', bgcolor: 'grey.50' }}>
+                <Link href="/alertas" passHref>
+                  <Button variant="text" size="small">
+                    Ver {(alertasAutomaticas.length + alertasHistoricas.length) - 10} alertas más →
+                  </Button>
+                </Link>
+              </Box>
+            )}
           </Card>
         )}
       </Paper>
 
       <Paper sx={{ p: 3 }}>
         <Typography variant="h6" gutterBottom textAlign="center">
-          Información del Sistema
+          Estado del Sistema
         </Typography>
         <Grid container spacing={2}>
-          <Grid size= {{xs: 12, md: 4}}>
+          <Grid size= {{xs: 12, md: 3}}>
             <Typography variant="body2" color="text.secondary" textAlign="center">
               🔄 Actualización: cada 5 segundos
             </Typography>
           </Grid>
-          <Grid size= {{xs: 12, md: 4}}>
+          <Grid size= {{xs: 12, md: 3}}>
             <Typography variant="body2" color="text.secondary" textAlign="center">
               📊 Período: {timeFilter === '1h' ? 'Última hora' : timeFilter === '6h' ? 'Últimas 6h' : timeFilter === '24h' ? 'Últimas 24h' : timeFilter === '7d' ? 'Últimos 7 días' : 'Todos los datos'}
             </Typography>
           </Grid>
-          <Grid size= {{xs: 12, md: 4}}>
+          <Grid size= {{xs: 12, md: 3}}>
             <Typography variant="body2" color="text.secondary" textAlign="center">
-              ⚡ CIMARQ v1.0.0 - Sistema Preventivo ML
+              🚨 Monitoreo: {monitoreoActivo ? '✅ Activo' : '❌ Inactivo'}
+            </Typography>
+          </Grid>
+          <Grid size= {{xs: 12, md: 3}}>
+            <Typography variant="body2" color="text.secondary" textAlign="center">
+              ⚡ CIMARQ v2.0.0 - Sistema Inteligente
             </Typography>
           </Grid>
           <Grid size= {{xs: 12}} sx={{ mt: 1 }}>
             <Typography variant="caption" color="text.secondary" textAlign="center" display="block">
-              🕒 Última actualización: {new Date().toLocaleTimeString()} | 🤖 IA Predictiva: Activa | 🚨 Alertas: Tiempo Real
+              🕒 Última actualización: {new Date().toLocaleTimeString()} | 
+              🤖 Alertas Automáticas: {estadisticas.total} | 
+              📧 Notificaciones: {mqttStatus.connected ? 'Activas' : 'Inactivas'} |
+              � Última revisión: {ultimaRevision ? ultimaRevision.toLocaleTimeString() : 'Nunca'}
             </Typography>
           </Grid>
         </Grid>
