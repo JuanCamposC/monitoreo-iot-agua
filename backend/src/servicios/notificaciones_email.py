@@ -44,6 +44,25 @@ class ServicioNotificacionesEmail:
             'MEDIO': False,     # No notificar por email
             'BAJO': False       # No notificar por email
         }
+        
+        # Base de datos (será asignada desde app.py)
+        self.db = None
+    
+    def set_database(self, db):
+        """Establece la conexión a la base de datos"""
+        self.db = db
+    
+    def verificar_emails_habilitados(self) -> bool:
+        """Verifica si los emails están habilitados en la configuración de la base de datos"""
+        if not self.db:
+            return True  # Por defecto habilitado si no hay BD
+        
+        try:
+            config_doc = self.db.configuracion.find_one({'tipo': 'emails'})
+            return config_doc.get('habilitado', True) if config_doc else True
+        except Exception as e:
+            logger.error(f"Error verificando configuración de emails: {e}")
+            return True  # Por defecto habilitado en caso de error
     
     def verificar_configuracion(self) -> bool:
         """Verifica si la configuración de email está completa"""
@@ -216,6 +235,11 @@ class ServicioNotificacionesEmail:
             logger.error("Configuración de email incompleta")
             return False
         
+        # Verificar configuración global de emails (aplica a alertas automáticas y predictivas)
+        if not self.verificar_emails_habilitados():
+            logger.info("Emails deshabilitados globalmente por configuración del usuario")
+            return True  # No es error, simplemente está desactivado
+        
         # Verificar si debe notificar este nivel
         nivel = alerta_data.get('nivel', 'MEDIO')
         if not self.niveles_notificacion.get(nivel, False):
@@ -342,6 +366,84 @@ Generado automáticamente
             return {
                 'success': False,
                 'error': str(e),
+                'timestamp': datetime.now(CHILE_TZ).isoformat()
+            }
+
+    def enviar_email_con_adjunto(self, email_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Envía email con archivo adjunto
+        
+        Args:
+            email_data: Dict con 'destinatario', 'asunto', 'mensaje', 'archivo_adjunto'
+            archivo_adjunto: Dict con 'contenido', 'nombre', 'tipo_mime'
+        """
+        try:
+            if not self.verificar_configuracion():
+                return {
+                    'success': False,
+                    'error': 'Configuración de email incompleta'
+                }
+
+            # Crear mensaje
+            msg = MIMEMultipart()
+            msg['From'] = self.email_remitente
+            msg['To'] = email_data['destinatario']
+            msg['Subject'] = email_data['asunto']
+
+            # Agregar cuerpo del mensaje
+            msg.attach(MIMEText(email_data['mensaje'], 'plain', 'utf-8'))
+
+            # Agregar archivo adjunto si existe
+            if 'archivo_adjunto' in email_data:
+                adjunto = email_data['archivo_adjunto']
+                
+                # Crear parte del adjunto
+                part = MIMEBase('application', 'octet-stream')
+                
+                # Manejar contenido según tipo
+                contenido = adjunto['contenido']
+                if isinstance(contenido, str):
+                    # CSV o texto
+                    part.set_payload(contenido.encode('utf-8-sig'))
+                else:
+                    # Excel binario
+                    part.set_payload(contenido)
+                
+                # Codificar en base64
+                encoders.encode_base64(part)
+                
+                # Agregar headers del adjunto
+                part.add_header(
+                    'Content-Disposition',
+                    f'attachment; filename= {adjunto["nombre"]}'
+                )
+                
+                # Agregar tipo MIME si se especifica
+                if 'tipo_mime' in adjunto:
+                    part.add_header('Content-Type', adjunto['tipo_mime'])
+                
+                msg.attach(part)
+
+            # Enviar email
+            with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
+                server.starttls()
+                server.login(self.email_remitente, self.email_password)
+                server.send_message(msg)
+
+            logger.info(f"✅ Email con adjunto enviado a: {email_data['destinatario']}")
+            
+            return {
+                'success': True,
+                'mensaje': f'Email enviado exitosamente a {email_data["destinatario"]}',
+                'timestamp': datetime.now(CHILE_TZ).isoformat()
+            }
+
+        except Exception as e:
+            error_msg = f"Error enviando email con adjunto: {str(e)}"
+            logger.error(f"❌ {error_msg}")
+            return {
+                'success': False,
+                'error': error_msg,
                 'timestamp': datetime.now(CHILE_TZ).isoformat()
             }
 

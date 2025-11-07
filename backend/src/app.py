@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, make_response
+from flask import Flask, jsonify, request, make_response, g
 from flask_cors import CORS
 from flask_restx import Api, Resource, fields, Namespace
 from pymongo import MongoClient
@@ -12,8 +12,16 @@ import pytz
 import paho.mqtt.client as mqtt
 import threading
 import time
+import csv
+import io
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment
 from sistema_preventivo import SistemaPreventivoML
 from servicios.notificaciones_email import servicio_email
+import hashlib
+import secrets
+import jwt
+from functools import wraps
 
 load_dotenv()
 
@@ -21,13 +29,23 @@ load_dotenv()
 CHILE_TZ = pytz.timezone('America/Santiago')
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, 
+     origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     allow_headers=["Content-Type", "Authorization"],
+     supports_credentials=True)
+
+# Configuración JWT
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", secrets.token_hex(32))
+JWT_ALGORITHM = "HS256"
+JWT_EXPIRATION_HOURS = 24
 
 # Configuración de Swagger/OpenAPI
 api = Api(
     app,
     version='2.0',
     title='API de Sensores IoT CIMARQ - Sistema Unificado',
+    doc='/docs/',  # Documentación disponible en /docs/
     description="""
     API REST para monitoreo de sensores de calidad del agua en acuicultura.
     
@@ -48,7 +66,6 @@ api = Api(
     - **cimarq/ph/update**: Solo pH (legacy)
     - **cimarq/oxigeno/update**: Solo oxígeno (legacy)
     """,
-    doc='/docs/',  # URL de la documentación
     prefix='/api/v1'
 )
 
@@ -73,16 +90,20 @@ try:
     db = client[DB_NAME]
     print(f"✅ Conectado a MongoDB: {DB_NAME}")
     
+    # Asignar base de datos al servicio de email
+    servicio_email.set_database(db)
+    print("✅ Servicio de email configurado con base de datos")
+    
     # Inicializar sistema preventivo ML
     try:
         sistema_ml = SistemaPreventivoML(MONGO_URI, DB_NAME)
-        print("✅ Sistema preventivo ML inicializado")
+        print("Sistema preventivo ML inicializado")
     except Exception as e:
-        print(f"⚠️ Error inicializando sistema ML: {e}")
+        print(f"Error inicializando sistema ML: {e}")
         sistema_ml = None
     
 except Exception as e:
-    print(f"❌ Error conectando a MongoDB: {e}")
+    print(f"Error conectando a MongoDB: {e}")
     print(f"URI utilizada: {MONGO_URI[:50]}...")
     client = None
     db = None
@@ -106,11 +127,11 @@ def reconnect_mongodb():
         
         client.admin.command('ping')
         db = client[DB_NAME]
-        print(f"✅ Reconectado a MongoDB: {DB_NAME}")
+        print(f"Reconectado a MongoDB: {DB_NAME}")
         return True
         
     except Exception as e:
-        print(f"❌ Error en reconexión a MongoDB: {e}")
+        print(f"Error en reconexión a MongoDB: {e}")
         client = None
         db = None
         return False
@@ -139,7 +160,7 @@ def ensure_mongodb_connection(f):
         
         # Si no hay cliente o no está conectado, intentar reconectar
         if client is None or db is None:
-            print("🔄 Intentando reconectar a MongoDB...")
+            print("Intentando reconectar a MongoDB...")
             if not reconnect_mongodb():
                 return jsonify({"success": False, "error": "No se pudo conectar a MongoDB"}), 500
         
@@ -147,7 +168,7 @@ def ensure_mongodb_connection(f):
         try:
             client.admin.command('ping')
         except Exception as e:
-            print(f"🔄 Conexión perdida, reconectando... Error: {e}")
+            print(f"Conexión perdida, reconectando... Error: {e}")
             if not reconnect_mongodb():
                 return jsonify({"success": False, "error": "No se pudo reconectar a MongoDB"}), 500
         
@@ -156,9 +177,65 @@ def ensure_mongodb_connection(f):
     wrapper.__name__ = f.__name__
     return wrapper
 
+# ============================================================================
+# FUNCIONES DE AUTENTICACIÓN Y SEGURIDADES
+# ============================================================================
+
+def hash_password(password: str) -> str:
+    """Crear hash seguro de la contraseña"""
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def verify_password(password: str, hashed: str) -> bool:
+    """Verificar contraseña contra hash"""
+    return hashlib.sha256(password.encode()).hexdigest() == hashed
+
+def generate_jwt_token(user_data: dict) -> str:
+    """Generar token JWT para el usuario"""
+    payload = {
+        'user_id': str(user_data['_id']),
+        'email': user_data['email'],
+        'nombre': user_data['nombre'],
+        'rol': user_data['rol'],
+        'exp': datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRATION_HOURS),
+        'iat': datetime.now(timezone.utc)
+    }
+    return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+
+def verify_jwt_token(token: str) -> dict:
+    """Verificar y decodificar token JWT"""
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        return None
+    except jwt.InvalidTokenError:
+        return None
+
+def require_auth(f):
+    """Decorador para rutas que requieren autenticación"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        auth_header = request.headers.get('Authorization')
+        
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return {'success': False, 'message': 'Token de autenticación requerido'}, 401
+        
+        token = auth_header.split(' ')[1]
+        payload = verify_jwt_token(token)
+        
+        if not payload:
+            return {'success': False, 'message': 'Token inválido o expirado'}, 401
+        
+        # Agregar información del usuario a g
+        g.current_user = payload
+        return f(*args, **kwargs)
+    
+    return decorated_function
+
 # Configurar headers anti-caché globalmente
 @app.after_request
 def after_request(response):
+    
     # Agregar headers anti-caché para endpoints de datos en tiempo real
     if '/sensores' in request.path or '/latest' in request.path or '/ml/' in request.path:
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
@@ -167,17 +244,19 @@ def after_request(response):
     return response
 
 # Definir namespaces para organizar endpoints
-sensores_ns = Namespace('sensores', description='📊 Datos unificados de todos los sensores (temperatura, pH, oxígeno)')
-temperatura_ns = Namespace('temperatura', description='🌡️ Datos de temperatura del agua (°C)')
-ph_ns = Namespace('ph', description='🧪 Datos de pH - acidez/alcalinidad del agua (6.5-8.5)')
-oxigeno_ns = Namespace('oxigeno', description='💨 Datos de oxígeno disuelto (mg/L) - calidad del agua')
-mqtt_ns = Namespace('mqtt', description='📡 Publicación de mensajes MQTT - comunicación IoT')
-health_ns = Namespace('health', description='❤️ Estado de salud del sistema (MongoDB, MQTT, timezone)')
-alertas_ns = Namespace('alertas', description='🚨 Sistema de alertas preventivas con ML')
-ml_ns = Namespace('ml', description='🤖 Análisis predictivo con Machine Learning')
-notificaciones_ns = Namespace('notificaciones', description='📧 Sistema de notificaciones por email y otros canales')
+auth_ns = Namespace('auth', description='🔐 Autenticación y autorización de usuarios')
+sensores_ns = Namespace('sensores', description='Datos unificados de todos los sensores (temperatura, pH, oxígeno)')
+temperatura_ns = Namespace('temperatura', description='Datos de temperatura del agua (°C)')
+ph_ns = Namespace('ph', description='Datos de pH - acidez/alcalinidad del agua (6.5-8.5)')
+oxigeno_ns = Namespace('oxigeno', description='Datos de oxígeno disuelto (mg/L) - calidad del agua')
+mqtt_ns = Namespace('mqtt', description='Publicación de mensajes MQTT - comunicación IoT')
+health_ns = Namespace('health', description='Estado de salud del sistema (MongoDB, MQTT, timezone)')
+alertas_ns = Namespace('alertas', description='Sistema de alertas preventivas con ML')
+ml_ns = Namespace('ml', description='Análisis predictivo con Machine Learning')
+notificaciones_ns = Namespace('notificaciones', description='Sistema de notificaciones por email y otros canales')
 
 # Registrar namespaces
+api.add_namespace(auth_ns, path='/auth')
 api.add_namespace(sensores_ns, path='/sensores')
 api.add_namespace(temperatura_ns, path='/temperatura')
 api.add_namespace(ph_ns, path='/ph')
@@ -187,6 +266,49 @@ api.add_namespace(health_ns, path='/health')
 api.add_namespace(alertas_ns, path='/alertas')
 api.add_namespace(ml_ns, path='/ml')
 api.add_namespace(notificaciones_ns, path='/notificaciones')
+
+# ============================================================================
+# MODELOS DE AUTENTICACIÓN
+# ============================================================================
+
+# Modelos de entrada para autenticación
+login_model = api.model('LoginData', {
+    'email': fields.String(required=True, description='Correo electrónico del usuario', example='admin@cimarq.com'),
+    'password': fields.String(required=True, description='Contraseña del usuario', example='admin123')
+})
+
+register_model = api.model('RegisterData', {
+    'email': fields.String(required=True, description='Correo electrónico del usuario', example='admin@cimarq.com'),
+    'password': fields.String(required=True, description='Contraseña del usuario (mín. 6 caracteres)', example='admin123'),
+    'nombre': fields.String(required=True, description='Nombre completo del usuario', example='Administrador CIMARQ'),
+    'confirmPassword': fields.String(required=True, description='Confirmación de la contraseña', example='admin123')
+})
+
+# Modelos de respuesta
+user_model = api.model('UserData', {
+    'id': fields.String(description='ID único del usuario'),
+    'email': fields.String(description='Correo electrónico del usuario'),
+    'nombre': fields.String(description='Nombre completo del usuario'),
+    'rol': fields.String(description='Rol del usuario', enum=['admin', 'usuario']),
+    'fecha_creacion': fields.String(description='Fecha de creación de la cuenta')
+})
+
+auth_response_model = api.model('AuthResponse', {
+    'success': fields.Boolean(description='Indica si la operación fue exitosa'),
+    'message': fields.String(description='Mensaje descriptivo del resultado'),
+    'token': fields.String(description='Token JWT para autenticación'),
+    'user': fields.Nested(user_model, description='Datos del usuario autenticado')
+})
+
+# Modelo de error
+error_model = api.model('ErrorResponse', {
+    'success': fields.Boolean(description='Siempre false para errores'),
+    'message': fields.String(description='Descripción del error')
+})
+
+# ============================================================================
+# MODELOS DE SENSORES
+# ============================================================================
 
 # Modelos para documentación
 unified_sensor_model = api.model('UnifiedSensorData', {
@@ -321,6 +443,68 @@ mqtt_publish_model = api.model('MQTTPublish', {
     'message': fields.Raw(required=True, description='Mensaje a publicar', example={'temperatura': 25.0})
 })
 
+# Modelo para ingreso manual de datos de sensores
+manual_input_model = api.model('ManualInput', {
+    'temperatura': fields.Float(
+        required=True, 
+        description='🌡️ Temperatura del agua en grados Celsius. Rango válido: -50°C a 100°C. Valores típicos para acuicultura: 18-25°C',
+        example=22.5,
+        min=-50.0,
+        max=100.0
+    ),
+    'ph': fields.Float(
+        required=True,
+        description='🧪 Nivel de pH del agua (acidez/alcalinidad). Rango válido: 0 a 14. Valores típicos para acuicultura: 6.5-8.5',
+        example=7.2,
+        min=0.0,
+        max=14.0
+    ),
+    'oxigeno': fields.Float(
+        required=True,
+        description='💨 Oxígeno disuelto en miligramos por litro. Rango válido: 0 a 30 mg/L. Valores críticos para acuicultura: >5 mg/L',
+        example=8.5,
+        min=0.0,
+        max=30.0
+    ),
+    'fecha': fields.String(
+        required=False,
+        description='📅 Timestamp ISO 8601 del momento de la medición. Si no se especifica, se usa la fecha/hora actual del servidor (GMT-3)',
+        example='2024-11-06T10:30:00Z'
+    ),
+    'fuente': fields.String(
+        required=False,
+        description='📝 Identificador de la fuente del dato. Usado para trazabilidad y filtrado. Por defecto: "manual"',
+        example='manual',
+        default='manual'
+    ),
+    'usuario': fields.String(
+        required=False,
+        description='👤 Usuario que registra la medición. Usado para auditoría y trazabilidad. Por defecto: "admin"',
+        example='admin',
+        default='admin'
+    )
+})
+
+# Modelo de respuesta específico para ingreso manual
+manual_response_model = api.model('ManualResponse', {
+    'success': fields.Boolean(description='✅ Indica si la operación fue exitosa', example=True),
+    'data': fields.Nested(api.model('ManualData', {
+        '_id': fields.String(description='🆔 ID único del registro en MongoDB', example='673b8e4f9c8d4e001f123456'),
+        'temperatura': fields.Float(description='🌡️ Temperatura registrada en °C', example=22.5),
+        'ph': fields.Float(description='🧪 pH registrado', example=7.2),
+        'oxigeno': fields.Float(description='💨 Oxígeno registrado en mg/L', example=8.5),
+        'fecha': fields.String(description='📅 Timestamp final con zona horaria Chile', example='2024-11-06T13:30:00-03:00'),
+        'fuente': fields.String(description='📝 Fuente confirmada del dato', example='manual'),
+        'usuario': fields.String(description='👤 Usuario confirmado', example='admin')
+    })),
+    'count': fields.Integer(description='📊 Número de registros creados (siempre 1)', example=1),
+    'alertas_generadas': fields.Integer(description='🚨 Cantidad de alertas generadas automáticamente', example=0),
+    'mqtt_status': fields.Nested(api.model('MQTTStatus', {
+        'connected': fields.Boolean(description='📡 Estado de conexión MQTT', example=True),
+        'last_message': fields.String(description='⏰ Último mensaje MQTT recibido', example='2024-11-06T13:29:45-03:00')
+    }))
+})
+
 def get_chile_time():
     """Obtiene la hora actual en zona horaria de Chile (America/Santiago)"""
     return datetime.now(CHILE_TZ)
@@ -395,7 +579,7 @@ def save_complete_sensor_data():
             
             # Guardar en base de datos
             result = db.datos.insert_one(complete_data)
-            print(f"✅ Datos completos guardados: T={complete_data['temperatura']}°C, "
+            print(f"Datos completos guardados: T={complete_data['temperatura']}°C, "
                   f"pH={complete_data['ph']}, O2={complete_data['oxigeno']}mg/L - ID: {result.inserted_id}")
             
             # Limpiar cache para próximo ciclo
@@ -409,7 +593,7 @@ def save_complete_sensor_data():
             return True
             
         except Exception as e:
-            print(f"❌ Error guardando datos completos: {e}")
+            print(f"Error guardando datos completos: {e}")
             return False
     
     return False
@@ -437,7 +621,7 @@ def on_message(client, userdata, msg):
                     }
                     
                     result = db.datos.insert_one(complete_data)
-                    print(f"✅ Datos unificados guardados: T={complete_data['temperatura']}°C, "
+                    print(f"Datos unificados guardados: T={complete_data['temperatura']}°C, "
                           f"pH={complete_data['ph']}, O2={complete_data['oxigeno']}mg/L - ID: {result.inserted_id}")
                     
                     # Ejecutar monitoreo en tiempo real tras guardar nuevos datos
@@ -446,16 +630,16 @@ def on_message(client, userdata, msg):
                             resultado_monitoreo = sistema_ml.monitorear_sensores_tiempo_real()
                             alertas_generadas = len(resultado_monitoreo.get('alertas_generadas', []))
                             if alertas_generadas > 0:
-                                print(f"🚨 Monitoreo automático: {alertas_generadas} alertas generadas")
+                                print(f"Monitoreo automático: {alertas_generadas} alertas generadas")
                             else:
-                                print("✅ Monitoreo automático: Todos los valores en rango normal")
+                                print("Monitoreo automático: Todos los valores en rango normal")
                         except Exception as e:
-                            print(f"⚠️ Error en monitoreo automático: {e}")
+                            print(f"Error en monitoreo automático: {e}")
                     
                 except Exception as e:
-                    print(f"❌ Error guardando datos unificados: {e}")
+                    print(f"Error guardando datos unificados: {e}")
             else:
-                print(f"⚠️ Mensaje unificado incompleto, faltan campos: {payload}")
+                print(f"Mensaje unificado incompleto, faltan campos: {payload}")
                 
         else:
             # Manejar mensajes individuales (sistema legacy)
@@ -467,29 +651,29 @@ def on_message(client, userdata, msg):
                 if value is not None:
                     sensor_cache['temperatura'] = value
                     sensor_cache['timestamp'] = timestamp
-                    print(f"🌡️ Temperatura actualizada: {value}°C")
+                    print(f"Temperatura actualizada: {value}°C")
                     
             elif "ph" in topic:
                 value = payload.get('ph') or payload.get('valor')
                 if value is not None:
                     sensor_cache['ph'] = value
                     sensor_cache['timestamp'] = timestamp
-                    print(f"🧪 pH actualizado: {value}")
+                    print(f"pH actualizado: {value}")
                     
             elif "oxigeno" in topic:
                 value = payload.get('oxigeno') or payload.get('valor')
                 if value is not None:
                     sensor_cache['oxigeno'] = value
                     sensor_cache['timestamp'] = timestamp
-                    print(f"💧 Oxígeno actualizado: {value} mg/L")
+                    print(f"Oxígeno actualizado: {value} mg/L")
             
             # Intentar guardar si tenemos datos completos del cache
             cache_status = f"Cache: T={sensor_cache['temperatura']}, pH={sensor_cache['ph']}, O2={sensor_cache['oxigeno']}"
-            print(f"📋 {cache_status}")
+            print(f"{cache_status}")
             
             # Guardar solo cuando todos los sensores estén disponibles
             if save_complete_sensor_data():
-                print("🎯 Documento completo creado - sin valores nulos")
+                print("Documento completo creado - sin valores nulos")
                 
                 # Ejecutar monitoreo en tiempo real tras guardar nuevos datos del cache
                 if sistema_ml and sistema_ml.monitoreo_activo:
@@ -497,11 +681,11 @@ def on_message(client, userdata, msg):
                         resultado_monitoreo = sistema_ml.monitorear_sensores_tiempo_real()
                         alertas_generadas = len(resultado_monitoreo.get('alertas_generadas', []))
                         if alertas_generadas > 0:
-                            print(f"🚨 Monitoreo automático cache: {alertas_generadas} alertas generadas")
+                            print(f"Monitoreo automático cache: {alertas_generadas} alertas generadas")
                         else:
-                            print("✅ Monitoreo automático cache: Todos los valores en rango normal")
+                            print("Monitoreo automático cache: Todos los valores en rango normal")
                     except Exception as e:
-                        print(f"⚠️ Error en monitoreo automático cache: {e}")
+                        print(f"Error en monitoreo automático cache: {e}")
                 
     except Exception as e:
         print(f"Error procesando mensaje MQTT: {e}")
@@ -623,6 +807,149 @@ class SensoresResource(Resource):
                     "last_message": last_message_time.isoformat() if last_message_time else None
                 }
             }
+        except Exception as e:
+            sensores_ns.abort(500, success=False, error=str(e))
+
+@sensores_ns.route('/manual')
+class SensoresManualResource(Resource):
+    @sensores_ns.doc(
+        'create_manual_data',
+        summary='📝 Registro manual de datos de sensores',
+        description='''
+        **Funcionalidad**: Permite el ingreso manual de datos de sensores de calidad del agua.
+        
+        **Casos de uso**:
+        - Calibración y verificación de sensores automáticos
+        - Registro de datos durante mantenimiento del sistema
+        - Ingreso de mediciones históricas o de respaldo
+        - Validación cruzada con instrumentos manuales
+        
+        **Proceso automatizado**:
+        1. Validación de rangos lógicos para cada sensor
+        2. Almacenamiento en base de datos con marca temporal
+        3. Activación automática del sistema de monitoreo ML
+        4. Generación de alertas si los valores están fuera de rango
+        
+        **Trazabilidad**: Todos los datos se marcan con fuente="manual" y usuario registrado.
+        '''
+    )
+    @sensores_ns.expect(manual_input_model, validate=True)
+    @sensores_ns.marshal_with(manual_response_model, code=201)
+    @sensores_ns.response(201, '✅ Datos creados exitosamente - Registro completado', manual_response_model)
+    @sensores_ns.response(400, 'Datos de entrada inválidos - Verificar rangos de sensores', error_model)
+    @sensores_ns.response(500, 'Error interno del servidor - Conexión BD o sistema ML', error_model)
+    @ensure_mongodb_connection
+    def post(self):
+        """
+        🔬 **INGRESO MANUAL DE DATOS DE SENSORES**
+        
+        **📊 Parámetros aceptados:**
+        - **Temperatura**: -50°C a 100°C (float) - Temperatura del agua
+        - **pH**: 0 a 14 (float) - Acidez/alcalinidad del agua  
+        - **Oxígeno**: 0 a 30 mg/L (float) - Oxígeno disuelto
+        - **Fecha**: ISO timestamp (string, opcional) - Si no se envía, usa fecha actual
+        - **Fuente**: Identificador (string, opcional) - Por defecto "manual"
+        - **Usuario**: Nombre del usuario (string, opcional) - Por defecto "admin"
+        
+        **⚙️ Procesamiento automático:**
+        - Validación de rangos lógicos
+        - Conversión a zona horaria Chile (GMT-3)
+        - Almacenamiento en colección unificada
+        - Activación de sistema de Machine Learning
+        - Generación automática de alertas preventivas
+        
+        **📋 Ejemplo de request:**
+        ```json
+        {
+            "temperatura": 22.5,
+            "ph": 7.2,
+            "oxigeno": 8.5,
+            "fecha": "2024-11-06T10:30:00Z",
+            "fuente": "manual",
+            "usuario": "admin"
+        }
+        ```
+        
+        **✅ Respuesta exitosa (201):**
+        ```json
+        {
+            "success": true,
+            "data": {
+                "_id": "ObjectId_generado",
+                "temperatura": 22.5,
+                "ph": 7.2,
+                "oxigeno": 8.5,
+                "fecha": "2024-11-06T13:30:00-03:00",
+                "fuente": "manual",
+                "usuario": "admin"
+            },
+            "count": 1,
+            "alertas_generadas": 0,
+            "mqtt_status": {
+                "connected": true,
+                "last_message": "2024-11-06T13:29:45-03:00"
+            }
+        }
+        ```
+        """
+        try:
+            data = request.json
+            
+            # Validaciones de rango
+            temperatura = data.get('temperatura')
+            ph = data.get('ph') 
+            oxigeno = data.get('oxigeno')
+            
+            if not (-50 <= temperatura <= 100):
+                sensores_ns.abort(400, success=False, error='Temperatura debe estar entre -50°C y 100°C')
+            
+            if not (0 <= ph <= 14):
+                sensores_ns.abort(400, success=False, error='pH debe estar entre 0 y 14')
+                
+            if not (0 <= oxigeno <= 30):
+                sensores_ns.abort(400, success=False, error='Oxígeno debe estar entre 0 y 30 mg/L')
+            
+            # Preparar datos para inserción
+            manual_data = {
+                'temperatura': temperatura,
+                'ph': ph,
+                'oxigeno': oxigeno,
+                'fecha': data.get('fecha', get_chile_time().isoformat()),
+                'fuente': data.get('fuente', 'manual'),
+                'usuario': data.get('usuario', 'admin')
+            }
+            
+            # Insertar en base de datos
+            result = db.datos.insert_one(manual_data)
+            
+            # Ejecutar monitoreo en tiempo real tras insertar datos manuales
+            alertas_generadas = []
+            if sistema_ml and sistema_ml.monitoreo_activo:
+                try:
+                    resultado_monitoreo = sistema_ml.monitorear_sensores_tiempo_real()
+                    alertas_generadas = resultado_monitoreo.get('alertas_generadas', [])
+                except Exception as e:
+                    print(f"Error en monitoreo automático: {e}")
+            
+            return {
+                "success": True,
+                "data": {
+                    "_id": str(result.inserted_id),
+                    "temperatura": temperatura,
+                    "ph": ph,
+                    "oxigeno": oxigeno,
+                    "fecha": manual_data['fecha'],
+                    "fuente": manual_data['fuente'],
+                    "usuario": manual_data['usuario']
+                },
+                "count": 1,
+                "alertas_generadas": len(alertas_generadas),
+                "mqtt_status": {
+                    "connected": mqtt_connected,
+                    "last_message": last_message_time.isoformat() if last_message_time else None
+                }
+            }, 201
+            
         except Exception as e:
             sensores_ns.abort(500, success=False, error=str(e))
 
@@ -1391,6 +1718,25 @@ notificacion_response_model = api.model('NotificacionResponse', {
     'errores': fields.List(fields.String, description='Lista de errores si los hay')
 })
 
+# Modelos para exportación de datos por email
+exportacion_email_model = api.model('ExportacionEmail', {
+    'destinatario': fields.String(required=True, description='📧 Email del destinatario', example='usuario@ejemplo.com'),
+    'asunto': fields.String(required=True, description='📝 Asunto del email', example='Exportación de Datos - Sistema de Monitoreo'),
+    'mensaje': fields.String(required=True, description='💬 Mensaje del email', example='Adjunto encontrará los datos exportados del sistema.'),
+    'datos_adjuntos': fields.List(fields.Raw, required=True, description='📊 Array de datos a adjuntar'),
+    'formato': fields.String(required=True, description='📄 Formato del archivo adjunto', enum=['csv', 'excel'], example='csv'),
+    'filtros_aplicados': fields.Raw(description='🔍 Información sobre filtros aplicados (opcional)')
+})
+
+exportacion_response_model = api.model('ExportacionResponse', {
+    'success': fields.Boolean(description='✅ Indica si el envío fue exitoso', example=True),
+    'mensaje': fields.String(description='📄 Mensaje de resultado', example='Email enviado exitosamente'),
+    'destinatario': fields.String(description='📧 Email de destino confirmado'),
+    'registros_enviados': fields.Integer(description='📊 Número de registros adjuntados'),
+    'formato_archivo': fields.String(description='📁 Formato del archivo generado'),
+    'timestamp': fields.String(description='⏰ Timestamp del envío')
+})
+
 @notificaciones_ns.route('/enviar')
 class NotificacionEnviarResource(Resource):
     @notificaciones_ns.doc('enviar_notificacion')
@@ -1501,11 +1847,17 @@ class NotificacionConfiguracionResource(Resource):
         try:
             config_email = servicio_email.verificar_configuracion()
             
+            # Verificar configuración de emails habilitados en base de datos
+            config_doc = db.configuracion.find_one({'tipo': 'emails'})
+            emails_habilitados = config_doc.get('habilitado', True) if config_doc else True
+            
             return {
                 'success': True,
                 'configuracion': {
                     'email': {
-                        'habilitado': config_email,
+                        'habilitado': config_email and emails_habilitados,
+                        'configurado': config_email,
+                        'activo': emails_habilitados,
                         'servidor_smtp': servicio_email.smtp_server,
                         'puerto': servicio_email.smtp_port,
                         'remitente': servicio_email.email_remitente,
@@ -1519,6 +1871,117 @@ class NotificacionConfiguracionResource(Resource):
             
         except Exception as e:
             notificaciones_ns.abort(500, success=False, error=str(e))
+
+@notificaciones_ns.route('/configuracion/emails')
+class EmailConfiguracionResource(Resource):
+    @notificaciones_ns.doc('actualizar_configuracion_emails')
+    @notificaciones_ns.expect(api.model('ConfiguracionEmails', {
+        'habilitado': fields.Boolean(required=True, description='¿Enviar notificaciones por email?'),
+        'timestamp': fields.String(description='Timestamp de la configuración')
+    }))
+    @notificaciones_ns.response(200, 'Configuración actualizada exitosamente')
+    @notificaciones_ns.response(400, 'Datos inválidos', error_model)
+    @notificaciones_ns.response(500, 'Error interno del servidor', error_model)
+    def post(self):
+        """
+        Actualizar configuración de notificaciones por email
+        
+        Permite activar o desactivar el envío de notificaciones por email.
+        """
+        try:
+            data = request.get_json()
+            habilitado = data.get('habilitado', True)
+            timestamp = data.get('timestamp', datetime.now(CHILE_TZ).isoformat())
+            
+            # Actualizar configuración en base de datos
+            db.configuracion.update_one(
+                {'tipo': 'emails'},
+                {
+                    '$set': {
+                        'tipo': 'emails',
+                        'habilitado': habilitado,
+                        'timestamp': timestamp,
+                        'fecha_actualizacion': datetime.now(CHILE_TZ)
+                    }
+                },
+                upsert=True
+            )
+            
+            # Verificar configuración de email
+            config_email = servicio_email.verificar_configuracion()
+            
+            return {
+                'success': True,
+                'mensaje': f'Notificaciones por email {"activadas" if habilitado else "desactivadas"}',
+                'configuracion': {
+                    'habilitado': habilitado,
+                    'configurado': config_email,
+                    'efectivo': config_email and habilitado
+                },
+                'timestamp': datetime.now(CHILE_TZ).isoformat()
+            }
+            
+        except Exception as e:
+            notificaciones_ns.abort(500, success=False, error=str(e))
+
+@notificaciones_ns.route('/correo-critico')
+class NotificacionCorreoCriticoResource(Resource):
+    @notificaciones_ns.doc('enviar_correo_critico')
+    @notificaciones_ns.response(200, 'Correo crítico enviado exitosamente')
+    @notificaciones_ns.response(400, 'Datos de entrada inválidos', error_model)
+    @notificaciones_ns.response(500, 'Error interno del servidor', error_model)
+    def post(self):
+        """
+        Enviar correo crítico para alerta automática
+        
+        Envía un correo electrónico detallado cuando se detecta una alerta crítica 
+        en el sistema de monitoreo automático.
+        """
+        try:
+            data = request.get_json()
+            
+            if not data:
+                notificaciones_ns.abort(400, success=False, error='No se proporcionaron datos')
+            
+            # Preparar datos para el servicio de email
+            alerta_data = {
+                'sensor': data.get('sensor'),
+                'nivel': 'CRITICO',
+                'valor_actual': data.get('valor'),
+                'mensaje': data.get('mensaje'),
+                'fecha_hora': data.get('timestamp'),
+                'rangos': data.get('rangos'),
+                'acciones_recomendadas': data.get('acciones_recomendadas', []),
+                'detalles_tecnicos': data.get('detalles_tecnicos', {}),
+                'impacto_ambiental': data.get('impacto_ambiental'),
+                'nivel_riesgo': data.get('nivel_riesgo'),
+                'fuente': 'monitoreo_automatico'
+            }
+            
+            # Enviar email crítico
+            resultado = servicio_email.enviar_alerta_email(alerta_data)
+            
+            if resultado:
+                return {
+                    'success': True,
+                    'mensaje': 'Correo crítico enviado exitosamente',
+                    'timestamp': datetime.now(CHILE_TZ).isoformat(),
+                    'detalles': {
+                        'sensor': data.get('sensor'),
+                        'valor': data.get('valor'),
+                        'nivel_riesgo': data.get('nivel_riesgo')
+                    }
+                }
+            else:
+                return {
+                    'success': False,
+                    'mensaje': 'Error al enviar correo crítico',
+                    'timestamp': datetime.now(CHILE_TZ).isoformat()
+                }
+                
+        except Exception as e:
+            print(f"Error al enviar correo crítico: {str(e)}")
+            notificaciones_ns.abort(500, success=False, error=f'Error interno: {str(e)}')
 
 @notificaciones_ns.route('/probar')
 class NotificacionProbarResource(Resource):
@@ -1542,6 +2005,655 @@ class NotificacionProbarResource(Resource):
             
         except Exception as e:
             notificaciones_ns.abort(500, success=False, error=str(e))
+
+@notificaciones_ns.route('/exportar')
+class ExportacionEmailResource(Resource):
+    @notificaciones_ns.doc(
+        'exportar_datos_email',
+        summary='📊 Exportar datos por email',
+        description='Envía datos exportados del sistema por email con archivo adjunto en formato CSV o Excel.'
+    )
+    @notificaciones_ns.expect(exportacion_email_model, validate=True)
+    @notificaciones_ns.marshal_with(exportacion_response_model, code=200)
+    @notificaciones_ns.response(200, 'Datos exportados y enviados exitosamente', exportacion_response_model)
+    @notificaciones_ns.response(400, 'Datos de entrada inválidos o email malformado', error_model)
+    @notificaciones_ns.response(413, 'Demasiados datos para enviar por email', error_model)
+    @notificaciones_ns.response(500, 'Error interno del servidor o configuración SMTP', error_model)
+    @ensure_mongodb_connection
+    def post(self):
+        """
+        Exportar datos por email con archivo adjunto
+        
+        Genera un archivo CSV o Excel con los datos proporcionados y lo envía
+        por email al destinatario especificado. Máximo 1000 registros por envío.
+        """
+        try:
+            data = request.json
+            
+            # Validaciones básicas
+            destinatario = data.get('destinatario')
+            datos_adjuntos = data.get('datos_adjuntos', [])
+            formato = data.get('formato', 'csv')
+            
+            # Validar email
+            import re
+            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            if not re.match(email_pattern, destinatario):
+                notificaciones_ns.abort(400, success=False, error='Formato de email inválido')
+            
+            # Validar cantidad de datos
+            if len(datos_adjuntos) == 0:
+                notificaciones_ns.abort(400, success=False, error='No se proporcionaron datos para exportar')
+            
+            if len(datos_adjuntos) > 1000:
+                notificaciones_ns.abort(413, success=False, 
+                    error=f'Demasiados registros ({len(datos_adjuntos)}). Máximo permitido: 1000')
+            
+            # Generar contenido del archivo según formato
+            if formato == 'csv':
+                contenido_archivo, nombre_archivo = generar_csv(datos_adjuntos)
+            elif formato == 'excel':
+                contenido_archivo, nombre_archivo = generar_excel_simple(datos_adjuntos)
+            else:
+                notificaciones_ns.abort(400, success=False, error='Formato no soportado. Use "csv" o "excel"')
+            
+            # Preparar datos para el servicio de email
+            asunto = data.get('asunto', 'Exportación de Datos - Sistema de Monitoreo')
+            mensaje = data.get('mensaje', 'Adjunto encontrará los datos exportados del sistema de monitoreo.')
+            
+            # Añadir información adicional al mensaje
+            mensaje += f"\\n\\nTotal de registros: {len(datos_adjuntos)}"
+            mensaje += f"\\nFecha de generación: {get_chile_time().strftime('%d/%m/%Y %H:%M:%S')}"
+            
+            # Envío real con servicio_email
+            try:
+                # Preparar datos para el servicio de email
+                email_data = {
+                    'destinatario': destinatario,
+                    'asunto': asunto,
+                    'mensaje': mensaje,
+                    'archivo_adjunto': {
+                        'contenido': contenido_archivo,
+                        'nombre': nombre_archivo,
+                        'tipo_mime': 'text/csv' if formato == 'csv' else 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                    }
+                }
+                
+                # Enviar email
+                resultado_email = servicio_email.enviar_email_con_adjunto(email_data)
+                
+                if resultado_email.get('success', False):
+                    return {
+                        'success': True,
+                        'mensaje': f'Email enviado exitosamente a {destinatario}',
+                        'destinatario': destinatario,
+                        'registros_enviados': len(datos_adjuntos),
+                        'formato_archivo': formato,
+                        'timestamp': get_chile_time().isoformat()
+                    }, 200
+                else:
+                    raise Exception(resultado_email.get('error', 'Error desconocido al enviar email'))
+                    
+            except Exception as email_error:
+                print(f"Error enviando email: {email_error}")
+                # Fallback: retornar éxito pero indicar problema con email
+                return {
+                    'success': False,
+                    'error': f'Error al enviar email: {str(email_error)}',
+                    'destinatario': destinatario,
+                    'registros_procesados': len(datos_adjuntos),
+                    'formato_archivo': formato
+                }, 500
+                
+        except Exception as e:
+            print(f"Error en exportación por email: {e}")
+            notificaciones_ns.abort(500, success=False, error=str(e))
+
+def generar_csv(datos):
+    """Genera contenido CSV compatible usando el módulo csv de Python"""
+    if not datos:
+        return "", "datos_vacios.csv"
+    
+    # Crear buffer de memoria para el CSV
+    output = io.StringIO()
+    
+    # Obtener encabezados del primer registro
+    encabezados = list(datos[0].keys())
+    
+    # Configurar writer CSV con formato estándar
+    writer = csv.DictWriter(
+        output, 
+        fieldnames=encabezados,
+        dialect='excel',
+        quoting=csv.QUOTE_MINIMAL,
+        lineterminator='\n'
+    )
+    
+    # Escribir encabezados
+    writer.writeheader()
+    
+    # Escribir datos
+    for registro in datos:
+        # Procesar cada registro para asegurar compatibilidad
+        registro_procesado = {}
+        for key, value in registro.items():
+            if isinstance(value, datetime):
+                # Formatear fechas de manera consistente
+                registro_procesado[key] = value.strftime('%Y-%m-%d %H:%M:%S')
+            elif isinstance(value, (int, float)):
+                # Mantener números como están
+                registro_procesado[key] = value
+            elif value is None:
+                # Convertir None a string vacío
+                registro_procesado[key] = ""
+            else:
+                # Convertir todo lo demás a string
+                registro_procesado[key] = str(value)
+        
+        writer.writerow(registro_procesado)
+    
+    # Obtener contenido con BOM para compatibilidad con Excel
+    contenido = '\ufeff' + output.getvalue()
+    output.close()
+    
+    nombre_archivo = f"datos_sensores_{get_chile_time().strftime('%Y%m%d_%H%M%S')}.csv"
+    
+    return contenido, nombre_archivo
+
+def generar_excel_simple(datos):
+    """Genera un archivo Excel real usando openpyxl"""
+    if not datos:
+        return b"", "datos_vacios.xlsx"
+    
+    try:
+        # Crear workbook y worksheet
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Datos Sensores"
+        
+        # Obtener encabezados del primer registro
+        encabezados = list(datos[0].keys())
+        
+        # Estilo para encabezados
+        header_font = Font(bold=True, color="FFFFFF")
+        header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+        header_alignment = Alignment(horizontal="center", vertical="center")
+        
+        # Escribir encabezados con estilo
+        for col, encabezado in enumerate(encabezados, 1):
+            cell = ws.cell(row=1, column=col, value=encabezado)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+        
+        # Escribir datos
+        for row_idx, registro in enumerate(datos, 2):  # Empezar en fila 2
+            for col_idx, key in enumerate(encabezados, 1):
+                value = registro.get(key, "")
+                
+                # Procesar diferentes tipos de datos
+                if isinstance(value, datetime):
+                    # Excel maneja fechas nativamente
+                    ws.cell(row=row_idx, column=col_idx, value=value)
+                elif isinstance(value, (int, float)):
+                    # Números se mantienen como números
+                    ws.cell(row=row_idx, column=col_idx, value=value)
+                elif value is None:
+                    ws.cell(row=row_idx, column=col_idx, value="")
+                else:
+                    ws.cell(row=row_idx, column=col_idx, value=str(value))
+        
+        # Ajustar ancho de columnas automáticamente
+        for column in ws.columns:
+            max_length = 0
+            column_letter = column[0].column_letter
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = min(max_length + 2, 50)  # Máximo 50 caracteres
+            ws.column_dimensions[column_letter].width = adjusted_width
+        
+        # Guardar en buffer de memoria
+        output = io.BytesIO()
+        wb.save(output)
+        output.seek(0)
+        
+        contenido = output.getvalue()
+        output.close()
+        
+        nombre_archivo = f"datos_sensores_{get_chile_time().strftime('%Y%m%d_%H%M%S')}.xlsx"
+        
+        return contenido, nombre_archivo
+        
+    except ImportError:
+        # Fallback a CSV si openpyxl no está disponible
+        print("openpyxl no disponible, generando CSV en su lugar")
+        contenido_csv, nombre_csv = generar_csv(datos)
+        nombre_excel = nombre_csv.replace('.csv', '.xlsx')
+        return contenido_csv.encode('utf-8-sig'), nombre_excel
+    except Exception as e:
+        print(f"Error generando Excel: {e}")
+        # Fallback a CSV en caso de error
+        contenido_csv, nombre_csv = generar_csv(datos)
+        nombre_excel = nombre_csv.replace('.csv', '.xlsx')
+        return contenido_csv.encode('utf-8-sig'), nombre_excel
+
+# Modelo para descarga directa de archivos
+descarga_model = api.model('DescargaArchivo', {
+    'datos': fields.List(fields.Raw, required=True, description='📊 Array de datos a exportar'),
+    'formato': fields.String(required=True, description='📄 Formato del archivo', enum=['csv', 'excel'], example='csv')
+})
+
+# Endpoints para descarga directa de archivos
+@notificaciones_ns.route('/descargar/csv')
+class DescargarCSVResource(Resource):
+    @notificaciones_ns.doc(
+        'descargar_csv',
+        summary='📊 Descargar CSV',
+        description='Descarga datos en formato CSV compatible con Excel y otras aplicaciones.'
+    )
+    @notificaciones_ns.expect(descarga_model)
+    def post(self):
+        """Descarga datos en formato CSV"""
+        try:
+            data = request.get_json()
+            datos = data.get('datos', [])
+            
+            if len(datos) == 0:
+                return {'success': False, 'error': 'No se proporcionaron datos para exportar'}, 400
+            
+            if len(datos) > 5000:  # Límite mayor para descarga directa
+                return {'success': False, 'error': f'Demasiados registros ({len(datos)}). Máximo permitido: 5000'}, 413
+            
+            # Generar CSV
+            contenido_csv, nombre_archivo = generar_csv(datos)
+            
+            # Crear respuesta con el archivo
+            response = make_response(contenido_csv)
+            response.headers['Content-Type'] = 'text/csv; charset=utf-8-sig'
+            response.headers['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
+            response.headers['Access-Control-Expose-Headers'] = 'Content-Disposition'
+            
+            return response
+            
+        except Exception as e:
+            print(f"Error en descarga CSV: {e}")
+            return {'success': False, 'error': str(e)}, 500
+
+@notificaciones_ns.route('/descargar/excel')
+class DescargarExcelResource(Resource):
+    @notificaciones_ns.doc(
+        'descargar_excel',
+        summary='📊 Descargar Excel',
+        description='Descarga datos en formato Excel nativo (.xlsx) con formato profesional.'
+    )
+    @notificaciones_ns.expect(descarga_model)
+    def post(self):
+        """Descarga datos en formato Excel"""
+        try:
+            data = request.get_json()
+            datos = data.get('datos', [])
+            
+            if len(datos) == 0:
+                return {'success': False, 'error': 'No se proporcionaron datos para exportar'}, 400
+            
+            if len(datos) > 5000:  # Límite mayor para descarga directa
+                return {'success': False, 'error': f'Demasiados registros ({len(datos)}). Máximo permitido: 5000'}, 413
+            
+            # Generar Excel
+            contenido_excel, nombre_archivo = generar_excel_simple(datos)
+            
+            # Crear respuesta con el archivo
+            response = make_response(contenido_excel)
+            response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            response.headers['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
+            response.headers['Access-Control-Expose-Headers'] = 'Content-Disposition'
+            
+            return response
+            
+        except Exception as e:
+            print(f"Error en descarga Excel: {e}")
+            return {'success': False, 'error': str(e)}, 500
+
+# ============================================================================
+# ENDPOINTS DE AUTENTICACIÓN
+# ============================================================================
+
+@auth_ns.route('/login')
+class LoginResource(Resource):
+    @auth_ns.doc('login_user')
+    @auth_ns.expect(login_model, validate=True)
+    @auth_ns.response(200, 'Login exitoso', auth_response_model)
+    @auth_ns.response(401, 'Credenciales inválidas', error_model)
+    @auth_ns.response(500, 'Error interno del servidor', error_model)
+    def post(self):
+        """
+        🔐 Iniciar sesión en el sistema
+        
+        Autentica a un usuario con email y contraseña.
+        Retorna un token JWT válido por 24 horas.
+        """
+        try:
+            data = request.get_json()
+            email = data.get('email', '').lower().strip()
+            password = data.get('password', '')
+            
+            # Validar entrada
+            if not email or not password:
+                return {
+                    'success': False,
+                    'message': 'Email y contraseña son requeridos'
+                }, 400
+            
+            # Buscar usuario en la base de datos
+            user = db.usuarios.find_one({'email': email})
+            
+            if not user:
+                return {
+                    'success': False,
+                    'message': 'Credenciales inválidas'
+                }, 401
+            
+            # Verificar contraseña
+            if not verify_password(password, user['password_hash']):
+                return {
+                    'success': False,
+                    'message': 'Credenciales inválidas'
+                }, 401
+            
+            # Generar token JWT
+            token = generate_jwt_token(user)
+            
+            # Preparar datos del usuario (sin contraseña)
+            user_data = {
+                'id': str(user['_id']),
+                'email': user['email'],
+                'nombre': user['nombre'],
+                'rol': user['rol'],
+                'fecha_creacion': user.get('fecha_creacion', '').isoformat() if user.get('fecha_creacion') else None
+            }
+            
+            return {
+                'success': True,
+                'message': 'Login exitoso',
+                'token': token,
+                'user': user_data
+            }
+            
+        except Exception as e:
+            print(f"Error en login: {e}")
+            return {
+                'success': False,
+                'message': 'Error interno del servidor'
+            }, 500
+
+@auth_ns.route('/register')
+class RegisterResource(Resource):
+    @auth_ns.doc('register_user')
+    @auth_ns.expect(register_model, validate=True)
+    @auth_ns.response(201, 'Usuario registrado exitosamente', auth_response_model)
+    @auth_ns.response(400, 'Datos inválidos', error_model)
+    @auth_ns.response(409, 'Usuario ya existe', error_model)
+    @auth_ns.response(500, 'Error interno del servidor', error_model)
+    def post(self):
+        """
+        👤 Registrar nuevo usuario administrador
+        
+        Crea una nueva cuenta de administrador del sistema.
+        Solo permite crear cuentas de administrador.
+        """
+        try:
+            data = request.get_json()
+            email = data.get('email', '').lower().strip()
+            password = data.get('password', '')
+            nombre = data.get('nombre', '').strip()
+            confirm_password = data.get('confirmPassword', '')
+            
+            # Validaciones básicas
+            if not all([email, password, nombre, confirm_password]):
+                return {
+                    'success': False,
+                    'message': 'Todos los campos son requeridos'
+                }, 400
+            
+            if password != confirm_password:
+                return {
+                    'success': False,
+                    'message': 'Las contraseñas no coinciden'
+                }, 400
+            
+            if len(password) < 6:
+                return {
+                    'success': False,
+                    'message': 'La contraseña debe tener al menos 6 caracteres'
+                }, 400
+            
+            # Validar formato de email
+            import re
+            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            if not re.match(email_pattern, email):
+                return {
+                    'success': False,
+                    'message': 'Formato de email inválido'
+                }, 400
+            
+            # Verificar si ya existe un usuario con ese email
+            existing_user = db.usuarios.find_one({'email': email})
+            if existing_user:
+                return {
+                    'success': False,
+                    'message': 'Ya existe un usuario con este email'
+                }, 409
+            
+            # Crear usuario
+            password_hash = hash_password(password)
+            
+            user_doc = {
+                'email': email,
+                'password_hash': password_hash,
+                'nombre': nombre,
+                'rol': 'admin',  # Por ahora solo administradores
+                'fecha_creacion': datetime.now(CHILE_TZ),
+                'activo': True
+            }
+            
+            result = db.usuarios.insert_one(user_doc)
+            
+            return {
+                'success': True,
+                'message': 'Usuario registrado exitosamente'
+            }, 201
+            
+        except Exception as e:
+            print(f"Error en registro: {e}")
+            return {
+                'success': False,
+                'message': 'Error interno del servidor'
+            }, 500
+
+@auth_ns.route('/verify')
+class VerifyTokenResource(Resource):
+    @auth_ns.doc('verify_token')
+    @auth_ns.response(200, 'Token válido', user_model)
+    @auth_ns.response(401, 'Token inválido', error_model)
+    @require_auth
+    def get(self):
+        """
+        ✅ Verificar validez del token JWT
+        
+        Verifica si el token proporcionado sigue siendo válido.
+        Retorna la información del usuario autenticado.
+        """
+        try:
+            user_data = {
+                'id': request.current_user['user_id'],
+                'email': request.current_user['email'],
+                'nombre': request.current_user['nombre'],
+                'rol': request.current_user['rol']
+            }
+            
+            return {
+                'success': True,
+                'user': user_data
+            }
+            
+        except Exception as e:
+            print(f"Error verificando token: {e}")
+            return {
+                'success': False,
+                'message': 'Error interno del servidor'
+            }, 500
+
+@auth_ns.route('/status')
+class AuthStatusResource(Resource):
+    @auth_ns.doc('auth_status')
+    @auth_ns.response(200, 'Estado de autenticación del sistema')
+    def get(self):
+        """
+        📊 Obtener estado del sistema de autenticación
+        
+        Verifica si hay usuarios registrados en el sistema.
+        Útil para determinar si se necesita configuración inicial.
+        """
+        try:
+            user_count = db.usuarios.count_documents({})
+            
+            return {
+                'success': True,
+                'users_registered': user_count > 0,
+                'total_users': user_count,
+                'needs_setup': user_count == 0,
+                'message': 'Sistema listo para usar' if user_count > 0 else 'Sistema requiere configuración inicial'
+            }
+            
+        except Exception as e:
+            print(f"Error obteniendo estado de auth: {e}")
+            return {
+                'success': False,
+                'message': 'Error interno del servidor'
+            }, 500
+
+@auth_ns.route('/update-profile')
+class UpdateProfile(Resource):
+    @auth_ns.doc('update_profile')
+    @auth_ns.expect(auth_ns.model('UpdateProfile', {
+        'nombre': fields.String(required=True, description='Nuevo nombre del usuario'),
+        'email': fields.String(required=True, description='Nuevo email del usuario'),
+        'currentPassword': fields.String(description='Contraseña actual (requerida para cambiar contraseña)'),
+        'newPassword': fields.String(description='Nueva contraseña (opcional)')
+    }))
+    @require_auth
+    def put(self):
+        """
+        Actualizar perfil de usuario
+        Permite actualizar nombre, email y contraseña del usuario autenticado
+        """
+        try:
+            data = request.get_json()
+            
+            # Obtener usuario actual del token
+            current_user = g.current_user
+            
+            # Validaciones básicas
+            if not data.get('nombre') or not data.get('nombre').strip():
+                return {'success': False, 'message': 'El nombre es requerido'}, 400
+                
+            if not data.get('email') or not data.get('email').strip():
+                return {'success': False, 'message': 'El email es requerido'}, 400
+            
+            # Preparar datos de actualización
+            update_data = {
+                'nombre': data['nombre'].strip(),
+                'email': data['email'].strip()
+            }
+            
+            # Si se quiere cambiar la contraseña
+            if data.get('newPassword'):
+                if not data.get('currentPassword'):
+                    return {'success': False, 'message': 'Contraseña actual requerida'}, 400
+                
+                # Verificar contraseña actual
+                current_user_db = db.usuarios.find_one({'email': current_user['email']})
+                if not current_user_db:
+                    return {'success': False, 'message': 'Usuario no encontrado'}, 404
+                
+                # Verificar contraseña actual
+                current_password_hash = hashlib.sha256(data['currentPassword'].encode()).hexdigest()
+                if current_password_hash != current_user_db['password_hash']:
+                    return {'success': False, 'message': 'Contraseña actual incorrecta'}, 400
+                
+                # Validar nueva contraseña
+                if len(data['newPassword']) < 6:
+                    return {'success': False, 'message': 'La nueva contraseña debe tener al menos 6 caracteres'}, 400
+                
+                # Hash de la nueva contraseña
+                update_data['password_hash'] = hashlib.sha256(data['newPassword'].encode()).hexdigest()
+            
+            # Verificar si el email ya existe (si se está cambiando)
+            if data['email'] != current_user['email']:
+                existing_user = db.usuarios.find_one({'email': data['email']})
+                if existing_user and str(existing_user['_id']) != str(current_user['_id']):
+                    return {'success': False, 'message': 'El email ya está en uso'}, 400
+            
+            # Actualizar usuario en la base de datos
+            result = db.usuarios.update_one(
+                {'email': current_user['email']},
+                {'$set': update_data}
+            )
+            
+            if result.modified_count == 0:
+                return {'success': False, 'message': 'No se realizaron cambios'}, 400
+            
+            # Obtener usuario actualizado
+            updated_user = db.usuarios.find_one({'email': data['email']})
+            if not updated_user:
+                return {'success': False, 'message': 'Error al obtener usuario actualizado'}, 500
+            
+            # Generar nuevo token con datos actualizados
+            user_data = {
+                '_id': str(updated_user['_id']),
+                'email': updated_user['email'],
+                'nombre': updated_user['nombre'],
+                'rol': updated_user['rol']
+            }
+            
+            new_token = generate_jwt_token(user_data)
+            
+            return {
+                'success': True,
+                'message': 'Perfil actualizado correctamente',
+                'user': {
+                    'id': user_data['_id'],
+                    'email': user_data['email'],
+                    'nombre': user_data['nombre'],
+                    'rol': user_data['rol']
+                },
+                'token': new_token
+            }
+            
+        except Exception as e:
+            print(f"Error actualizando perfil: {e}")
+            return {
+                'success': False,
+                'message': 'Error interno del servidor'
+            }, 500
+
+# ============================================================================
+# ENDPOINT DE ESTADO GENERAL (sin autenticación requerida)
+# ============================================================================
+
+@app.route('/api/v1/estado')
+def estado_sistema():
+    """Endpoint simple para verificar conectividad del backend"""
+    return jsonify({
+        'success': True,
+        'message': 'Backend funcionando correctamente',
+        'timestamp': datetime.now(CHILE_TZ).isoformat(),
+        'version': '2.0'
+    })
 
 # Inicializar MQTT al cargar el módulo
 import threading
