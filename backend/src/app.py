@@ -16,7 +16,6 @@ import csv
 import io
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
-from sistema_preventivo import SistemaPreventivoML
 from servicios.notificaciones_email import servicio_email
 import hashlib
 import secrets
@@ -43,28 +42,22 @@ JWT_EXPIRATION_HOURS = 24
 # Configuración de Swagger/OpenAPI
 api = Api(
     app,
-    version='2.0',
-    title='API de Sensores IoT CIMARQ - Sistema Unificado',
+    version='2.1',
+    title='CIMARQ - API Sistema de Monitoreo Acuícola',
     doc='/docs/',  # Documentación disponible en /docs/
     description="""
-    API REST para monitoreo de sensores de calidad del agua en acuicultura.
+    Sistema completo para monitoreo en tiempo real de parámetros de calidad del agua en acuicultura.
     
-    ## Características Principales:
-    - **Estructura Unificada**: Todos los sensores se almacenan en documentos completos sin valores nulos
-    - **Timezone Chile**: Todos los timestamps usan GMT-3 (America/Santiago)  
-    - **Comunicación MQTT**: Integración con broker test.mosquitto.org
-    - **Sensores**: Temperatura (°C), pH (acidez/alcalinidad), Oxígeno Disuelto (mg/L)
+    **Sensores monitoreados**: Temperatura, pH y Oxígeno Disuelto  
+    **Zona horaria**: Chile GMT-3 (America/Santiago)  
+    **Base de datos**: MongoDB con estructura unificada  
+    **Comunicación IoT**: MQTT para datos en tiempo real
     
-    ## Colección de Datos:
-    - **Base de datos**: cimarqdb
-    - **Colección**: datos (estructura unificada)
-    - **Formato**: {temperatura: float, ph: float, oxigeno: float, fecha: timestamp}
-    
-    ## Tópicos MQTT:
-    - **cimarq/sensores/unified**: Mensajes completos con todos los sensores
-    - **cimarq/temperatura/update**: Solo temperatura (legacy)  
-    - **cimarq/ph/update**: Solo pH (legacy)
-    - **cimarq/oxigeno/update**: Solo oxígeno (legacy)
+    ## Endpoints principales:
+    - **/sensores**: Datos unificados de todos los sensores (recomendado)
+    - **/alertas**: Sistema de alertas inteligentes con Machine Learning
+    - **/auth**: Autenticación y gestión de usuarios
+    - **/health**: Diagnóstico del sistema
     """,
     prefix='/api/v1'
 )
@@ -72,6 +65,9 @@ api = Api(
 # Configuración MongoDB
 MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://cimarq:eGEr87FyYHIadm4p@proyectotitulo.idqwtmo.mongodb.net/")
 DB_NAME = os.getenv("DB_NAME", "cimarqdb")
+
+# Variables globales
+sistema_ml = None
 
 # Configurar cliente MongoDB con opciones específicas para Docker
 try:
@@ -107,6 +103,7 @@ except Exception as e:
     print(f"URI utilizada: {MONGO_URI[:50]}...")
     client = None
     db = None
+    sistema_ml = None
 
 # Función para reconectar a MongoDB
 def reconnect_mongodb():
@@ -244,16 +241,16 @@ def after_request(response):
     return response
 
 # Definir namespaces para organizar endpoints
-auth_ns = Namespace('auth', description='Autenticación y autorización de usuarios')
-sensores_ns = Namespace('sensores', description='Datos unificados de todos los sensores (temperatura, pH, oxígeno)')
-temperatura_ns = Namespace('temperatura', description='Datos de temperatura del agua (°C)')
-ph_ns = Namespace('ph', description='Datos de pH - acidez/alcalinidad del agua (6.5-8.5)')
-oxigeno_ns = Namespace('oxigeno', description='Datos de oxígeno disuelto (mg/L) - calidad del agua')
-mqtt_ns = Namespace('mqtt', description='Publicación de mensajes MQTT - comunicación IoT')
-health_ns = Namespace('health', description='Estado de salud del sistema (MongoDB, MQTT, timezone)')
-alertas_ns = Namespace('alertas', description='Sistema de alertas preventivas con ML')
-ml_ns = Namespace('ml', description='Análisis predictivo con Machine Learning')
-notificaciones_ns = Namespace('notificaciones', description='Sistema de notificaciones por email - solo alertas críticas')
+auth_ns = Namespace('auth', description='Autenticación JWT y gestión de usuarios')
+sensores_ns = Namespace('sensores', description='Datos unificados de sensores - API principal recomendada')
+temperatura_ns = Namespace('temperatura', description='Datos específicos de temperatura (°C)')
+ph_ns = Namespace('ph', description='Datos específicos de pH - acidez/alcalinidad (6.5-8.5)')
+oxigeno_ns = Namespace('oxigeno', description='Datos específicos de oxígeno disuelto (mg/L)')
+mqtt_ns = Namespace('mqtt', description='Publicación manual MQTT para testing')
+health_ns = Namespace('health', description='Diagnóstico y estado del sistema')
+alertas_ns = Namespace('alertas', description='Sistema de alertas inteligentes con ML')
+ml_ns = Namespace('ml', description='Análisis predictivo y Machine Learning')
+notificaciones_ns = Namespace('notificaciones', description='Notificaciones automáticas por email')
 
 # Registrar namespaces
 api.add_namespace(auth_ns, path='/auth')
@@ -272,16 +269,9 @@ api.add_namespace(notificaciones_ns, path='/notificaciones')
 # ============================================================================
 
 # Modelos de entrada para autenticación
-login_model = api.model('LoginData', {
-    'email': fields.String(required=True, description='Correo electrónico del usuario', example='admin@cimarq.com'),
-    'password': fields.String(required=True, description='Contraseña del usuario', example='admin123')
-})
-
-register_model = api.model('RegisterData', {
-    'email': fields.String(required=True, description='Correo electrónico del usuario', example='admin@cimarq.com'),
-    'password': fields.String(required=True, description='Contraseña del usuario (mín. 6 caracteres)', example='admin123'),
-    'nombre': fields.String(required=True, description='Nombre completo del usuario', example='Administrador CIMARQ'),
-    'confirmPassword': fields.String(required=True, description='Confirmación de la contraseña', example='admin123')
+login_model = api.model('LoginCredentials', {
+    'email': fields.String(required=True, description='Email registrado en el sistema', example='admin@cimarq.com'),
+    'password': fields.String(required=True, description='Contraseña de acceso', example='admin123')
 })
 
 # Modelos de respuesta
@@ -313,12 +303,12 @@ error_model = api.model('ErrorResponse', {
 # ============================================================================
 
 # Modelos para documentación
-unified_sensor_model = api.model('UnifiedSensorData', {
-    '_id': fields.String(description='ID único del registro'),
-    'temperatura': fields.Float(required=True, description='Temperatura en grados Celsius', example=14.2),
-    'ph': fields.Float(required=True, description='Valor de pH del agua', example=8.1),
-    'oxigeno': fields.Float(required=True, description='Oxígeno disuelto en mg/L', example=7.8),
-    'fecha': fields.String(description='Fecha y hora con timezone Chile (GMT-3)', example='2025-10-13T20:26:07.248000-03:00')
+unified_sensor_model = api.model('SensorReading', {
+    '_id': fields.String(description='Identificador único del registro'),
+    'temperatura': fields.Float(required=True, description='Temperatura del agua en °C (rango normal: 8-20°C)', example=14.2),
+    'ph': fields.Float(required=True, description='Nivel de pH - acidez/alcalinidad (rango seguro: 6.5-8.5)', example=7.1),
+    'oxigeno': fields.Float(required=True, description='Oxígeno disuelto en mg/L (mínimo recomendado: 6 mg/L)', example=7.8),
+    'fecha': fields.String(description='Timestamp con zona horaria Chile (GMT-3)', example='2025-11-09T15:30:00-03:00')
 })
 
 # Modelos legacy para compatibilidad
@@ -446,25 +436,25 @@ mqtt_publish_model = api.model('MQTTPublish', {
 })
 
 # Modelo para ingreso manual de datos de sensores
-manual_input_model = api.model('ManualInput', {
+manual_input_model = api.model('ManualSensorInput', {
     'temperatura': fields.Float(
         required=True, 
-        description='Temperatura del agua en grados Celsius. Rango válido: -50°C a 100°C. Valores típicos para acuicultura: 18-25°C',
-        example=22.5,
+        description='Temperatura del agua en °C (rango acuicultura: 8-20°C)',
+        example=15.2,
         min=-50.0,
         max=100.0
     ),
     'ph': fields.Float(
         required=True,
-        description='Nivel de pH del agua (acidez/alcalinidad). Rango válido: 0 a 14. Valores típicos para acuicultura: 6.5-8.5',
-        example=7.2,
+        description='Nivel de pH del agua (rango seguro: 6.5-8.5)',
+        example=7.1,
         min=0.0,
         max=14.0
     ),
     'oxigeno': fields.Float(
         required=True,
-        description='Oxígeno disuelto en miligramos por litro. Rango válido: 0 a 30 mg/L. Valores críticos para acuicultura: >5 mg/L',
-        example=8.5,
+        description='Oxígeno disuelto en mg/L (mínimo crítico: 6 mg/L)',
+        example=8.2,
         min=0.0,
         max=30.0
     ),
@@ -736,24 +726,23 @@ def simple_health():
 
 @sensores_ns.route('')
 class SensoresResource(Resource):
-    @sensores_ns.doc('get_all_sensors')
+    @sensores_ns.doc('get_unified_sensors')
     @sensores_ns.marshal_with(unified_response_model, code=200)
     @sensores_ns.response(500, 'Error interno del servidor', error_model)
     @ensure_mongodb_connection
     def get(self):
         """
-        Obtiene datos organizados por tipo de sensor
+        Obtiene todos los datos de sensores organizados por tipo
         
-        Retorna datos de temperatura, pH y oxígeno disuelto agrupados por tipo de sensor.
-        Cada grupo contiene solo los campos específicos del sensor correspondiente.
-        Los timestamps están en zona horaria de Chile (GMT-3).
+        **API principal recomendada** para obtener datos de monitoreo de calidad del agua.
         
-        Estructura de respuesta:
-        - data.temperatura: []{_id, temperatura, fecha} - Solo datos de temperatura
-        - data.ph: []{_id, ph, fecha} - Solo datos de pH  
-        - data.oxigeno: []{_id, oxigeno, fecha} - Solo datos de oxígeno
-        - count: {temperatura: int, ph: int, oxigeno: int, total: int}
-        - mqtt_status: {connected: bool, last_message: datetime|null}
+        **Datos incluidos:**
+        - Temperatura del agua (°C)
+        - Nivel de pH (acidez/alcalinidad)  
+        - Oxígeno disuelto (mg/L)
+        
+        **Respuesta agrupada por sensor** con timestamps en zona horaria Chile (GMT-3).
+        Los datos se ordenan por fecha descendente (más recientes primero).
         """
         try:
             # Obtener datos específicos para cada sensor con proyección
@@ -815,25 +804,8 @@ class SensoresResource(Resource):
 @sensores_ns.route('/manual')
 class SensoresManualResource(Resource):
     @sensores_ns.doc(
-        'create_manual_data',
-        summary='Registro manual de datos de sensores',
-        description='''
-        **Funcionalidad**: Permite el ingreso manual de datos de sensores de calidad del agua.
-        
-        **Casos de uso**:
-        - Calibración y verificación de sensores automáticos
-        - Registro de datos durante mantenimiento del sistema
-        - Ingreso de mediciones históricas o de respaldo
-        - Validación cruzada con instrumentos manuales
-        
-        **Proceso automatizado**:
-        1. Validación de rangos lógicos para cada sensor
-        2. Almacenamiento en base de datos con marca temporal
-        3. Activación automática del sistema de monitoreo ML
-        4. Generación de alertas si los valores están fuera de rango
-        
-        **Trazabilidad**: Todos los datos se marcan con fuente="manual" y usuario registrado.
-        '''
+        'manual_sensor_input',
+        summary='Ingreso manual de datos de sensores'
     )
     @sensores_ns.expect(manual_input_model, validate=True)
     @sensores_ns.marshal_with(manual_response_model, code=201)
@@ -843,45 +815,21 @@ class SensoresManualResource(Resource):
     @ensure_mongodb_connection
     def post(self):
         """
-        **INGRESO MANUAL DE DATOS DE SENSORES**
+        Registro manual de mediciones de sensores
         
-        **Parámetros aceptados:**
-        - **Temperatura**: -50°C a 100°C (float) - Temperatura del agua
-        - **pH**: 0 a 14 (float) - Acidez/alcalinidad del agua  
-        - **Oxígeno**: 0 a 30 mg/L (float) - Oxígeno disuelto
-        - **Fecha**: ISO timestamp (string, opcional) - Si no se envía, usa fecha actual
-        - **Fuente**: Identificador (string, opcional) - Por defecto "manual"
-        - **Usuario**: Nombre del usuario (string, opcional) - Por defecto "admin"
+        Permite ingresar datos de temperatura, pH y oxígeno disuelto manualmente.
+        Útil para calibración, mantenimiento o ingreso de mediciones históricas.
         
-        **Procesamiento automático:**
-        - Validación de rangos lógicos
-        - Conversión a zona horaria Chile (GMT-3)
-        - Almacenamiento en colección unificada
-        - Activación de sistema de Machine Learning
-        - Generación automática de alertas preventivas
+        **Proceso automático:**
+        - Validación de rangos de seguridad
+        - Timestamp automático (Chile GMT-3)
+        - Activación de sistema de alertas ML
+        - Notificaciones si hay valores críticos
         
-        **Ejemplo de request:**
-        ```json
-        {
-            "temperatura": 22.5,
-            "ph": 7.2,
-            "oxigeno": 8.5,
-            "fecha": "2024-11-06T10:30:00Z",
-            "fuente": "manual",
-            "usuario": "admin"
-        }
-        ```
-        
-        **Respuesta exitosa (201):**
-        ```json
-        {
-            "success": true,
-            "data": {
-                "_id": "ObjectId_generado",
-                "temperatura": 22.5,
-                "ph": 7.2,
-                "oxigeno": 8.5,
-                "fecha": "2024-11-06T13:30:00-03:00",
+        **Rangos recomendados para acuicultura:**
+        - Temperatura: 8-20°C
+        - pH: 6.5-8.5  
+        - Oxígeno: >6 mg/L
                 "fuente": "manual",
                 "usuario": "admin"
             },
@@ -957,18 +905,17 @@ class SensoresManualResource(Resource):
 
 @temperatura_ns.route('')
 class TemperaturaResource(Resource):
-    @temperatura_ns.doc('get_temperatura')
+    @temperatura_ns.doc('get_temperatura_only')
     @temperatura_ns.marshal_with(temperatura_response_model, code=200)
     @temperatura_ns.response(500, 'Error interno del servidor', error_model)
     @temperatura_ns.param('sort', 'Orden: asc o desc', type=str, default='desc')
     @ensure_mongodb_connection
     def get(self):
         """
-        Obtiene solo los datos de temperatura
+        Datos específicos de temperatura únicamente
         
-        Retorna únicamente los valores de temperatura y fecha desde la colección unificada.
-        Filtra y devuelve solo los campos: _id, temperatura, fecha.
-        Los datos están ordenados por fecha (desc por defecto).
+        Obtiene solo las mediciones de temperatura del agua filtradas desde la base de datos.
+        Para obtener todos los sensores juntos se recomienda usar /sensores.
         """
         try:
             sort_order = request.args.get('sort', 'desc', type=str)
@@ -999,18 +946,17 @@ class TemperaturaResource(Resource):
 
 @ph_ns.route('')
 class PHResource(Resource):
-    @ph_ns.doc('get_ph')
+    @ph_ns.doc('get_ph_only')
     @ph_ns.marshal_with(ph_response_model, code=200)
     @ph_ns.response(500, 'Error interno del servidor', error_model)
     @ph_ns.param('sort', 'Orden: asc o desc', type=str, default='desc')
     @ensure_mongodb_connection
     def get(self):
         """
-        Obtiene solo los datos de pH
+        Datos específicos de pH únicamente
         
-        Retorna únicamente los valores de pH y fecha desde la colección unificada.
-        Filtra y devuelve solo los campos: _id, ph, fecha.
-        Los valores de pH indican la acidez/alcalinidad del agua (rango típico: 6.5-8.5).
+        Obtiene solo las mediciones de pH (acidez/alcalinidad) filtradas desde la base de datos.
+        Rango seguro para acuicultura: 6.5-8.5. Para datos completos usar /sensores.
         """
         try:
             sort_order = request.args.get('sort', 'desc', type=str)
@@ -1041,18 +987,17 @@ class PHResource(Resource):
 
 @oxigeno_ns.route('')
 class OxigenoResource(Resource):
-    @oxigeno_ns.doc('get_oxigeno')
+    @oxigeno_ns.doc('get_oxigeno_only')
     @oxigeno_ns.marshal_with(oxigeno_response_model, code=200)
     @oxigeno_ns.response(500, 'Error interno del servidor', error_model)
     @oxigeno_ns.param('sort', 'Orden: asc o desc', type=str, default='desc')
     @ensure_mongodb_connection
     def get(self):
         """
-        Obtiene solo los datos de oxígeno disuelto
+        Datos específicos de oxígeno disuelto únicamente
         
-        Retorna únicamente los valores de oxígeno y fecha desde la colección unificada.
-        Filtra y devuelve solo los campos: _id, oxigeno, fecha.
-        El oxígeno disuelto se mide en mg/L (valores típicos: 5-12 mg/L para acuicultura).
+        Obtiene solo las mediciones de oxígeno disuelto (mg/L) filtradas desde la base de datos.
+        Nivel crítico para acuicultura: >6 mg/L. Para datos completos usar /sensores.
         """
         try:
             sort_order = request.args.get('sort', 'desc', type=str)
@@ -1131,24 +1076,25 @@ class LatestSensoresResource(Resource):
 
 @mqtt_ns.route('/publish')
 class MQTTPublishResource(Resource):
-    @mqtt_ns.doc('publish_mqtt')
+    @mqtt_ns.doc('mqtt_test_publish')
     @mqtt_ns.expect(mqtt_publish_model)
     @mqtt_ns.marshal_with(response_model, code=200)
-    @mqtt_ns.response(400, 'Datos de entrada inválidos', error_model)
-    @mqtt_ns.response(500, 'Error interno del servidor', error_model)
+    @mqtt_ns.response(400, 'Tópico o mensaje inválido', error_model)
+    @mqtt_ns.response(500, 'Error de conexión MQTT', error_model)
     def post(self):
         """
-        Publica un mensaje a un tópico MQTT específico
+        Herramienta de testing para publicación MQTT manual
         
-        Permite publicar datos de sensores al broker MQTT (test.mosquitto.org).
+        **Uso recomendado**: Testing, debugging y demostraciones del sistema MQTT.
+        Los sensores IoT reales publican automáticamente.
         
-        Tópicos principales:
-        - cimarq/sensores/unified: Mensajes con estructura completa {temperatura, ph, oxigeno, fecha}
-        - cimarq/temperatura/update: Solo datos de temperatura
-        - cimarq/ph/update: Solo datos de pH
-        - cimarq/oxigeno/update: Solo datos de oxígeno
+        **Tópicos disponibles:**
+        - cimarq/sensores/unified: Datos completos (recomendado)
+        - cimarq/temperatura/update: Solo temperatura
+        - cimarq/ph/update: Solo pH  
+        - cimarq/oxigeno/update: Solo oxígeno
         
-        El timestamp debe incluir zona horaria Chile GMT-3.
+        Los datos publicados se almacenan en la base de datos y activan alertas.
         """
         try:
             data = request.get_json()
@@ -1181,19 +1127,20 @@ class MQTTPublishResource(Resource):
 
 @health_ns.route('')
 class HealthResource(Resource):
-    @health_ns.doc('health_check')
+    @health_ns.doc('system_health')
     @health_ns.marshal_with(health_model, code=200)
-    @health_ns.response(500, 'Sistema no saludable', health_model)
+    @health_ns.response(500, 'Sistema con fallos', health_model)
     def get(self):
         """
-        Verifica el estado de salud de la API y sus dependencias
+        Diagnóstico completo del estado del sistema
         
-        Retorna información completa sobre:
-        - Estado de conexión MongoDB (base de datos cimarqdb)
-        - Estado de conexión MQTT (broker test.mosquitto.org)
-        - Número de colecciones en la base de datos
-        - Timestamp con zona horaria Chile GMT-3
-        - Información del entorno (configuración, variables)
+        Verifica el estado de conexión y funcionamiento de todos los componentes:
+        - Base de datos MongoDB
+        - Comunicación MQTT  
+        - Configuración del sistema
+        - Timestamp Chile GMT-3
+        
+        Útil para monitoreo automático y diagnóstico de problemas.
         """
         health_status = {
             "status": "healthy",
@@ -1367,6 +1314,11 @@ class PrediccionesResource(Resource):
             if horas < 1 or horas > 168:  # Máximo 1 semana
                 ml_ns.abort(400, success=False, error="Horas debe estar entre 1 y 168")
             
+            # Verificar estado de API ML externa
+            estado_api = sistema_ml.verificar_estado_api_ml()
+            if not estado_api.get("disponible", False):
+                ml_ns.abort(503, success=False, error="API ML externa no disponible", details=estado_api)
+            
             sensores = [sensor_param] if sensor_param else ['temperatura', 'ph', 'oxigeno']
             
             predicciones = {}
@@ -1374,37 +1326,42 @@ class PrediccionesResource(Resource):
             
             for sensor in sensores:
                 try:
-                    # Cargar o entrenar modelo
-                    if not sistema_ml.cargar_modelo(sensor):
-                        sistema_ml.entrenar_modelo(sensor)
-                    
-                    # Generar predicción
+                    # Generar predicción usando API ML externa
                     prediccion = sistema_ml.predecir_sensor(sensor, horas)
                     predicciones[sensor] = prediccion
                     
-                    # Generar alerta si es necesaria
-                    alerta = sistema_ml.generar_alerta(sensor, prediccion)
-                    if alerta:
-                        alerta_id = sistema_ml.guardar_alerta(alerta)
-                        if alerta_id:
-                            alertas_generadas.append({
-                                'sensor': sensor,
-                                'nivel': alerta['nivel'],
-                                'alerta_id': alerta_id,
-                                'mensaje': alerta['mensaje']
-                            })
+                    # Generar alerta si es necesaria y la predicción fue exitosa
+                    if prediccion.get("exito", False):
+                        alerta = sistema_ml.generar_alerta(sensor, prediccion)
+                        if alerta:
+                            alerta_id = sistema_ml.guardar_alerta(alerta)
+                            if alerta_id:
+                                alertas_generadas.append({
+                                    'sensor': sensor,
+                                    'nivel': alerta['nivel'],
+                                    'alerta_id': alerta_id,
+                                    'mensaje': alerta['mensaje'],
+                                    'valor_predicho': prediccion.get('prediccion', 0)
+                                })
                             
                 except Exception as e:
-                    predicciones[sensor] = {"error": str(e)}
+                    predicciones[sensor] = {
+                        "exito": False,
+                        "error": str(e),
+                        "timestamp": get_chile_time().isoformat()
+                    }
             
             return {
                 "success": True,
                 "predicciones": predicciones,
                 "alertas_generadas": alertas_generadas,
+                "estado_api_ml": estado_api,
                 "fecha_procesamiento": get_chile_time().isoformat(),
                 "parametros": {
                     "horas_prediccion": horas,
-                    "sensores_procesados": sensores
+                    "sensores_procesados": sensores,
+                    "window_size": sistema_ml.window_size,
+                    "api_url": sistema_ml.ml_api_base_url
                 }
             }
             
@@ -1417,45 +1374,54 @@ class EntrenarModelosResource(Resource):
     @ml_ns.marshal_with(ml_response_model, code=200)
     @ml_ns.response(500, 'Error interno del servidor', error_model)
     @ml_ns.param('sensor', 'Sensor específico (opcional)', type=str, enum=['temperatura', 'ph', 'oxigeno'])
-    @ml_ns.param('dias', 'Días de datos históricos', type=int, default=30)
+    @ml_ns.param('epochs', 'Épocas de entrenamiento', type=int, default=50)
     @ensure_mongodb_connection
     def post(self):
         """
-        Entrena o re-entrena modelos de Machine Learning
+        Entrena o re-entrena modelos de Machine Learning usando API externa
         
-        Entrena modelos Perceptron con datos históricos recientes.
+        Utiliza la API ML externa (ml-monitoreo.onrender.com) para entrenar modelos.
         Puede entrenar un sensor específico o todos los sensores.
-        Retorna métricas de rendimiento y precisión de los modelos.
+        Retorna métricas de rendimiento del entrenamiento.
         """
         try:
             if not sistema_ml:
                 ml_ns.abort(500, success=False, error="Sistema ML no inicializado")
             
             sensor_param = request.args.get('sensor')
-            dias = request.args.get('dias', 30, type=int)
+            epochs = request.args.get('epochs', 50, type=int)
             
             # Validar parámetros
-            if dias < 7 or dias > 90:
-                ml_ns.abort(400, success=False, error="Días debe estar entre 7 y 90")
+            if epochs < 10 or epochs > 200:
+                ml_ns.abort(400, success=False, error="Épocas debe estar entre 10 y 200")
             
-            sensores = [sensor_param] if sensor_param else ['temperatura', 'ph', 'oxigeno']
+            # Verificar estado de API ML externa
+            estado_api = sistema_ml.verificar_estado_api_ml()
+            if not estado_api.get("disponible", False):
+                ml_ns.abort(503, success=False, error="API ML externa no disponible", details=estado_api)
             
-            metricas_modelos = {}
-            
-            for sensor in sensores:
-                try:
-                    metricas = sistema_ml.entrenar_modelo(sensor, dias)
-                    metricas_modelos[sensor] = metricas
-                except Exception as e:
-                    metricas_modelos[sensor] = {"error": str(e)}
+            if sensor_param:
+                # Entrenar sensor específico
+                resultado = sistema_ml.entrenar_modelo_individual(sensor_param, epochs)
+                metricas_modelos = {sensor_param: resultado}
+            else:
+                # Entrenar todos los modelos
+                resultado = sistema_ml.entrenar_todos_modelos(epochs)
+                if resultado.get("exito", False):
+                    metricas_modelos = resultado.get("resultados", {})
+                else:
+                    metricas_modelos = {"error": resultado.get("mensaje", "Error en entrenamiento masivo")}
             
             return {
                 "success": True,
                 "metricas_modelos": metricas_modelos,
+                "estado_api_ml": estado_api,
                 "fecha_procesamiento": get_chile_time().isoformat(),
                 "parametros": {
-                    "dias_entrenamiento": dias,
-                    "sensores_entrenados": sensores
+                    "epochs": epochs,
+                    "window_size": sistema_ml.window_size,
+                    "sensor_especifico": sensor_param or "todos",
+                    "api_url": sistema_ml.ml_api_base_url
                 }
             }
             
@@ -1538,6 +1504,194 @@ class SistemaCompletoResource(Resource):
                     "alertas_creadas": len(resultado.get('alertas_generadas', [])),
                     "errores_encontrados": len(resultado.get('errores', []))
                 }
+            }
+            
+        except Exception as e:
+            ml_ns.abort(500, success=False, error=str(e))
+
+@ml_ns.route('/api-externa/estado')
+class EstadoAPIExternaResource(Resource):
+    @ml_ns.doc('estado_api_externa')
+    @ml_ns.response(500, 'Error interno del servidor', error_model)
+    @ensure_mongodb_connection
+    def get(self):
+        """
+        Verificar estado de la API ML externa
+        
+        Verifica la disponibilidad y estado de la API ML externa
+        en ml-monitoreo.onrender.com. Incluye información de conectividad
+        y servicios disponibles.
+        """
+        try:
+            if not sistema_ml:
+                ml_ns.abort(500, success=False, error="Sistema ML no inicializado")
+            
+            # Probar conexión a la API Externa directamente
+            try:
+                import requests
+                response = requests.get(f"{sistema_ml.ml_api_base_url}/health", timeout=10)
+                api_data = response.json() if response.status_code == 200 else {"error": "API no disponible"}
+            except Exception as e:
+                api_data = {"error": str(e)}
+            
+            return {
+                "success": True,
+                "api_ml_externa": {
+                    "disponible": True if "error" not in api_data else False,
+                    "estado": "activo" if "error" not in api_data else "error",
+                    "datos_api": api_data,
+                    "timestamp": datetime.now(CHILE_TZ).isoformat()
+                },
+                "configuracion": {
+                    "url": sistema_ml.ml_api_base_url,
+                    "timeout": sistema_ml.ml_api_timeout
+                },
+                "fecha_verificacion": datetime.now(CHILE_TZ).isoformat()
+            }
+            
+        except Exception as e:
+            print(f"Error detallado en estado API ML: {e}")
+            import traceback
+            traceback.print_exc()
+            ml_ns.abort(500, success=False, error=str(e))
+
+@ml_ns.route('/api-externa/muestra-datos')
+class MuestraDatosAPIResource(Resource):
+    @ml_ns.doc('muestra_datos_api')
+    @ml_ns.marshal_with(ml_response_model, code=200)
+    @ml_ns.response(500, 'Error interno del servidor', error_model)
+    @ensure_mongodb_connection
+    def get(self):
+        """
+        Obtener muestra de datos desde API ML externa
+        
+        Solicita a la API ML externa una muestra de los datos
+        disponibles para entrenamiento. Útil para verificar
+        la conectividad y disponibilidad de datos.
+        """
+        try:
+            if not sistema_ml:
+                ml_ns.abort(500, success=False, error="Sistema ML no inicializado")
+            
+            # Verificar estado de API
+            estado_api = sistema_ml.verificar_estado_api_ml()
+            if not estado_api.get("disponible", False):
+                ml_ns.abort(503, success=False, error="API ML externa no disponible", details=estado_api)
+            
+            muestra = sistema_ml.obtener_muestra_datos()
+            
+            return {
+                "success": True,
+                "muestra_datos": muestra,
+                "estado_api": estado_api,
+                "fecha_consulta": get_chile_time().isoformat()
+            }
+            
+        except Exception as e:
+            ml_ns.abort(500, success=False, error=str(e))
+
+@ml_ns.route('/entrenar-individual/<string:sensor>')
+class EntrenarSensorIndividualResource(Resource):
+    @ml_ns.doc('entrenar_sensor_individual')
+    @ml_ns.marshal_with(ml_response_model, code=200)
+    @ml_ns.response(400, 'Parámetros inválidos', error_model)
+    @ml_ns.response(503, 'API ML externa no disponible', error_model)
+    @ml_ns.response(500, 'Error interno del servidor', error_model)
+    @ml_ns.param('epochs', 'Épocas de entrenamiento', type=int, default=50)
+    @ensure_mongodb_connection
+    def post(self, sensor):
+        """
+        Entrenar modelo individual usando API ML externa
+        
+        Entrena un modelo específico para un sensor usando la API ML externa.
+        Permite control granular del entrenamiento con parámetros específicos.
+        Ideal para ajuste fino de modelos individuales.
+        """
+        try:
+            if not sistema_ml:
+                ml_ns.abort(500, success=False, error="Sistema ML no inicializado")
+            
+            # Validar sensor
+            if sensor not in ['temperatura', 'ph', 'oxigeno']:
+                ml_ns.abort(400, success=False, error="Sensor debe ser: temperatura, ph, oxigeno")
+            
+            epochs = request.args.get('epochs', 50, type=int)
+            
+            # Validar épocas
+            if epochs < 10 or epochs > 200:
+                ml_ns.abort(400, success=False, error="Épocas debe estar entre 10 y 200")
+            
+            # Verificar estado de API
+            estado_api = sistema_ml.verificar_estado_api_ml()
+            if not estado_api.get("disponible", False):
+                ml_ns.abort(503, success=False, error="API ML externa no disponible", details=estado_api)
+            
+            # Entrenar modelo individual
+            resultado = sistema_ml.entrenar_modelo_individual(sensor, epochs)
+            
+            return {
+                "success": resultado.get("exito", False),
+                "entrenamiento": resultado,
+                "estado_api": estado_api,
+                "fecha_procesamiento": get_chile_time().isoformat()
+            }
+            
+        except Exception as e:
+            ml_ns.abort(500, success=False, error=str(e))
+
+@ml_ns.route('/prediccion-individual/<string:sensor>')
+class PrediccionSensorIndividualResource(Resource):
+    @ml_ns.doc('prediccion_sensor_individual')
+    @ml_ns.marshal_with(ml_response_model, code=200)
+    @ml_ns.response(400, 'Parámetros inválidos', error_model)
+    @ml_ns.response(503, 'API ML externa no disponible', error_model)
+    @ml_ns.response(500, 'Error interno del servidor', error_model)
+    @ensure_mongodb_connection
+    def get(self, sensor):
+        """
+        Predicción individual usando API ML externa
+        
+        Genera predicción para un sensor específico usando la API ML externa.
+        Utiliza los últimos datos disponibles para hacer la predicción.
+        Incluye análisis de riesgo y generación automática de alertas.
+        """
+        try:
+            if not sistema_ml:
+                ml_ns.abort(500, success=False, error="Sistema ML no inicializado")
+            
+            # Validar sensor
+            if sensor not in ['temperatura', 'ph', 'oxigeno']:
+                ml_ns.abort(400, success=False, error="Sensor debe ser: temperatura, ph, oxigeno")
+            
+            # Verificar estado de API
+            estado_api = sistema_ml.verificar_estado_api_ml()
+            if not estado_api.get("disponible", False):
+                ml_ns.abort(503, success=False, error="API ML externa no disponible", details=estado_api)
+            
+            # Generar predicción
+            prediccion = sistema_ml.predecir_sensor(sensor)
+            
+            # Generar alerta si es necesaria
+            alerta_generada = None
+            if prediccion.get("exito", False):
+                alerta = sistema_ml.generar_alerta(sensor, prediccion)
+                if alerta:
+                    alerta_id = sistema_ml.guardar_alerta(alerta)
+                    if alerta_id:
+                        alerta_generada = {
+                            'sensor': sensor,
+                            'nivel': alerta['nivel'],
+                            'alerta_id': alerta_id,
+                            'mensaje': alerta['mensaje'],
+                            'valor_predicho': prediccion.get('prediccion', 0)
+                        }
+            
+            return {
+                "success": prediccion.get("exito", False),
+                "prediccion": prediccion,
+                "alerta_generada": alerta_generada,
+                "estado_api": estado_api,
+                "fecha_procesamiento": get_chile_time().isoformat()
             }
             
         except Exception as e:
@@ -1985,29 +2139,6 @@ class NotificacionCorreoCriticoResource(Resource):
             print(f"Error al enviar correo crítico: {str(e)}")
             notificaciones_ns.abort(500, success=False, error=f'Error interno: {str(e)}')
 
-@notificaciones_ns.route('/probar')
-class NotificacionProbarResource(Resource):
-    @notificaciones_ns.doc('probar_notificaciones')
-    @notificaciones_ns.response(200, 'Resultado de la prueba')
-    @notificaciones_ns.response(500, 'Error interno del servidor', error_model)
-    def post(self):
-        """
-        Probar configuración de notificaciones
-        
-        Envía un email de prueba para verificar que la configuración es correcta.
-        """
-        try:
-            resultado_prueba = servicio_email.probar_configuracion()
-            
-            return {
-                'success': resultado_prueba['success'],
-                'resultado_email': resultado_prueba,
-                'timestamp': datetime.now(CHILE_TZ).isoformat()
-            }
-            
-        except Exception as e:
-            notificaciones_ns.abort(500, success=False, error=str(e))
-
 @notificaciones_ns.route('/exportar')
 class ExportacionEmailResource(Resource):
     @notificaciones_ns.doc(
@@ -2387,90 +2518,6 @@ class LoginResource(Resource):
             
         except Exception as e:
             print(f"Error en login: {e}")
-            return {
-                'success': False,
-                'message': 'Error interno del servidor'
-            }, 500
-
-@auth_ns.route('/register')
-class RegisterResource(Resource):
-    @auth_ns.doc('register_user')
-    @auth_ns.expect(register_model, validate=True)
-    @auth_ns.response(201, 'Usuario registrado exitosamente', auth_response_model)
-    @auth_ns.response(400, 'Datos inválidos', error_model)
-    @auth_ns.response(409, 'Usuario ya existe', error_model)
-    @auth_ns.response(500, 'Error interno del servidor', error_model)
-    def post(self):
-        """
-        Registrar nuevo usuario administrador
-        
-        Crea una nueva cuenta de administrador del sistema.
-        Solo permite crear cuentas de administrador.
-        """
-        try:
-            data = request.get_json()
-            email = data.get('email', '').lower().strip()
-            password = data.get('password', '')
-            nombre = data.get('nombre', '').strip()
-            confirm_password = data.get('confirmPassword', '')
-            
-            # Validaciones básicas
-            if not all([email, password, nombre, confirm_password]):
-                return {
-                    'success': False,
-                    'message': 'Todos los campos son requeridos'
-                }, 400
-            
-            if password != confirm_password:
-                return {
-                    'success': False,
-                    'message': 'Las contraseñas no coinciden'
-                }, 400
-            
-            if len(password) < 6:
-                return {
-                    'success': False,
-                    'message': 'La contraseña debe tener al menos 6 caracteres'
-                }, 400
-            
-            # Validar formato de email
-            import re
-            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-            if not re.match(email_pattern, email):
-                return {
-                    'success': False,
-                    'message': 'Formato de email inválido'
-                }, 400
-            
-            # Verificar si ya existe un usuario con ese email
-            existing_user = db.usuarios.find_one({'email': email})
-            if existing_user:
-                return {
-                    'success': False,
-                    'message': 'Ya existe un usuario con este email'
-                }, 409
-            
-            # Crear usuario
-            password_hash = hash_password(password)
-            
-            user_doc = {
-                'email': email,
-                'password_hash': password_hash,
-                'nombre': nombre,
-                'rol': 'admin',  # Por ahora solo administradores
-                'fecha_creacion': datetime.now(CHILE_TZ),
-                'activo': True
-            }
-            
-            result = db.usuarios.insert_one(user_doc)
-            
-            return {
-                'success': True,
-                'message': 'Usuario registrado exitosamente'
-            }, 201
-            
-        except Exception as e:
-            print(f"Error en registro: {e}")
             return {
                 'success': False,
                 'message': 'Error interno del servidor'

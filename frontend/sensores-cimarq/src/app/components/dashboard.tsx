@@ -19,6 +19,7 @@ import ErrorIcon from '@mui/icons-material/Error';
 import InfoIcon from '@mui/icons-material/Info';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import WidgetPrediccionesML from './WidgetPrediccionesML';
 
 interface SensorData {
   _id: string;
@@ -572,32 +573,32 @@ export default function SensoresPage() {
         </Grid>
 
         {/* Estadísticas de Alertas */}
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <Paper sx={{ p: 3, height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Estadísticas de Alertas
             </Typography>
             
             <Grid container spacing={2}>
-              <Grid size={{ xs: 6, sm: 3 }}>
+              <Grid size={{ xs: 6, sm: 6 }}>
                 <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'primary.light', borderRadius: 2, color: 'white' }}>
                   <Typography variant="h4">{estadisticas.total}</Typography>
                   <Typography variant="caption">Total</Typography>
                 </Box>
               </Grid>
-              <Grid size={{ xs: 6, sm: 3 }}>
+              <Grid size={{ xs: 6, sm: 6 }}>
                 <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'error.light', borderRadius: 2, color: 'white' }}>
                   <Typography variant="h4">{estadisticas.criticas}</Typography>
                   <Typography variant="caption">Críticas</Typography>
                 </Box>
               </Grid>
-              <Grid size={{ xs: 6, sm: 3 }}>
+              <Grid size={{ xs: 6, sm: 6 }}>
                 <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'warning.light', borderRadius: 2, color: 'white' }}>
                   <Typography variant="h4">{estadisticas.aceptables}</Typography>
                   <Typography variant="caption">Aceptables</Typography>
                 </Box>
               </Grid>
-              <Grid size={{ xs: 6, sm: 3 }}>
+              <Grid size={{ xs: 6, sm: 6 }}>
                 <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'info.light', borderRadius: 2, color: 'white' }}>
                   <Typography variant="h4">{estadisticas.noLeidas}</Typography>
                   <Typography variant="caption">Sin Leer</Typography>
@@ -632,6 +633,11 @@ export default function SensoresPage() {
               </Box>
             </Box>
           </Paper>
+        </Grid>
+
+        {/* Widget de Predicciones ML */}
+        <Grid size={{ xs: 12, md: 4 }}>
+          <WidgetPrediccionesML />
         </Grid>
       </Grid>
 

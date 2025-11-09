@@ -28,6 +28,7 @@ const menuItems: MenuItem[] = [
   { icon: <HiCog className="w-4 h-4" />, label: "Ingreso Manual", href: "/sensores/ingreso-manual" },
   { icon: <FaPlay className="w-5 h-5" />, label: "Simulador", href: "/simulador" },
   { icon: <HiDownload className="w-5 h-5" />, label: "Exportar Datos", href: "/exportar-datos" },
+  { icon: <span className="text-lg">🤖</span>, label: "Machine Learning", href: "/machine-learning" },
   { icon: <HiExclamation className="w-5 h-5" />, label: "Alertas", href: "/alertas" },
   { icon: <HiCog className="w-5 h-5" />, label: "Configuración", href: "/configuracion" },
 ];
