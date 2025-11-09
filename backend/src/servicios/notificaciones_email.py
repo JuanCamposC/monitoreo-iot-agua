@@ -77,12 +77,6 @@ class ServicioNotificacionesEmail:
         
         fecha_chile = datetime.now(CHILE_TZ).strftime("%d/%m/%Y %H:%M:%S")
         
-        # Emoji por sensor
-        sensor_emoji = {
-            'temperatura': '🌡️',
-            'ph': '🧪', 
-            'oxigeno': '💨'
-        }
         
         # Color por nivel
         nivel_color = {
@@ -92,7 +86,6 @@ class ServicioNotificacionesEmail:
             'BAJO': '#388e3c'
         }
         
-        emoji = sensor_emoji.get(alerta_data.get('sensor', ''), '⚠️')
         color = nivel_color.get(alerta_data.get('nivel', 'MEDIO'), '#1976d2')
         
         html_content = f"""
@@ -108,7 +101,7 @@ class ServicioNotificacionesEmail:
                 <!-- Header -->
                 <div style="background: {color}; color: white; padding: 20px; text-align: center;">
                     <h1 style="margin: 0; font-size: 24px;">
-                        🚨 SISTEMA CIMARQ - ALERTA {alerta_data.get('nivel', 'CRÍTICA')}
+                        SISTEMA CIMARQ - ALERTA {alerta_data.get('nivel', 'CRÍTICA')}
                     </h1>
                     <p style="margin: 10px 0 0 0; opacity: 0.9;">
                         Sistema de Monitoreo Acuícola Preventivo
@@ -119,7 +112,7 @@ class ServicioNotificacionesEmail:
                 <div style="padding: 30px;">
                     <div style="background: #f8f9fa; border-left: 4px solid {color}; padding: 20px; margin-bottom: 20px;">
                         <h2 style="margin: 0 0 15px 0; color: {color}; font-size: 20px;">
-                            {emoji} {alerta_data.get('sensor', 'Sensor').upper()}
+                            {alerta_data.get('sensor', 'Sensor').upper()}
                         </h2>
                         <p style="margin: 0; font-size: 16px; line-height: 1.5; color: #333;">
                             <strong>{alerta_data.get('mensaje', 'Sin mensaje')}</strong>
@@ -130,7 +123,7 @@ class ServicioNotificacionesEmail:
                     <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
                         <tr>
                             <td style="padding: 12px; border: 1px solid #e0e0e0; background: #fafafa; font-weight: bold; width: 30%;">
-                                📊 Valor Actual:
+                                Valor Actual:
                             </td>
                             <td style="padding: 12px; border: 1px solid #e0e0e0;">
                                 <strong style="color: {color}; font-size: 18px;">
@@ -141,7 +134,7 @@ class ServicioNotificacionesEmail:
                         </tr>
                         <tr>
                             <td style="padding: 12px; border: 1px solid #e0e0e0; background: #fafafa; font-weight: bold;">
-                                🔴 Nivel de Alerta:
+                                Nivel de Alerta:
                             </td>
                             <td style="padding: 12px; border: 1px solid #e0e0e0;">
                                 <span style="background: {color}; color: white; padding: 4px 12px; border-radius: 4px; font-weight: bold;">
@@ -151,7 +144,7 @@ class ServicioNotificacionesEmail:
                         </tr>
                         <tr>
                             <td style="padding: 12px; border: 1px solid #e0e0e0; background: #fafafa; font-weight: bold;">
-                                ⏰ Fecha Detección:
+                                Fecha Detección:
                             </td>
                             <td style="padding: 12px; border: 1px solid #e0e0e0;">
                                 {alerta_data.get('fecha_creacion', fecha_chile)}
@@ -159,7 +152,7 @@ class ServicioNotificacionesEmail:
                         </tr>
                         <tr>
                             <td style="padding: 12px; border: 1px solid #e0e0e0; background: #fafafa; font-weight: bold;">
-                                🎯 Prioridad:
+                                Prioridad:
                             </td>
                             <td style="padding: 12px; border: 1px solid #e0e0e0;">
                                 {alerta_data.get('prioridad', 3)}/5
@@ -174,7 +167,7 @@ class ServicioNotificacionesEmail:
             html_content += f"""
                     <div style="background: #e8f5e8; border: 1px solid #4caf50; border-radius: 6px; padding: 20px; margin: 20px 0;">
                         <h3 style="margin: 0 0 15px 0; color: #2e7d32; font-size: 16px;">
-                            💡 Acciones Recomendadas:
+                            Acciones Recomendadas:
                         </h3>
                         <ul style="margin: 0; padding-left: 20px; color: #2e7d32;">
             """
@@ -191,7 +184,7 @@ class ServicioNotificacionesEmail:
                     <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
                         <a href="http://localhost:3000/alertas" 
                            style="display: inline-block; background: {color}; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-bottom: 15px;">
-                            🌐 Acceder al Dashboard
+                            Acceder al Dashboard
                         </a>
                         <p style="margin: 0; color: #666; font-size: 12px;">
                             Sistema CIMARQ - Monitoreo Acuícola Inteligente<br>
@@ -258,7 +251,7 @@ class ServicioNotificacionesEmail:
             
             msg['From'] = self.email_remitente
             msg['To'] = ", ".join(destinatarios)
-            msg['Subject'] = f"🚨 CIMARQ - {nivel} {sensor}: Acción Requerida"
+            msg['Subject'] = f"CIMARQ - {nivel} {sensor}: Acción Requerida"
             
             # Contenido HTML
             html_content = self.generar_plantilla_alerta_critica(alerta_data)
@@ -320,54 +313,7 @@ Generado automáticamente
         
         return texto
     
-    def probar_configuracion(self) -> Dict[str, Any]:
-        """
-        Prueba la configuración de email enviando un mensaje de test
-        
-        Returns:
-            dict: Resultado de la prueba
-        """
-        
-        if not self.verificar_configuracion():
-            return {
-                'success': False,
-                'error': 'Configuración incompleta',
-                'detalles': {
-                    'smtp_server': bool(self.smtp_server),
-                    'email_remitente': bool(self.email_remitente),
-                    'email_password': bool(self.email_password)
-                }
-            }
-        
-        # Datos de prueba
-        alerta_prueba = {
-            'sensor': 'temperatura',
-            'nivel': 'CRITICO',
-            'mensaje': '🧪 Mensaje de prueba del sistema de notificaciones CIMARQ',
-            'valor_actual': 25.5,
-            'fecha_creacion': datetime.now(CHILE_TZ).strftime("%d/%m/%Y %H:%M:%S"),
-            'prioridad': 5,
-            'sugerencias': [
-                'Este es un email de prueba del sistema',
-                'Si recibe este mensaje, la configuración es correcta',
-                'Puede proceder con el monitoreo automático'
-            ]
-        }
-        
-        try:
-            exito = self.enviar_alerta_email(alerta_prueba)
-            return {
-                'success': exito,
-                'mensaje': 'Email de prueba enviado exitosamente' if exito else 'Error al enviar email de prueba',
-                'destinatarios': self.destinatarios_default,
-                'timestamp': datetime.now(CHILE_TZ).isoformat()
-            }
-        except Exception as e:
-            return {
-                'success': False,
-                'error': str(e),
-                'timestamp': datetime.now(CHILE_TZ).isoformat()
-            }
+
 
     def enviar_email_con_adjunto(self, email_data: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -430,7 +376,7 @@ Generado automáticamente
                 server.login(self.email_remitente, self.email_password)
                 server.send_message(msg)
 
-            logger.info(f"✅ Email con adjunto enviado a: {email_data['destinatario']}")
+            logger.info(f"Email con adjunto enviado a: {email_data['destinatario']}")
             
             return {
                 'success': True,
@@ -440,12 +386,14 @@ Generado automáticamente
 
         except Exception as e:
             error_msg = f"Error enviando email con adjunto: {str(e)}"
-            logger.error(f"❌ {error_msg}")
+            logger.error(f"{error_msg}")
             return {
                 'success': False,
                 'error': error_msg,
                 'timestamp': datetime.now(CHILE_TZ).isoformat()
             }
+
+
 
 
 # Instancia global del servicio

@@ -144,9 +144,9 @@ class SistemaPreventivoML:
             self.db = self.client[self.db_name]
             # Verificar conexión
             self.client.admin.command('ping')
-            logger.info(f"✅ Conectado a MongoDB: {self.db_name}")
+            logger.info(f"Conectado a MongoDB: {self.db_name}")
         except Exception as e:
-            logger.error(f"❌ Error conectando a MongoDB: {e}")
+            logger.error(f"Error conectando a MongoDB: {e}")
             raise
             
     def obtener_datos_entrenamiento(self, sensor: str, dias_historicos: int = 30) -> pd.DataFrame:
@@ -173,7 +173,7 @@ class SistemaPreventivoML:
             datos = list(cursor)
             
             if not datos:
-                logger.warning(f"⚠️ No se encontraron datos para {sensor}")
+                logger.warning(f"No se encontraron datos para {sensor}")
                 return pd.DataFrame()
                 
             # Convertir a DataFrame
@@ -184,11 +184,11 @@ class SistemaPreventivoML:
                 df['fecha'] = pd.to_datetime(df['fecha'], unit='ms')
                 df['fecha_chile'] = df['fecha'].dt.tz_localize('UTC').dt.tz_convert(CHILE_TZ)
             
-            logger.info(f"📊 Datos obtenidos para {sensor}: {len(df)} registros")
+            logger.info(f"Datos obtenidos para {sensor}: {len(df)} registros")
             return df
             
         except Exception as e:
-            logger.error(f"❌ Error obteniendo datos para {sensor}: {e}")
+            logger.error(f"Error obteniendo datos para {sensor}: {e}")
             return pd.DataFrame()
             
     def crear_features_temporales(self, df: pd.DataFrame, sensor: str) -> Tuple[np.ndarray, np.ndarray]:
@@ -247,7 +247,7 @@ class SistemaPreventivoML:
         Returns:
             Métricas del entrenamiento
         """
-        logger.info(f"🤖 Iniciando entrenamiento para {sensor}")
+        logger.info(f"Iniciando entrenamiento para {sensor}")
         
         # Obtener datos
         df = self.obtener_datos_entrenamiento(sensor, dias_historicos)
@@ -292,7 +292,7 @@ class SistemaPreventivoML:
         # Guardar modelo y scaler
         self._guardar_modelo(sensor)
         
-        logger.info(f"✅ {sensor} - R²:{metricas['r2_test']:.3f} | MAE:{metricas['mae_test']:.3f} | {tiempo_entrenamiento:.2f}s")
+        logger.info(f"{sensor} - R²:{metricas['r2_test']:.3f} | MAE:{metricas['mae_test']:.3f} | {tiempo_entrenamiento:.2f}s")
         return metricas
         
     def _guardar_modelo(self, sensor: str):
@@ -304,9 +304,9 @@ class SistemaPreventivoML:
             joblib.dump(self.modelos[sensor], modelo_path)
             joblib.dump(self.scalers[sensor], scaler_path)
             
-            logger.info(f"💾 Modelo {sensor} guardado en {modelo_path}")
+            logger.info(f"Modelo {sensor} guardado en {modelo_path}")
         except Exception as e:
-            logger.error(f"❌ Error guardando modelo {sensor}: {e}")
+            logger.error(f"Error guardando modelo {sensor}: {e}")
             
     def cargar_modelo(self, sensor: str) -> bool:
         """
@@ -325,13 +325,13 @@ class SistemaPreventivoML:
             if os.path.exists(modelo_path) and os.path.exists(scaler_path):
                 self.modelos[sensor] = joblib.load(modelo_path)
                 self.scalers[sensor] = joblib.load(scaler_path)
-                logger.info(f"✅ Modelo {sensor} cargado correctamente")
+                logger.info(f"Modelo {sensor} cargado correctamente")
                 return True
             else:
-                logger.warning(f"⚠️ No se encontró modelo pre-entrenado para {sensor}")
+                logger.warning(f"No se encontró modelo pre-entrenado para {sensor}")
                 return False
         except Exception as e:
-            logger.error(f"❌ Error cargando modelo {sensor}: {e}")
+            logger.error(f"Error cargando modelo {sensor}: {e}")
             return False
             
     def predecir_sensor(self, sensor: str, horas_futuro: int = 24) -> Dict[str, Any]:
@@ -401,7 +401,7 @@ class SistemaPreventivoML:
             }
             
         except Exception as e:
-            logger.error(f"❌ Error prediciendo {sensor}: {e}")
+            logger.error(f"Error prediciendo {sensor}: {e}")
             return {"error": str(e)}
             
     def _analizar_predicciones(self, sensor: str, predicciones: List[float]) -> Dict[str, Any]:
@@ -505,19 +505,19 @@ class SistemaPreventivoML:
         # Mensajes por sensor y nivel
         mensajes = {
             'temperatura': {
-                'CRITICO': f"🚨 TEMPERATURA CRÍTICA: Valores predichos fuera del rango seguro ({rangos['min_critico']}-{rangos['max_critico']}°C)",
-                'ALTO': f"⚠️ TEMPERATURA ELEVADA: Valores predichos fuera del rango óptimo ({rangos['min_optimo']}-{rangos['max_optimo']}°C)",
-                'MEDIO': f"📊 TEMPERATURA SUBÓPTIMA: Algunos valores predichos fuera del rango ideal"
+                'CRITICO': f"TEMPERATURA CRÍTICA: Valores predichos fuera del rango seguro ({rangos['min_critico']}-{rangos['max_critico']}°C)",
+                'ALTO': f"TEMPERATURA ELEVADA: Valores predichos fuera del rango óptimo ({rangos['min_optimo']}-{rangos['max_optimo']}°C)",
+                'MEDIO': f"TEMPERATURA SUBÓPTIMA: Algunos valores predichos fuera del rango ideal"
             },
             'ph': {
-                'CRITICO': f"🚨 pH CRÍTICO: Acidez/alcalinidad peligrosa para la vida acuática ({rangos['min_critico']}-{rangos['max_critico']})",
-                'ALTO': f"⚠️ pH DESEQUILIBRADO: Valores fuera del rango óptimo ({rangos['min_optimo']}-{rangos['max_optimo']})",
-                'MEDIO': f"📊 pH SUBÓPTIMO: Ligero desequilibrio en la acidez del agua"
+                'CRITICO': f"pH CRÍTICO: Acidez/alcalinidad peligrosa para la vida acuática ({rangos['min_critico']}-{rangos['max_critico']})",
+                'ALTO': f"pH DESEQUILIBRADO: Valores fuera del rango óptimo ({rangos['min_optimo']}-{rangos['max_optimo']})",
+                'MEDIO': f"pH SUBÓPTIMO: Ligero desequilibrio en la acidez del agua"
             },
             'oxigeno': {
-                'CRITICO': f"🚨 OXÍGENO CRÍTICO: Niveles peligrosos para la vida acuática ({rangos['min_critico']}-{rangos['max_critico']} mg/L)",
-                'ALTO': f"⚠️ OXÍGENO BAJO/ALTO: Fuera del rango óptimo ({rangos['min_optimo']}-{rangos['max_optimo']} mg/L)",
-                'MEDIO': f"📊 OXÍGENO SUBÓPTIMO: Niveles no ideales para el crecimiento"
+                'CRITICO': f"OXÍGENO CRÍTICO: Niveles peligrosos para la vida acuática ({rangos['min_critico']}-{rangos['max_critico']} mg/L)",
+                'ALTO': f"OXÍGENO BAJO/ALTO: Fuera del rango óptimo ({rangos['min_optimo']}-{rangos['max_optimo']} mg/L)",
+                'MEDIO': f"OXÍGENO SUBÓPTIMO: Niveles no ideales para el crecimiento"
             }
         }
         
@@ -538,62 +538,62 @@ class SistemaPreventivoML:
         if sensor == 'temperatura':
             if valor_actual < rangos['min_optimo']:
                 sugerencias.extend([
-                    "🔥 Instalar calentadores de agua adicionales",
-                    "🌊 Reducir flujo de agua fría de entrada",
-                    "🏠 Mejorar aislamiento térmico del estanque",
-                    "☀️ Optimizar exposición solar directa"
+                    "Instalar calentadores de agua adicionales",
+                    "Reducir flujo de agua fría de entrada",
+                    "Mejorar aislamiento térmico del estanque",
+                    "Optimizar exposición solar directa"
                 ])
             elif valor_actual > rangos['max_optimo']:
                 sugerencias.extend([
-                    "❄️ Aumentar ventilación y circulación de agua",
-                    "🌊 Incrementar flujo de agua fría",
-                    "🏠 Instalar sistemas de enfriamiento",
-                    "🌳 Proporcionar sombra adicional"
+                    "Aumentar ventilación y circulación de agua",
+                    "Incrementar flujo de agua fría",
+                    "Instalar sistemas de enfriamiento",
+                    "Proporcionar sombra adicional"
                 ])
                 
         elif sensor == 'ph':
             if valor_actual < rangos['min_optimo']:  # Muy ácido
                 sugerencias.extend([
-                    "🧪 Agregar cal hidratada o bicarbonato de sodio",
-                    "🪨 Instalar filtros con medios alcalinos",
-                    "🌊 Aumentar aireación para reducir CO2",
-                    "🔬 Verificar niveles de CO2 disuelto"
+                    "Agregar cal hidratada o bicarbonato de sodio",
+                    "Instalar filtros con medios alcalinos",
+                    "Aumentar aireación para reducir CO2",
+                    "Verificar niveles de CO2 disuelto"
                 ])
             elif valor_actual > rangos['max_optimo']:  # Muy alcalino
                 sugerencias.extend([
-                    "🧪 Agregar ácidos orgánicos controladamente",
-                    "🌊 Aumentar renovación de agua",
-                    "🪨 Usar medios filtrantes ácidos",
-                    "📊 Monitorear niveles de amoníaco"
+                    "Agregar ácidos orgánicos controladamente",
+                    "Aumentar renovación de agua",
+                    "Usar medios filtrantes ácidos",
+                    "Monitorear niveles de amoníaco"
                 ])
                 
         elif sensor == 'oxigeno':
             if valor_actual < rangos['min_optimo']:
                 sugerencias.extend([
-                    "💨 Instalar aireadores adicionales o más potentes",
-                    "🌊 Aumentar circulación y movimiento del agua",
-                    "🐟 Reducir densidad de peces temporalmente",
-                    "🌱 Verificar y limpiar filtros biológicos"
+                    "Instalar aireadores adicionales o más potentes",
+                    "Aumentar circulación y movimiento del agua",
+                    "Reducir densidad de peces temporalmente",
+                    "Verificar y limpiar filtros biológicos"
                 ])
             elif valor_actual > rangos['max_optimo']:
                 sugerencias.extend([
-                    "💨 Reducir intensidad de aireación",
-                    "🌊 Ajustar flujo de agua para equilibrar O2",
-                    "🌡️ Verificar temperatura (agua fría retiene más O2)",
-                    "📊 Monitorear niveles durante la noche"
+                    "Reducir intensidad de aireación",
+                    "Ajustar flujo de agua para equilibrar O2",
+                    "Verificar temperatura (agua fría retiene más O2)",
+                    "Monitorear niveles durante la noche"
                 ])
         
         # Sugerencias generales por nivel
         if nivel == 'CRITICO':
             sugerencias.extend([
-                "🚨 ACCIÓN INMEDIATA: Implementar medidas correctivas en las próximas 2-4 horas",
-                "👨‍🔬 Contactar al responsable técnico de acuicultura",
-                "📱 Activar protocolo de emergencia del sistema"
+                "ACCIÓN INMEDIATA: Implementar medidas correctivas en las próximas 2-4 horas",
+                "Contactar al responsable técnico de acuicultura",
+                "Activar protocolo de emergencia del sistema"
             ])
         elif nivel == 'ALTO':
             sugerencias.extend([
-                "⏰ Implementar correcciones en las próximas 6-12 horas",
-                "📊 Aumentar frecuencia de monitoreo manual"
+                "Implementar correcciones en las próximas 6-12 horas",
+                "Aumentar frecuencia de monitoreo manual"
             ])
             
         return sugerencias
@@ -652,11 +652,11 @@ class SistemaPreventivoML:
                 alerta_mongo['fecha_creacion'] = alerta_mongo['fecha_creacion'].isoformat()
                 
             resultado = self.db.alertas.insert_one(alerta_mongo)
-            logger.info(f"✅ Alerta guardada: {resultado.inserted_id}")
+            logger.info(f"Alerta guardada: {resultado.inserted_id}")
             return str(resultado.inserted_id)
             
         except Exception as e:
-            logger.error(f"❌ Error guardando alerta: {e}")
+            logger.error(f"Error guardando alerta: {e}")
             return None
             
     def obtener_alertas_activas(self, limite: int = 50) -> List[Dict]:
@@ -676,7 +676,7 @@ class SistemaPreventivoML:
             return alertas
             
         except Exception as e:
-            logger.error(f"❌ Error obteniendo alertas: {e}")
+            logger.error(f"Error obteniendo alertas: {e}")
             return []
     
     def obtener_ultimo_valor(self, sensor: str) -> Dict[str, Any]:
@@ -722,7 +722,7 @@ class SistemaPreventivoML:
             }
             
         except Exception as e:
-            logger.error(f"❌ Error obteniendo último valor de {sensor}: {e}")
+            logger.error(f"Error obteniendo último valor de {sensor}: {e}")
             return None
     
     def verificar_valor_en_rango(self, sensor: str, valor: float) -> Dict[str, Any]:
@@ -746,7 +746,7 @@ class SistemaPreventivoML:
             return {
                 'en_rango': False,
                 'nivel': 'CRITICO',
-                'mensaje': f"🚨 {sensor.upper()} CRÍTICO: Valor {valor} fuera del rango seguro ({rango['min_critico']}-{rango['max_critico']} {rango['unidad']})",
+                'mensaje': f"{sensor.upper()} CRÍTICO: Valor {valor} fuera del rango seguro ({rango['min_critico']}-{rango['max_critico']} {rango['unidad']})",
                 'tipo_problema': 'fuera_rango_critico',
                 'valor': valor,
                 'rango_min': rango['min_critico'],
@@ -758,7 +758,7 @@ class SistemaPreventivoML:
             return {
                 'en_rango': False,
                 'nivel': 'ALTO',
-                'mensaje': f"⚠️ {sensor.upper()} ALTO: Valor {valor} fuera del rango óptimo ({rango['min_optimo']}-{rango['max_optimo']} {rango['unidad']})",
+                'mensaje': f"{sensor.upper()} ALTO: Valor {valor} fuera del rango óptimo ({rango['min_optimo']}-{rango['max_optimo']} {rango['unidad']})",
                 'tipo_problema': 'fuera_rango_optimo',
                 'valor': valor,
                 'rango_min': rango['min_optimo'],
@@ -768,7 +768,7 @@ class SistemaPreventivoML:
         return {
             'en_rango': True,
             'nivel': 'NORMAL',
-            'mensaje': f"✅ {sensor.upper()} NORMAL: Valor {valor} dentro del rango óptimo",
+            'mensaje': f"{sensor.upper()} NORMAL: Valor {valor} dentro del rango óptimo",
             'valor': valor
         }
     
@@ -827,61 +827,61 @@ class SistemaPreventivoML:
             if sensor == 'temperatura':
                 if valor < rangos['min_critico']:
                     sugerencias = [
-                        "🚨 EMERGENCIA: Instalar calentadores inmediatamente",
-                        "🔥 Verificar sistemas de calefacción",
-                        "🌡️ Monitorear temperatura cada 15 minutos"
+                        "EMERGENCIA: Instalar calentadores inmediatamente",
+                        "Verificar sistemas de calefacción",
+                        "Monitorear temperatura cada 15 minutos"
                     ]
                 else:
                     sugerencias = [
-                        "❄️ EMERGENCIA: Aumentar enfriamiento inmediatamente",
-                        "🌊 Incrementar flujo de agua fría",
-                        "🌡️ Monitorear temperatura cada 15 minutos"
+                        "EMERGENCIA: Aumentar enfriamiento inmediatamente",
+                        "Incrementar flujo de agua fría",
+                        "Monitorear temperatura cada 15 minutos"
                     ]
             elif sensor == 'ph':
                 if valor < rangos['min_critico']:
                     sugerencias = [
-                        "🚨 EMERGENCIA: Agua muy ácida - agregar cal inmediatamente",
-                        "🧪 Aplicar bicarbonato de sodio gradualmente",
-                        "🔬 Verificar pH cada 30 minutos"
+                        "EMERGENCIA: Agua muy ácida - agregar cal inmediatamente",
+                        "Aplicar bicarbonato de sodio gradualmente",
+                        "Verificar pH cada 30 minutos"
                     ]
                 else:
                     sugerencias = [
-                        "🚨 EMERGENCIA: Agua muy alcalina - reducir pH inmediatamente",
-                        "🧪 Agregar ácido cítrico diluido gradualmente",
-                        "🔬 Verificar pH cada 30 minutos"
+                        "EMERGENCIA: Agua muy alcalina - reducir pH inmediatamente",
+                        "Agregar ácido cítrico diluido gradualmente",
+                        "Verificar pH cada 30 minutos"
                     ]
             elif sensor == 'oxigeno':
                 if valor < rangos['min_critico']:
                     sugerencias = [
-                        "🚨 EMERGENCIA: Oxígeno crítico - aumentar aireación máxima",
-                        "💨 Activar todos los sistemas de aireación",
-                        "🐟 Reducir densidad de peces inmediatamente"
+                        "EMERGENCIA: Oxígeno crítico - aumentar aireación máxima",
+                        "Activar todos los sistemas de aireación",
+                        "Reducir densidad de peces inmediatamente"
                     ]
                 else:
                     sugerencias = [
-                        "🚨 EMERGENCIA: Exceso de oxígeno - reducir aireación",
-                        "💨 Disminuir potencia de aireadores",
-                        "🌊 Aumentar circulación de agua"
+                        "EMERGENCIA: Exceso de oxígeno - reducir aireación",
+                        "Disminuir potencia de aireadores",
+                        "Aumentar circulación de agua"
                     ]
         
         elif nivel == 'ADVERTENCIA':
             if sensor == 'temperatura':
                 sugerencias = [
-                    f"🌡️ Temperatura fuera del rango óptimo ({rangos['min_optimo']}-{rangos['max_optimo']}°C)",
-                    "📊 Ajustar sistemas de control térmico",
-                    "⏰ Monitorear evolución próximas 2 horas"
+                    f"Temperatura fuera del rango óptimo ({rangos['min_optimo']}-{rangos['max_optimo']}°C)",
+                    "Ajustar sistemas de control térmico",
+                    "Monitorear evolución próximas 2 horas"
                 ]
             elif sensor == 'ph':
                 sugerencias = [
-                    f"🧪 pH fuera del rango óptimo ({rangos['min_optimo']}-{rangos['max_optimo']})",
-                    "⚖️ Ajustar balance ácido-base gradualmente",
-                    "📊 Verificar pH en 1 hora"
+                    f"pH fuera del rango óptimo ({rangos['min_optimo']}-{rangos['max_optimo']})",
+                    "Ajustar balance ácido-base gradualmente",
+                    "Verificar pH en 1 hora"
                 ]
             elif sensor == 'oxigeno':
                 sugerencias = [
-                    f"💨 Oxígeno fuera del rango óptimo ({rangos['min_optimo']}-{rangos['max_optimo']} mg/L)",
-                    "🔄 Ajustar sistemas de aireación",
-                    "📊 Monitorear en próximos 30 minutos"
+                    f"Oxígeno fuera del rango óptimo ({rangos['min_optimo']}-{rangos['max_optimo']} mg/L)",
+                    "Ajustar sistemas de aireación",
+                    "Monitorear en próximos 30 minutos"
                 ]
         
         return sugerencias
@@ -898,22 +898,22 @@ class SistemaPreventivoML:
         """
         if nivel == 'CRITICO':
             return [
-                "🚨 Acción inmediata requerida",
-                "📞 Notificar al técnico responsable",
-                "📋 Documentar acciones tomadas",
-                "⏰ Verificar cada 15-30 minutos hasta normalizar"
+                "Acción inmediata requerida",
+                "Notificar al técnico responsable",
+                "Documentar acciones tomadas",
+                "Verificar cada 15-30 minutos hasta normalizar"
             ]
         elif nivel == 'ADVERTENCIA':
             return [
-                "⚠️ Monitoreo frecuente recomendado",
-                "📊 Revisar tendencias de las últimas horas",
-                "🔧 Preparar equipos de ajuste si es necesario",
-                "⏰ Verificar en 1-2 horas"
+                "Monitoreo frecuente recomendado",
+                "Revisar tendencias de las últimas horas",
+                "Preparar equipos de ajuste si es necesario",
+                "Verificar en 1-2 horas"
             ]
         else:
             return [
-                "✅ Mantener monitoreo rutinario",
-                "📊 Continuar con mediciones regulares"
+                "Mantener monitoreo rutinario",
+                "Continuar con mediciones regulares"
             ]
     
     def monitorear_sensores_tiempo_real(self) -> Dict[str, Any]:
@@ -957,7 +957,7 @@ class SistemaPreventivoML:
                             'mensaje': alerta['mensaje'],
                             'alerta_id': alerta_id
                         })
-                        logger.warning(f"🚨 Alerta {alerta['nivel']} generada para {sensor}: {alerta['mensaje']}")
+                        logger.warning(f"Alerta {alerta['nivel']} generada para {sensor}: {alerta['mensaje']}")
                 else:
                     resultado['valores_normales'].append({
                         'sensor': sensor,
@@ -967,7 +967,7 @@ class SistemaPreventivoML:
             except Exception as e:
                 error_msg = f"Error monitoreando {sensor}: {str(e)}"
                 resultado['errores'].append(error_msg)
-                logger.error(f"❌ {error_msg}")
+                logger.error(f"{error_msg}")
         
         return resultado
             
@@ -978,7 +978,7 @@ class SistemaPreventivoML:
         Returns:
             Resumen del procesamiento completo
         """
-        logger.info("🚀 Iniciando sistema preventivo completo CIMARQ")
+        logger.info("Iniciando sistema preventivo completo CIMARQ")
         
         resultado = {
             'fecha_procesamiento': self.get_chile_time().isoformat(),
@@ -1003,7 +1003,7 @@ class SistemaPreventivoML:
             except Exception as e:
                 error_msg = f"Error procesando modelo {sensor}: {str(e)}"
                 resultado['errores'].append(error_msg)
-                logger.error(f"❌ {error_msg}")
+                logger.error(f"{error_msg}")
                 continue
         
         # 2. Generar predicciones
@@ -1026,9 +1026,9 @@ class SistemaPreventivoML:
             except Exception as e:
                 error_msg = f"Error generando predicción/alerta {sensor}: {str(e)}"
                 resultado['errores'].append(error_msg)
-                logger.error(f"❌ {error_msg}")
+                logger.error(f"{error_msg}")
                 
-        logger.info(f"✅ Sistema completado: {len(resultado['alertas_generadas'])} alertas generadas")
+        logger.info(f"Sistema completado: {len(resultado['alertas_generadas'])} alertas generadas")
         return resultado
 
 if __name__ == "__main__":
@@ -1041,16 +1041,16 @@ if __name__ == "__main__":
     # Ejecutar procesamiento completo
     resultado = sistema.procesar_sistema_completo()
     
-    print("🎯 RESUMEN DEL SISTEMA PREVENTIVO")
+    print("RESUMEN DEL SISTEMA PREVENTIVO")
     print("=" * 50)
-    print(f"📅 Fecha: {resultado['fecha_procesamiento']}")
-    print(f"🤖 Modelos: {len(resultado['modelos_entrenados'])}")
-    print(f"📊 Predicciones: {len(resultado['predicciones'])}")
-    print(f"🚨 Alertas: {len(resultado['alertas_generadas'])}")
-    print(f"❌ Errores: {len(resultado['errores'])}")
+    print(f"Fecha: {resultado['fecha_procesamiento']}")
+    print(f"Modelos: {len(resultado['modelos_entrenados'])}")
+    print(f"Predicciones: {len(resultado['predicciones'])}")
+    print(f"Alertas: {len(resultado['alertas_generadas'])}")
+    print(f"Errores: {len(resultado['errores'])}")
     
     # Mostrar alertas generadas
     if resultado['alertas_generadas']:
-        print("\n🚨 ALERTAS GENERADAS:")
+        print("\nALERTAS GENERADAS:")
         for alerta in resultado['alertas_generadas']:
             print(f"  • {alerta['sensor']}: {alerta['nivel']} (ID: {alerta['alerta_id']})")
