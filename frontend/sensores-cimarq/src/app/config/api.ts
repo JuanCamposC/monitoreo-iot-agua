@@ -19,11 +19,11 @@ export const API_ENDPOINTS = {
   ALERTAS: '/api/v1/alertas',
   AUTH: {
     LOGIN: '/api/v1/auth/login',
-    REGISTER: '/api/v1/auth/register',
     VERIFY: '/api/v1/auth/verify',
     STATUS: '/api/v1/auth/status',
     UPDATE_PROFILE: '/api/v1/auth/update-profile',
-  }
+  },
+
 } as const;
 
 // Función helper para construir URLs completas
@@ -54,7 +54,7 @@ export const apiRequest = async (
 ): Promise<Response> => {
   const url = buildApiUrl(endpoint, params);
   
-  console.log(`🔄 API Request: ${options.method || 'GET'} ${url}`);
+  console.log(`API Request: ${options.method || 'GET'} ${url}`);
   
   // Merge correcto de headers
   const mergedOptions: RequestInit = {
@@ -66,11 +66,11 @@ export const apiRequest = async (
     },
   };
   
-  console.log('🔧 Headers enviados:', mergedOptions.headers);
+  console.log('Headers enviados:', mergedOptions.headers);
   
   const response = await fetch(url, mergedOptions);
   
-  console.log(`📡 API Response: ${response.status} ${response.statusText}`);
+  console.log(`API Response: ${response.status} ${response.statusText}`);
   
   return response;
 };
@@ -84,7 +84,20 @@ export const apiRequestJson = async <T = any>(
   const response = await apiRequest(endpoint, options, params);
   
   if (!response.ok) {
-    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    let errorMessage = `API Error: ${response.status} ${response.statusText}`;
+    
+    try {
+      const errorData = await response.json();
+      if (errorData.message) {
+        errorMessage = errorData.message;
+      } else if (errorData.error) {
+        errorMessage = errorData.error;
+      }
+    } catch (e) {
+      // Si no se puede parsear la respuesta, usar el mensaje por defecto
+    }
+    
+    throw new Error(errorMessage);
   }
   
   return await response.json();

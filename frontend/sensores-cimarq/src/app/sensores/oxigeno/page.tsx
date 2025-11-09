@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import OxygenChart from '../../components/graficos/OxigenoChart';
+import OxigenoChart from '../../components/graficos/OxigenoChart';
 import { useConfiguracionRangos } from '../../hooks/useConfiguracionRangos';
+import { useNombreSistema } from '../../hooks/useNombreSistema';
+import DynamicTitle from '../../components/DynamicTitle';
 import InfoRangos from '../../components/InfoRangos';
 import { MdAir } from 'react-icons/md';
 
@@ -20,6 +22,7 @@ export default function OxigenoPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { evaluarEstadoSensor, configuracion } = useConfiguracionRangos();
+  const nombreSistema = useNombreSistema();
 
   useEffect(() => {
     const fetchOxigeno = async () => {
@@ -85,9 +88,9 @@ export default function OxigenoPage() {
   const getEstadoColor = (oxigeno: number) => {
     const estado = evaluarEstadoSensor('oxigeno', oxigeno);
     const colorMap: Record<string, string> = {
-      'crítico': 'bg-red-100 text-red-800',
+      'Critico': 'bg-red-100 text-red-800',
       'aceptable': 'bg-yellow-100 text-yellow-800',
-      'óptimo': 'bg-green-100 text-green-800'
+      'optimo': 'bg-green-100 text-green-800'
     };
     return colorMap[estado] || 'bg-gray-100 text-gray-800';
   };
@@ -126,8 +129,9 @@ export default function OxigenoPage() {
 
   return (
     <div className="bg-gray-100 p-6 min-h-screen">
+      <DynamicTitle pageName="Sensor de Oxígeno" />
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Sensor de Oxígeno Disuelto</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Oxígeno - {nombreSistema}</h1>
         
         {/* Información de rangos configurados */}
         <InfoRangos
@@ -143,7 +147,7 @@ export default function OxigenoPage() {
         {/* Gráfico histórico (prioridad principal) */}
         <div className="mb-6 bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold text-gray-700 mb-4">Análisis Histórico de Oxígeno Disuelto</h2>
-          <OxygenChart data={historial} title="Tendencias de Oxígeno en el Tiempo" />
+          <OxigenoChart data={historial} title="Tendencias de Oxígeno en el Tiempo" />
         </div>
 
         {/* Grid con historial detallado y lectura actual */}
@@ -228,6 +232,150 @@ export default function OxigenoPage() {
               </p>
             </div>
 
+            {/* Escala de Oxígeno visual con rangos configurados */}
+            <div className="mb-4">
+              <div className="text-sm text-gray-600 mb-2">Escala de Oxígeno Disuelto:</div>
+              <div className="relative h-4 rounded-full overflow-hidden border border-gray-200">
+                {/* Fondo con zonas de color según rangos configurados */}
+                <div className="absolute inset-0 flex">
+                  {(() => {
+                    const rangoTotal = configuracion.oxigeno.maximo - configuracion.oxigeno.minimo;
+                    const anchoCriticoBajo = ((configuracion.oxigeno.minimoOptimo - configuracion.oxigeno.minimo) / rangoTotal) * 50;
+                    const anchoOptimo = ((configuracion.oxigeno.maximoOptimo - configuracion.oxigeno.minimoOptimo) / rangoTotal) * 100;
+                    const anchoCriticoAlto = ((configuracion.oxigeno.maximo - configuracion.oxigeno.maximoOptimo) / rangoTotal) * 50;
+                    const anchoAceptableBajo = 50 - anchoCriticoBajo;
+                    const anchoAceptableAlto = 50 - anchoCriticoAlto;
+                    
+                    return (
+                      <>
+                        {/* Zona crítica baja */}
+                        <div 
+                          className="bg-red-400" 
+                          style={{ 
+                            width: `${anchoCriticoBajo}%`
+                          }}
+                        ></div>
+                        {/* Zona aceptable baja */}
+                        <div 
+                          className="bg-yellow-400" 
+                          style={{ 
+                            width: `${anchoAceptableBajo}%`
+                          }}
+                        ></div>
+                        {/* Zona óptima */}
+                        <div 
+                          className="bg-green-400" 
+                          style={{ 
+                            width: `${anchoOptimo}%`
+                          }}
+                        ></div>
+                        {/* Zona aceptable alta */}
+                        <div 
+                          className="bg-yellow-400" 
+                          style={{ 
+                            width: `${anchoAceptableAlto}%`
+                          }}
+                        ></div>
+                        {/* Zona crítica alta */}
+                        <div 
+                          className="bg-red-400" 
+                          style={{ 
+                            width: `${anchoCriticoAlto}%`
+                          }}
+                        ></div>
+                      </>
+                    );
+                  })()}
+                </div>
+                
+                {/* Indicador de oxígeno actual */}
+                {oxigenoActual && (
+                  <div 
+                    className="absolute top-0 w-1 h-4 bg-black shadow-lg" 
+                    style={{ 
+                      left: `${Math.max(0, Math.min(100, ((oxigenoActual - configuracion.oxigeno.minimo) / (configuracion.oxigeno.maximo - configuracion.oxigeno.minimo)) * 100))}%` 
+                    }}
+                  ></div>
+                )}
+              </div>
+              
+              {/* Etiquetas de valores con posiciones dinámicas */}
+              <div className="relative mt-1 h-4">
+                <span 
+                  className="absolute text-xs text-gray-500 transform -translate-x-1/2" 
+                  style={{ left: '0%' }}
+                >
+                  {configuracion.oxigeno.minimo}
+                </span>
+                <span 
+                  className="absolute text-xs text-yellow-600 font-medium transform -translate-x-1/2" 
+                  style={{ 
+                    left: `${((configuracion.oxigeno.minimoOptimo - configuracion.oxigeno.minimo) / (configuracion.oxigeno.maximo - configuracion.oxigeno.minimo)) * 100}%` 
+                  }}
+                >
+                  {configuracion.oxigeno.minimoOptimo}
+                </span>
+                <span 
+                  className="absolute text-xs text-green-600 font-bold transform -translate-x-1/2" 
+                  style={{ 
+                    left: `${((configuracion.oxigeno.minimoOptimo + configuracion.oxigeno.maximoOptimo) / 2 - configuracion.oxigeno.minimo) / (configuracion.oxigeno.maximo - configuracion.oxigeno.minimo) * 100}%` 
+                  }}
+                >
+                  ÓPTIMO
+                </span>
+                <span 
+                  className="absolute text-xs text-yellow-600 font-medium transform -translate-x-1/2" 
+                  style={{ 
+                    left: `${((configuracion.oxigeno.maximoOptimo - configuracion.oxigeno.minimo) / (configuracion.oxigeno.maximo - configuracion.oxigeno.minimo)) * 100}%` 
+                  }}
+                >
+                  {configuracion.oxigeno.maximoOptimo}
+                </span>
+                <span 
+                  className="absolute text-xs text-gray-500 transform -translate-x-1/2" 
+                  style={{ left: '100%' }}
+                >
+                  {configuracion.oxigeno.maximo}
+                </span>
+              </div>
+              
+              {/* Etiquetas de zonas con posiciones dinámicas */}
+              <div className="relative mt-2 h-4">
+                <span 
+                  className="absolute text-xs text-red-600 font-medium transform -translate-x-1/2" 
+                  style={{ 
+                    left: `${((configuracion.oxigeno.minimo + configuracion.oxigeno.minimoOptimo) / 2 - configuracion.oxigeno.minimo) / (configuracion.oxigeno.maximo - configuracion.oxigeno.minimo) * 50}%` 
+                  }}
+                >
+                  Crítico
+                </span>
+                <span 
+                  className="absolute text-xs text-yellow-600 font-medium transform -translate-x-1/2" 
+                  style={{ 
+                    left: `${25 + ((configuracion.oxigeno.minimoOptimo - configuracion.oxigeno.minimo) / (configuracion.oxigeno.maximo - configuracion.oxigeno.minimo)) * 25}%` 
+                  }}
+                >
+                  Aceptable
+                </span>
+                <span 
+                  className="absolute text-xs text-yellow-600 font-medium transform -translate-x-1/2" 
+                  style={{ 
+                    left: `${75 - ((configuracion.oxigeno.maximo - configuracion.oxigeno.maximoOptimo) / (configuracion.oxigeno.maximo - configuracion.oxigeno.minimo)) * 25}%` 
+                  }}
+                >
+                  Aceptable
+                </span>
+                <span 
+                  className="absolute text-xs text-red-600 font-medium transform -translate-x-1/2" 
+                  style={{ 
+                    left: `${50 + ((configuracion.oxigeno.maximoOptimo + configuracion.oxigeno.maximo) / 2 - configuracion.oxigeno.minimo) / (configuracion.oxigeno.maximo - configuracion.oxigeno.minimo) * 50}%` 
+                  }}
+                >
+                  Crítico
+                </span>
+              </div>
+            </div>
+
             {/* Estadísticas del historial */}
             <div className="space-y-3 pt-4 border-t">
               <div className="flex justify-between">
@@ -274,7 +422,7 @@ export default function OxigenoPage() {
           <h3 className="text-lg font-semibold text-gray-700 mb-4">Información Técnica del Sensor</h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-green-50 rounded-lg">
-              <p className="text-lg font-bold text-green-600">Sensor Óptico</p>
+              <p className="text-lg font-bold text-green-600">Sensor Oxigeno Disuelto SIMULADO</p>
               <p className="text-sm text-gray-600">Tipo de Sensor</p>
             </div>
             <div className="text-center p-4 bg-blue-50 rounded-lg">

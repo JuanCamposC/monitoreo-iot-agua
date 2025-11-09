@@ -34,16 +34,14 @@ const menuItems: MenuItem[] = [
 
 export default function Sidebar() {
   const { isOpen, isMobile, setIsOpen } = useSidebar();
+  const { user } = useAuth();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
-  // Bloquea scroll cuando el sidebar móvil está abierto
+  // Gestiona el scroll del sidebar móvil (sin bloquear el scroll general)
   useEffect(() => {
-    if (!isMobile) return;
-    const original = document.body.style.overflow;
-    document.body.style.overflow = isOpen ? "hidden" : original || "";
-    return () => {
-      document.body.style.overflow = original || "";
-    };
+    // Removemos la lógica que bloqueaba el scroll del body
+    // El scroll se maneja ahora a nivel del layout principal
   }, [isOpen, isMobile]);
 
   // Cierra con ESC
@@ -112,7 +110,7 @@ export default function Sidebar() {
                 handleLinkClick={handleLinkClick}
               />
             </div>
-            <Footer isOpen />
+            <Footer isOpen onOpenProfile={() => setShowProfileModal(true)} />
           </div>
         </div>
       )}
@@ -134,8 +132,16 @@ export default function Sidebar() {
               handleLinkClick={handleLinkClick}
             />
           </div>
-          <Footer isOpen={isOpen} />
+          <Footer isOpen={isOpen} onOpenProfile={() => setShowProfileModal(true)} />
         </div>
+      )}
+
+      {/* Modal de Perfil - Renderizado en el nivel superior */}
+      {showProfileModal && user && (
+        <ProfileModal 
+          user={user}
+          onClose={() => setShowProfileModal(false)}
+        />
       )}
     </>
   );
@@ -268,10 +274,9 @@ function Nav({
   );
 }
 
-function Footer({ isOpen }: { isOpen: boolean }) {
+function Footer({ isOpen, onOpenProfile }: { isOpen: boolean; onOpenProfile?: () => void }) {
   const { user, logout } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [showProfileModal, setShowProfileModal] = useState(false);
 
   if (!user) return null;
 
@@ -285,7 +290,7 @@ function Footer({ isOpen }: { isOpen: boolean }) {
   };
 
   const getRoleDisplay = (role: string) => {
-    return role === 'admin' ? '👑 Administrador' : '👤 Usuario';
+    return role === 'admin' ? 'Administrador' : 'Usuario';
   };
 
   const getRoleColor = (role: string) => {
@@ -332,7 +337,7 @@ function Footer({ isOpen }: { isOpen: boolean }) {
               <div className="p-2">
                 <button
                   onClick={() => {
-                    setShowProfileModal(true);
+                    onOpenProfile?.();
                     setShowProfileMenu(false);
                   }}
                   className="w-full flex items-center space-x-2 p-2 text-sm text-slate-200 hover:bg-slate-700 rounded-md transition-colors"
@@ -352,14 +357,6 @@ function Footer({ isOpen }: { isOpen: boolean }) {
           )}
         </div>
       </div>
-
-      {/* Modal de Perfil */}
-      {showProfileModal && (
-        <ProfileModal 
-          user={user}
-          onClose={() => setShowProfileModal(false)}
-        />
-      )}
     </>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { HiX, HiUser, HiLockClosed } from "react-icons/hi";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -72,14 +73,16 @@ export default function ProfileModal({ user, onClose }: ProfileModalProps) {
         currentPassword?: string;
         newPassword?: string;
       } = {
-        nombre: formData.nombre,
-        email: formData.email
+        nombre: formData.nombre.trim(),
+        email: formData.email.trim()
       };
 
       if (formData.newPassword) {
         updateData.currentPassword = formData.currentPassword;
         updateData.newPassword = formData.newPassword;
       }
+
+      console.log('Datos a enviar desde ProfileModal:', updateData);
 
       // Usar la función del contexto
       const result = await updateProfile(updateData);
@@ -124,26 +127,49 @@ export default function ProfileModal({ user, onClose }: ProfileModalProps) {
   };
 
   const getRoleDisplay = (role: string) => {
-    return role === 'admin' ? '👑 Administrador' : '👤 Usuario';
+    return role === 'admin' ? 'Administrador' : 'Usuario';
   };
 
   const getRoleColor = (role: string) => {
     return role === 'admin' ? 'bg-yellow-600' : 'bg-blue-600';
   };
 
-  // Cerrar modal al hacer clic en el overlay
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
+  // Función removida: ya no hay overlay para hacer clic
 
-  return (
-    <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-      onClick={handleOverlayClick}
-    >
-      <div className="bg-slate-800 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+  // Prevenir scroll del body cuando el modal está abierto
+  useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = 'hidden';
+    
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
+  }, []);
+
+  // Cerrar modal con ESC
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onClose]);
+
+  const modalContent = (
+    <>
+      {/* Backdrop con solo desenfoque */}
+      <div className="fixed inset-0 backdrop-blur-sm z-[99998]" />
+      
+      {/* Modal Content */}
+      <div 
+        className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[99999] p-4"
+        style={{ zIndex: 99999 }}
+      >
+        <div className="bg-slate-800 rounded-lg w-150 max-h-[90vh] overflow-y-auto border border-slate-600" 
+           style={{ 
+             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1)' 
+           }}>
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-700">
           <h2 className="text-xl font-bold text-white flex items-center space-x-2">
@@ -203,7 +229,7 @@ export default function ProfileModal({ user, onClose }: ProfileModalProps) {
               {/* Nombre */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Nombre completo
+                  Nombre de Usuario
                 </label>
                 <input
                   type="text"
@@ -238,6 +264,12 @@ export default function ProfileModal({ user, onClose }: ProfileModalProps) {
                   <HiLockClosed className="w-4 h-4" />
                   <span>Cambiar Contraseña (opcional)</span>
                 </h4>
+
+                <div className="mt-1 mb-3 p-3 bg-blue-900 bg-opacity-30 border border-blue-700 border-opacity-50 rounded-lg">
+                  <p className="text-xs text-blue-200">
+                    💡 Deja estos campos vacíos si no quieres cambiar tu contraseña
+                  </p>
+                </div>                
                 
                 <div className="space-y-3">
                   <input
@@ -265,28 +297,9 @@ export default function ProfileModal({ user, onClose }: ProfileModalProps) {
                     className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-slate-400"
                   />
                 </div>
-                
-                <div className="mt-3 p-3 bg-blue-900 bg-opacity-30 border border-blue-700 border-opacity-50 rounded-lg">
-                  <p className="text-xs text-blue-200">
-                    💡 Deja estos campos vacíos si no quieres cambiar tu contraseña
-                  </p>
-                </div>
               </div>
             )}
           </div>
-
-          {/* Estadísticas del usuario (solo si es admin) */}
-          {user.rol === 'admin' && (
-            <div className="mt-6 bg-yellow-900 bg-opacity-30 border border-yellow-700 border-opacity-50 p-4 rounded-lg">
-              <h4 className="text-sm font-medium text-yellow-200 mb-2 flex items-center space-x-2">
-                <span>👑</span>
-                <span>Privilegios de Administrador</span>
-              </h4>
-              <p className="text-xs text-yellow-300">
-                Tienes acceso completo al sistema de monitoreo y configuración.
-              </p>
-            </div>
-          )}
 
           {/* Botones */}
           <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-slate-700">
@@ -321,7 +334,15 @@ export default function ProfileModal({ user, onClose }: ProfileModalProps) {
             )}
           </div>
         </div>
+        </div>
       </div>
-    </div>
+    </>
   );
+
+  // Renderizar el modal usando un portal en el body
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  return createPortal(modalContent, document.body);
 }

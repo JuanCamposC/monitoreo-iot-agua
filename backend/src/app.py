@@ -88,11 +88,11 @@ try:
     # Verificar conexión
     client.admin.command('ping')
     db = client[DB_NAME]
-    print(f"✅ Conectado a MongoDB: {DB_NAME}")
+    print(f"Conectado a MongoDB: {DB_NAME}")
     
     # Asignar base de datos al servicio de email
     servicio_email.set_database(db)
-    print("✅ Servicio de email configurado con base de datos")
+    print("Servicio de email configurado con base de datos")
     
     # Inicializar sistema preventivo ML
     try:
@@ -244,7 +244,7 @@ def after_request(response):
     return response
 
 # Definir namespaces para organizar endpoints
-auth_ns = Namespace('auth', description='🔐 Autenticación y autorización de usuarios')
+auth_ns = Namespace('auth', description='Autenticación y autorización de usuarios')
 sensores_ns = Namespace('sensores', description='Datos unificados de todos los sensores (temperatura, pH, oxígeno)')
 temperatura_ns = Namespace('temperatura', description='Datos de temperatura del agua (°C)')
 ph_ns = Namespace('ph', description='Datos de pH - acidez/alcalinidad del agua (6.5-8.5)')
@@ -253,7 +253,7 @@ mqtt_ns = Namespace('mqtt', description='Publicación de mensajes MQTT - comunic
 health_ns = Namespace('health', description='Estado de salud del sistema (MongoDB, MQTT, timezone)')
 alertas_ns = Namespace('alertas', description='Sistema de alertas preventivas con ML')
 ml_ns = Namespace('ml', description='Análisis predictivo con Machine Learning')
-notificaciones_ns = Namespace('notificaciones', description='Sistema de notificaciones por email y otros canales')
+notificaciones_ns = Namespace('notificaciones', description='Sistema de notificaciones por email - solo alertas críticas')
 
 # Registrar namespaces
 api.add_namespace(auth_ns, path='/auth')
@@ -305,6 +305,8 @@ error_model = api.model('ErrorResponse', {
     'success': fields.Boolean(description='Siempre false para errores'),
     'message': fields.String(description='Descripción del error')
 })
+
+
 
 # ============================================================================
 # MODELOS DE SENSORES
@@ -447,39 +449,39 @@ mqtt_publish_model = api.model('MQTTPublish', {
 manual_input_model = api.model('ManualInput', {
     'temperatura': fields.Float(
         required=True, 
-        description='🌡️ Temperatura del agua en grados Celsius. Rango válido: -50°C a 100°C. Valores típicos para acuicultura: 18-25°C',
+        description='Temperatura del agua en grados Celsius. Rango válido: -50°C a 100°C. Valores típicos para acuicultura: 18-25°C',
         example=22.5,
         min=-50.0,
         max=100.0
     ),
     'ph': fields.Float(
         required=True,
-        description='🧪 Nivel de pH del agua (acidez/alcalinidad). Rango válido: 0 a 14. Valores típicos para acuicultura: 6.5-8.5',
+        description='Nivel de pH del agua (acidez/alcalinidad). Rango válido: 0 a 14. Valores típicos para acuicultura: 6.5-8.5',
         example=7.2,
         min=0.0,
         max=14.0
     ),
     'oxigeno': fields.Float(
         required=True,
-        description='💨 Oxígeno disuelto en miligramos por litro. Rango válido: 0 a 30 mg/L. Valores críticos para acuicultura: >5 mg/L',
+        description='Oxígeno disuelto en miligramos por litro. Rango válido: 0 a 30 mg/L. Valores críticos para acuicultura: >5 mg/L',
         example=8.5,
         min=0.0,
         max=30.0
     ),
     'fecha': fields.String(
         required=False,
-        description='📅 Timestamp ISO 8601 del momento de la medición. Si no se especifica, se usa la fecha/hora actual del servidor (GMT-3)',
+        description='Timestamp ISO 8601 del momento de la medición. Si no se especifica, se usa la fecha/hora actual del servidor (GMT-3)',
         example='2024-11-06T10:30:00Z'
     ),
     'fuente': fields.String(
         required=False,
-        description='📝 Identificador de la fuente del dato. Usado para trazabilidad y filtrado. Por defecto: "manual"',
+        description='Identificador de la fuente del dato. Usado para trazabilidad y filtrado. Por defecto: "manual"',
         example='manual',
         default='manual'
     ),
     'usuario': fields.String(
         required=False,
-        description='👤 Usuario que registra la medición. Usado para auditoría y trazabilidad. Por defecto: "admin"',
+        description='Usuario que registra la medición. Usado para auditoría y trazabilidad. Por defecto: "admin"',
         example='admin',
         default='admin'
     )
@@ -487,21 +489,21 @@ manual_input_model = api.model('ManualInput', {
 
 # Modelo de respuesta específico para ingreso manual
 manual_response_model = api.model('ManualResponse', {
-    'success': fields.Boolean(description='✅ Indica si la operación fue exitosa', example=True),
+    'success': fields.Boolean(description='Indica si la operación fue exitosa', example=True),
     'data': fields.Nested(api.model('ManualData', {
-        '_id': fields.String(description='🆔 ID único del registro en MongoDB', example='673b8e4f9c8d4e001f123456'),
-        'temperatura': fields.Float(description='🌡️ Temperatura registrada en °C', example=22.5),
-        'ph': fields.Float(description='🧪 pH registrado', example=7.2),
-        'oxigeno': fields.Float(description='💨 Oxígeno registrado en mg/L', example=8.5),
-        'fecha': fields.String(description='📅 Timestamp final con zona horaria Chile', example='2024-11-06T13:30:00-03:00'),
-        'fuente': fields.String(description='📝 Fuente confirmada del dato', example='manual'),
-        'usuario': fields.String(description='👤 Usuario confirmado', example='admin')
+        '_id': fields.String(description='ID único del registro en MongoDB', example='673b8e4f9c8d4e001f123456'),
+        'temperatura': fields.Float(description='Temperatura registrada en °C', example=22.5),
+        'ph': fields.Float(description='pH registrado', example=7.2),
+        'oxigeno': fields.Float(description='Oxígeno registrado en mg/L', example=8.5),
+        'fecha': fields.String(description='Timestamp final con zona horaria Chile', example='2024-11-06T13:30:00-03:00'),
+        'fuente': fields.String(description='Fuente confirmada del dato', example='manual'),
+        'usuario': fields.String(description='Usuario confirmado', example='admin')
     })),
-    'count': fields.Integer(description='📊 Número de registros creados (siempre 1)', example=1),
-    'alertas_generadas': fields.Integer(description='🚨 Cantidad de alertas generadas automáticamente', example=0),
+    'count': fields.Integer(description='Número de registros creados (siempre 1)', example=1),
+    'alertas_generadas': fields.Integer(description='Cantidad de alertas generadas automáticamente', example=0),
     'mqtt_status': fields.Nested(api.model('MQTTStatus', {
-        'connected': fields.Boolean(description='📡 Estado de conexión MQTT', example=True),
-        'last_message': fields.String(description='⏰ Último mensaje MQTT recibido', example='2024-11-06T13:29:45-03:00')
+        'connected': fields.Boolean(description='Estado de conexión MQTT', example=True),
+        'last_message': fields.String(description='Último mensaje MQTT recibido', example='2024-11-06T13:29:45-03:00')
     }))
 })
 
@@ -814,7 +816,7 @@ class SensoresResource(Resource):
 class SensoresManualResource(Resource):
     @sensores_ns.doc(
         'create_manual_data',
-        summary='📝 Registro manual de datos de sensores',
+        summary='Registro manual de datos de sensores',
         description='''
         **Funcionalidad**: Permite el ingreso manual de datos de sensores de calidad del agua.
         
@@ -835,15 +837,15 @@ class SensoresManualResource(Resource):
     )
     @sensores_ns.expect(manual_input_model, validate=True)
     @sensores_ns.marshal_with(manual_response_model, code=201)
-    @sensores_ns.response(201, '✅ Datos creados exitosamente - Registro completado', manual_response_model)
+    @sensores_ns.response(201, 'Datos creados exitosamente - Registro completado', manual_response_model)
     @sensores_ns.response(400, 'Datos de entrada inválidos - Verificar rangos de sensores', error_model)
     @sensores_ns.response(500, 'Error interno del servidor - Conexión BD o sistema ML', error_model)
     @ensure_mongodb_connection
     def post(self):
         """
-        🔬 **INGRESO MANUAL DE DATOS DE SENSORES**
+        **INGRESO MANUAL DE DATOS DE SENSORES**
         
-        **📊 Parámetros aceptados:**
+        **Parámetros aceptados:**
         - **Temperatura**: -50°C a 100°C (float) - Temperatura del agua
         - **pH**: 0 a 14 (float) - Acidez/alcalinidad del agua  
         - **Oxígeno**: 0 a 30 mg/L (float) - Oxígeno disuelto
@@ -851,14 +853,14 @@ class SensoresManualResource(Resource):
         - **Fuente**: Identificador (string, opcional) - Por defecto "manual"
         - **Usuario**: Nombre del usuario (string, opcional) - Por defecto "admin"
         
-        **⚙️ Procesamiento automático:**
+        **Procesamiento automático:**
         - Validación de rangos lógicos
         - Conversión a zona horaria Chile (GMT-3)
         - Almacenamiento en colección unificada
         - Activación de sistema de Machine Learning
         - Generación automática de alertas preventivas
         
-        **📋 Ejemplo de request:**
+        **Ejemplo de request:**
         ```json
         {
             "temperatura": 22.5,
@@ -870,7 +872,7 @@ class SensoresManualResource(Resource):
         }
         ```
         
-        **✅ Respuesta exitosa (201):**
+        **Respuesta exitosa (201):**
         ```json
         {
             "success": true,
@@ -1720,21 +1722,21 @@ notificacion_response_model = api.model('NotificacionResponse', {
 
 # Modelos para exportación de datos por email
 exportacion_email_model = api.model('ExportacionEmail', {
-    'destinatario': fields.String(required=True, description='📧 Email del destinatario', example='usuario@ejemplo.com'),
-    'asunto': fields.String(required=True, description='📝 Asunto del email', example='Exportación de Datos - Sistema de Monitoreo'),
-    'mensaje': fields.String(required=True, description='💬 Mensaje del email', example='Adjunto encontrará los datos exportados del sistema.'),
-    'datos_adjuntos': fields.List(fields.Raw, required=True, description='📊 Array de datos a adjuntar'),
-    'formato': fields.String(required=True, description='📄 Formato del archivo adjunto', enum=['csv', 'excel'], example='csv'),
-    'filtros_aplicados': fields.Raw(description='🔍 Información sobre filtros aplicados (opcional)')
+    'destinatario': fields.String(required=True, description='Email del destinatario', example='usuario@ejemplo.com'),
+    'asunto': fields.String(required=True, description='Asunto del email', example='Exportación de Datos - Sistema de Monitoreo'),
+    'mensaje': fields.String(required=True, description='Mensaje del email', example='Adjunto encontrará los datos exportados del sistema.'),
+    'datos_adjuntos': fields.List(fields.Raw, required=True, description='Array de datos a adjuntar'),
+    'formato': fields.String(required=True, description='Formato del archivo adjunto', enum=['csv', 'excel'], example='csv'),
+    'filtros_aplicados': fields.Raw(description='Información sobre filtros aplicados (opcional)')
 })
 
 exportacion_response_model = api.model('ExportacionResponse', {
-    'success': fields.Boolean(description='✅ Indica si el envío fue exitoso', example=True),
-    'mensaje': fields.String(description='📄 Mensaje de resultado', example='Email enviado exitosamente'),
-    'destinatario': fields.String(description='📧 Email de destino confirmado'),
-    'registros_enviados': fields.Integer(description='📊 Número de registros adjuntados'),
-    'formato_archivo': fields.String(description='📁 Formato del archivo generado'),
-    'timestamp': fields.String(description='⏰ Timestamp del envío')
+    'success': fields.Boolean(description='Indica si el envío fue exitoso', example=True),
+    'mensaje': fields.String(description='Mensaje de resultado', example='Email enviado exitosamente'),
+    'destinatario': fields.String(description='Email de destino confirmado'),
+    'registros_enviados': fields.Integer(description='Número de registros adjuntados'),
+    'formato_archivo': fields.String(description='Formato del archivo generado'),
+    'timestamp': fields.String(description='Timestamp del envío')
 })
 
 @notificaciones_ns.route('/enviar')
@@ -2010,7 +2012,7 @@ class NotificacionProbarResource(Resource):
 class ExportacionEmailResource(Resource):
     @notificaciones_ns.doc(
         'exportar_datos_email',
-        summary='📊 Exportar datos por email',
+        summary='Exportar datos por email',
         description='Envía datos exportados del sistema por email con archivo adjunto en formato CSV o Excel.'
     )
     @notificaciones_ns.expect(exportacion_email_model, validate=True)
@@ -2062,8 +2064,8 @@ class ExportacionEmailResource(Resource):
             mensaje = data.get('mensaje', 'Adjunto encontrará los datos exportados del sistema de monitoreo.')
             
             # Añadir información adicional al mensaje
-            mensaje += f"\\n\\nTotal de registros: {len(datos_adjuntos)}"
-            mensaje += f"\\nFecha de generación: {get_chile_time().strftime('%d/%m/%Y %H:%M:%S')}"
+            mensaje += f"\nTotal de registros: {len(datos_adjuntos)}"
+            mensaje += f"\nFecha de generación: {get_chile_time().strftime('%d/%m/%Y %H:%M:%S')}"
             
             # Envío real con servicio_email
             try:
@@ -2243,8 +2245,8 @@ def generar_excel_simple(datos):
 
 # Modelo para descarga directa de archivos
 descarga_model = api.model('DescargaArchivo', {
-    'datos': fields.List(fields.Raw, required=True, description='📊 Array de datos a exportar'),
-    'formato': fields.String(required=True, description='📄 Formato del archivo', enum=['csv', 'excel'], example='csv')
+    'datos': fields.List(fields.Raw, required=True, description='Array de datos a exportar'),
+    'formato': fields.String(required=True, description='Formato del archivo', enum=['csv', 'excel'], example='csv')
 })
 
 # Endpoints para descarga directa de archivos
@@ -2252,7 +2254,7 @@ descarga_model = api.model('DescargaArchivo', {
 class DescargarCSVResource(Resource):
     @notificaciones_ns.doc(
         'descargar_csv',
-        summary='📊 Descargar CSV',
+        summary='Descargar CSV',
         description='Descarga datos en formato CSV compatible con Excel y otras aplicaciones.'
     )
     @notificaciones_ns.expect(descarga_model)
@@ -2287,7 +2289,7 @@ class DescargarCSVResource(Resource):
 class DescargarExcelResource(Resource):
     @notificaciones_ns.doc(
         'descargar_excel',
-        summary='📊 Descargar Excel',
+        summary='Descargar Excel',
         description='Descarga datos en formato Excel nativo (.xlsx) con formato profesional.'
     )
     @notificaciones_ns.expect(descarga_model)
@@ -2331,7 +2333,7 @@ class LoginResource(Resource):
     @auth_ns.response(500, 'Error interno del servidor', error_model)
     def post(self):
         """
-        🔐 Iniciar sesión en el sistema
+        Iniciar sesión en el sistema
         
         Autentica a un usuario con email y contraseña.
         Retorna un token JWT válido por 24 horas.
@@ -2400,7 +2402,7 @@ class RegisterResource(Resource):
     @auth_ns.response(500, 'Error interno del servidor', error_model)
     def post(self):
         """
-        👤 Registrar nuevo usuario administrador
+        Registrar nuevo usuario administrador
         
         Crea una nueva cuenta de administrador del sistema.
         Solo permite crear cuentas de administrador.
@@ -2482,7 +2484,7 @@ class VerifyTokenResource(Resource):
     @require_auth
     def get(self):
         """
-        ✅ Verificar validez del token JWT
+        Verificar validez del token JWT
         
         Verifica si el token proporcionado sigue siendo válido.
         Retorna la información del usuario autenticado.
@@ -2513,7 +2515,7 @@ class AuthStatusResource(Resource):
     @auth_ns.response(200, 'Estado de autenticación del sistema')
     def get(self):
         """
-        📊 Obtener estado del sistema de autenticación
+        Obtener estado del sistema de autenticación
         
         Verifica si hay usuarios registrados en el sistema.
         Útil para determinar si se necesita configuración inicial.
@@ -2640,6 +2642,8 @@ class UpdateProfile(Resource):
                 'success': False,
                 'message': 'Error interno del servidor'
             }, 500
+
+
 
 # ============================================================================
 # ENDPOINT DE ESTADO GENERAL (sin autenticación requerida)

@@ -113,12 +113,17 @@ export default function OxygenChart({ data, title = "Análisis de Oxígeno Disue
     max: Math.max(...oxygenValues) || 0
   };
 
-  // Determinar estado del oxígeno actual
+  // Determinar estado del oxígeno actual usando configuración
   const getOxygenStatus = (oxygen: number) => {
-    if (oxygen < 4) return { text: 'Crítico', color: 'error', bgColor: '#ffebee' };
-    if (oxygen < 6) return { text: 'Bajo', color: 'warning', bgColor: '#fff3e0' };
-    if (oxygen > 12) return { text: 'Alto', color: 'info', bgColor: '#e3f2fd' };
-    return { text: 'Óptimo', color: 'success', bgColor: '#e8f5e8' };
+    const rango = configuracion.oxigeno;
+    
+    if (oxygen < rango.minimo || oxygen > rango.maximo) {
+      return { text: 'Crítico', color: 'error', bgColor: '#ffebee' };
+    }
+    if (oxygen >= rango.minimoOptimo && oxygen <= rango.maximoOptimo) {
+      return { text: 'Óptimo', color: 'success', bgColor: '#e8f5e8' };
+    }
+    return { text: 'Aceptable', color: 'warning', bgColor: '#fff3e0' };
   };
 
   const currentStatus = getOxygenStatus(stats.current);
@@ -262,7 +267,13 @@ export default function OxygenChart({ data, title = "Análisis de Oxígeno Disue
               <Typography variant="h6" gutterBottom>Rangos Configurados</Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <Chip 
-                  label={`Crítico: ${configuracion.oxigeno.minimo} - ${configuracion.oxigeno.maximo} mg/L`} 
+                  label={`Crítico: < ${configuracion.oxigeno.minimo} o > ${configuracion.oxigeno.maximo} mg/L`} 
+                  color="error" 
+                  variant="outlined" 
+                  size="small" 
+                />
+                <Chip 
+                  label={`Aceptable: ${configuracion.oxigeno.minimo} - ${configuracion.oxigeno.minimoOptimo} y ${configuracion.oxigeno.maximoOptimo} - ${configuracion.oxigeno.maximo} mg/L`} 
                   color="warning" 
                   variant="outlined" 
                   size="small" 

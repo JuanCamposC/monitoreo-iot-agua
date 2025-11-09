@@ -29,12 +29,13 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="flex h-screen">
       <Sidebar />
       <main 
-        className="flex-1 overflow-auto bg-gray-50 transition-all duration-300 ease-in-out min-h-screen"
+        className="flex-1 overflow-y-auto bg-gray-50 transition-all duration-300 ease-in-out"
         style={{ 
-          marginLeft: getMarginLeft()
+          marginLeft: getMarginLeft(),
+          height: '100vh'
         }}
       >
         {children}
@@ -56,12 +57,12 @@ export default function RootLayout({
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        style={{ margin: 0, padding: 0 }}
       >
         <AuthProvider>
           <ProtectedRoute>
             <SidebarProvider>
               <LayoutContent>
-                <Sidebar />
                 {children}
               </LayoutContent>
             </SidebarProvider>

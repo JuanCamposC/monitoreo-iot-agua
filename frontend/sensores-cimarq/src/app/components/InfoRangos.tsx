@@ -218,7 +218,7 @@ export default function InfoRangos({
           borderRadius: '6px',
           border: '1px solid #f57f17'
         }}>
-          <strong style={{ color: '#f57f17' }}>🚨 Rango Crítico</strong><br />
+          <strong style={{ color: '#f57f17' }}>Rango Crítico</strong><br />
           {rango.minimo} - {rango.maximo} {unidad}
         </div>
         <div style={{ 
@@ -227,7 +227,7 @@ export default function InfoRangos({
           borderRadius: '6px',
           border: '1px solid #4caf50'
         }}>
-          <strong style={{ color: '#2e7d32' }}>✅ Rango Óptimo</strong><br />
+          <strong style={{ color: '#2e7d32' }}>Rango Óptimo</strong><br />
           {rango.minimoOptimo} - {rango.maximoOptimo} {unidad}
         </div>
       </div>

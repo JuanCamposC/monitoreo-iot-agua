@@ -1,487 +1,202 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import {Box,Typography,Card,CardContent,TextField,Button,Paper,Alert,Snackbar, InputAdornment,Grid, Chip,Container,CardHeader,Avatar} from '@mui/material';
-import {MdSettings,MdThermostat,MdScience,MdAir,MdSave,MdRestore,MdWarning,MdCheckCircle,MdInfo} from 'react-icons/md';
+import { useState } from 'react';
+import {
+  Box,
+  Typography,
+  Tabs,
+  Tab,
+  Container,
+  Paper,
+  Alert,
+  CircularProgress,
+  Chip
+} from '@mui/material';
+import {
+  MdSettings,
+  MdThermostat,
+  MdImportExport,
+  MdInfo
+} from 'react-icons/md';
 
-interface RangoSensor {
-  minimo: number;
-  maximo: number;
-  minimoOptimo: number;
-  maximoOptimo: number;
+// Importar hooks y componentes
+import { useConfiguracionSistema } from './hooks/useConfiguracionSistema';
+import { useNombreSistema } from '../hooks/useNombreSistema';
+import DynamicTitle from '../components/DynamicTitle';
+import ConfiguracionRangos from './components/ConfiguracionRangos';
+import ConfiguracionGeneral from './components/ConfiguracionGeneral';
+import ImportExportConfig from './components/ImportExportConfig';
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
 }
 
-interface ConfiguracionRangos {
-  temperatura: RangoSensor;
-  ph: RangoSensor;
-  oxigeno: RangoSensor;
+function TabPanel({ children, value, index }: TabPanelProps) {
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`configuracion-tabpanel-${index}`}
+      aria-labelledby={`configuracion-tab-${index}`}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
 }
 
-// Configuración por defecto para acuicultura
-const configuracionPorDefecto: ConfiguracionRangos = {
-  temperatura: {
-    minimo: 5,
-    maximo: 25,
-    minimoOptimo: 12,
-    maximoOptimo: 18
-  },
-  ph: {
-    minimo: 6.0,
-    maximo: 9.0,
-    minimoOptimo: 7.0,
-    maximoOptimo: 8.2
-  },
-  oxigeno: {
-    minimo: 3.0,
-    maximo: 15.0,
-    minimoOptimo: 5.0,
-    maximoOptimo: 9.0
-  }
-};
-
-// Información adicional para cada sensor
-const infoSensores = {
-  temperatura: {
-    icono: MdThermostat,
-    color: '#ff5722',
-    unidad: '°C',
-    titulo: 'Temperatura del Agua',
-    descripcion: 'Controla la temperatura ideal para el crecimiento de peces',
-    rangoFisico: { min: 0, max: 35 },
-    recomendaciones: {
-      critico: 'Temperaturas extremas pueden ser letales',
-      optimo: 'Rango ideal para máximo crecimiento y salud'
-    }
-  },
-  ph: {
-    icono: MdScience,
-    color: '#2196f3',
-    unidad: 'pH',
-    titulo: 'Nivel de pH',
-    descripcion: 'Controla la acidez/alcalinidad del agua',
-    rangoFisico: { min: 0, max: 14 },
-    recomendaciones: {
-      critico: 'pH extremos causan estrés y mortalidad',
-      optimo: 'Mantiene el equilibrio químico ideal'
-    }
-  },
-  oxigeno: {
-    icono: MdAir,
-    color: '#4caf50',
-    unidad: 'mg/L',
-    titulo: 'Oxígeno Disuelto',
-    descripcion: 'Controla el oxígeno disponible para respiración',
-    rangoFisico: { min: 0, max: 20 },
-    recomendaciones: {
-      critico: 'Niveles inadecuados causan asfixia o toxicidad',
-      optimo: 'Garantiza respiración saludable'
-    }
-  }
-};
+function a11yProps(index: number) {
+  return {
+    id: `configuracion-tab-${index}`,
+    'aria-controls': `configuracion-tabpanel-${index}`,
+  };
+}
 
 export default function ConfiguracionPage() {
-  const [configuracion, setConfiguracion] = useState<ConfiguracionRangos>(configuracionPorDefecto);
-  const [configuracionOriginal, setConfiguracionOriginal] = useState<ConfiguracionRangos>(configuracionPorDefecto);
-  const [mostrarAlerta, setMostrarAlerta] = useState(false);
-  const [mensajeAlerta, setMensajeAlerta] = useState('');
-  const [tipoAlerta, setTipoAlerta] = useState<'success' | 'error'>('success');
+  const {
+    configuracion,
+    loading,
+    actualizarRangos,
+    actualizarConfiguracionGeneral,
+    restaurarDefecto,
+    exportarConfiguracion,
+    importarConfiguracion
+  } = useConfiguracionSistema();
 
-  // Cargar configuración desde localStorage al iniciar
-  useEffect(() => {
-    const configGuardada = localStorage.getItem('configuracionRangos');
-    if (configGuardada) {
-      try {
-        const config = JSON.parse(configGuardada);
-        setConfiguracion(config);
-        setConfiguracionOriginal(config);
-      } catch (error) {
-        console.error('Error al cargar configuración:', error);
-      }
-    }
-  }, []);
+  const nombreSistema = useNombreSistema();
+  const [tabActiva, setTabActiva] = useState(0);
 
-  // Función para actualizar un rango específico
-  const actualizarRango = (sensor: keyof ConfiguracionRangos, campo: keyof RangoSensor, valor: number) => {
-    setConfiguracion(prev => ({
-      ...prev,
-      [sensor]: {
-        ...prev[sensor],
-        [campo]: valor
-      }
-    }));
+  const handleChangeTab = (event: React.SyntheticEvent, nuevaTab: number) => {
+    setTabActiva(nuevaTab);
   };
 
-  // Validar rangos
-  const validarRangos = (): boolean => {
-    for (const sensor of Object.keys(configuracion) as Array<keyof ConfiguracionRangos>) {
-      const rango = configuracion[sensor];
-      
-      if (rango.minimo >= rango.maximo) {
-        setMensajeAlerta(`Error en ${sensor}: El valor mínimo debe ser menor que el máximo`);
-        setTipoAlerta('error');
-        setMostrarAlerta(true);
-        return false;
-      }
-      
-      if (rango.minimoOptimo < rango.minimo || rango.maximoOptimo > rango.maximo) {
-        setMensajeAlerta(`Error en ${sensor}: El rango óptimo debe estar dentro del rango general`);
-        setTipoAlerta('error');
-        setMostrarAlerta(true);
-        return false;
-      }
-      
-      if (rango.minimoOptimo >= rango.maximoOptimo) {
-        setMensajeAlerta(`Error en ${sensor}: El mínimo óptimo debe ser menor que el máximo óptimo`);
-        setTipoAlerta('error');
-        setMostrarAlerta(true);
-        return false;
-      }
-    }
-    
-    return true;
-  };
-
-  // Guardar configuración
-  const guardarConfiguracion = () => {
-    if (!validarRangos()) return;
-
-    try {
-      localStorage.setItem('configuracionRangos', JSON.stringify(configuracion));
-      setConfiguracionOriginal(configuracion);
-      setMensajeAlerta('Configuración guardada exitosamente');
-      setTipoAlerta('success');
-      setMostrarAlerta(true);
-    } catch (error) {
-      setMensajeAlerta('Error al guardar configuración');
-      setTipoAlerta('error');
-      setMostrarAlerta(true);
-    }
-  };
-
-  // Restaurar configuración por defecto
-  const restaurarDefecto = () => {
-    setConfiguracion(configuracionPorDefecto);
-  };
-
-  // Descartar cambios
-  const descartarCambios = () => {
-    setConfiguracion(configuracionOriginal);
-  };
-
-  // Verificar si hay cambios sin guardar
-  const hayCambiosSinGuardar = JSON.stringify(configuracion) !== JSON.stringify(configuracionOriginal);
-
-  // Función para renderizar cada sensor
-  const renderSensorConfig = (sensorKey: keyof ConfiguracionRangos) => {
-    const sensor = configuracion[sensorKey];
-    const info = infoSensores[sensorKey];
-    const IconComponent = info.icono;
-
-    // Calcular porcentajes para las barras visuales
-    const rangoTotal = info.rangoFisico.max - info.rangoFisico.min;
-    const porcentajeMinimo = ((sensor.minimo - info.rangoFisico.min) / rangoTotal) * 100;
-    const porcentajeMaximo = ((sensor.maximo - info.rangoFisico.min) / rangoTotal) * 100;
-    const porcentajeMinimoOptimo = ((sensor.minimoOptimo - info.rangoFisico.min) / rangoTotal) * 100;
-    const porcentajeMaximoOptimo = ((sensor.maximoOptimo - info.rangoFisico.min) / rangoTotal) * 100;
-
+  if (loading) {
     return (
-      <Card key={sensorKey} sx={{ mb: 3, boxShadow: 3 }}>
-        <CardHeader
-          avatar={
-            <Avatar sx={{ bgcolor: info.color, width: 56, height: 56 }}>
-              <IconComponent size={28} />
-            </Avatar>
-          }
-          title={
-            <Box display="flex" alignItems="center" gap={1}>
-              <Typography variant="h6" component="div">
-                {info.titulo}
-              </Typography>
-              <Chip 
-                label={info.unidad} 
-                size="small" 
-                sx={{ bgcolor: info.color, color: 'white' }}
-              />
-            </Box>
-          }
-          subheader={
-            <Typography variant="body2" color="text.secondary">
-              {info.descripcion}
-            </Typography>
-          }
-        />
-        
-        <Box sx={{ p: 3 }}>
-          {/* Indicadores visuales de rangos */}
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="subtitle2" gutterBottom>
-              Visualización de Rangos
-            </Typography>
-            <Box sx={{ position: 'relative', height: 40, bgcolor: '#f5f5f5', borderRadius: 2 }}>
-              {/* Rango general (crítico) */}
-              <Box
-                sx={{
-                  position: 'absolute',
-                  left: `${porcentajeMinimo}%`,
-                  width: `${porcentajeMaximo - porcentajeMinimo}%`,
-                  height: '50%',
-                  top: '25%',
-                  bgcolor: '#ffeb3b',
-                  borderRadius: 1,
-                  border: '2px solid #f57f17'
-                }}
-              />
-              {/* Rango óptimo */}
-              <Box
-                sx={{
-                  position: 'absolute',
-                  left: `${porcentajeMinimoOptimo}%`,
-                  width: `${porcentajeMaximoOptimo - porcentajeMinimoOptimo}%`,
-                  height: '70%',
-                  top: '15%',
-                  bgcolor: '#4caf50',
-                  borderRadius: 1,
-                  border: '2px solid #2e7d32'
-                }}
-              />
-              {/* Etiquetas de valores */}
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  position: 'absolute', 
-                  left: `${porcentajeMinimo}%`, 
-                  top: -20, 
-                  fontSize: '10px',
-                  transform: 'translateX(-50%)'
-                }}
-              >
-                {sensor.minimo}
-              </Typography>
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  position: 'absolute', 
-                  left: `${porcentajeMaximo}%`, 
-                  top: -20, 
-                  fontSize: '10px',
-                  transform: 'translateX(-50%)'
-                }}
-              >
-                {sensor.maximo}
-              </Typography>
-            </Box>
-            
-            {/* Leyenda */}
-            <Box sx={{ display: 'flex', gap: 2, mt: 1, justifyContent: 'center' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Box sx={{ width: 16, height: 8, bgcolor: '#ffeb3b', border: '1px solid #f57f17' }} />
-                <Typography variant="caption">Rango Crítico</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Box sx={{ width: 16, height: 8, bgcolor: '#4caf50', border: '1px solid #2e7d32' }} />
-                <Typography variant="caption">Rango Óptimo</Typography>
-              </Box>
-            </Box>
-          </Box>
-
-          {/* Campos de entrada organizados en grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-            {/* Rango Crítico */}
-            <Card variant="outlined" sx={{ p: 2, bgcolor: '#fff9c4' }}>
-              <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', color: '#f57f17' }}>
-                Rango Crítico
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {info.recomendaciones.critico}
-              </Typography>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <TextField
-                  fullWidth
-                  label="Mínimo Crítico"
-                  type="number"
-                  value={sensor.minimo}
-                  onChange={(e) => actualizarRango(sensorKey, 'minimo', parseFloat(e.target.value) || 0)}
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">{info.unidad}</InputAdornment>,
-                  }}
-                  size="small"
-                />
-                <TextField
-                  fullWidth
-                  label="Máximo Crítico"
-                  type="number"
-                  value={sensor.maximo}
-                  onChange={(e) => actualizarRango(sensorKey, 'maximo', parseFloat(e.target.value) || 0)}
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">{info.unidad}</InputAdornment>,
-                  }}
-                  size="small"
-                />
-              </div>
-            </Card>
-
-            {/* Rango Óptimo */}
-            <Card variant="outlined" sx={{ p: 2, bgcolor: '#e8f5e8' }}>
-              <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', color: '#2e7d32' }}>
-                Rango Óptimo
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {info.recomendaciones.optimo}
-              </Typography>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <TextField
-                  fullWidth
-                  label="Mínimo Óptimo"
-                  type="number"
-                  value={sensor.minimoOptimo}
-                  onChange={(e) => actualizarRango(sensorKey, 'minimoOptimo', parseFloat(e.target.value) || 0)}
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">{info.unidad}</InputAdornment>,
-                  }}
-                  size="small"
-                />
-                <TextField
-                  fullWidth
-                  label="Máximo Óptimo"
-                  type="number"
-                  value={sensor.maximoOptimo}
-                  onChange={(e) => actualizarRango(sensorKey, 'maximoOptimo', parseFloat(e.target.value) || 0)}
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">{info.unidad}</InputAdornment>,
-                  }}
-                  size="small"
-                />
-              </div>
-            </Card>
-          </div>
+      <Container maxWidth="lg">
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <CircularProgress />
+          <Typography variant="h6" sx={{ ml: 2 }}>
+            Cargando configuración del sistema...
+          </Typography>
         </Box>
-      </Card>
+      </Container>
     );
-  };
+  }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Header */}
-      <Box sx={{ mb: 4, textAlign: 'center' }}>
-        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-          Configuración de Rangos de Sensores
-        </Typography>
-        <Typography variant="h6" color="text.secondary">
-          Define los rangos óptimos y críticos para el monitoreo de calidad del agua
-        </Typography>
-      </Box>
-
-      {/* Alerta de estado */}
-      {mostrarAlerta && (
-        <Box sx={{ mb: 3 }}>
-          <Box
-            sx={{
-              p: 2,
-              borderRadius: 2,
-              bgcolor: tipoAlerta === 'success' ? '#e8f5e8' : '#ffebee',
-              border: `1px solid ${tipoAlerta === 'success' ? '#4caf50' : '#f44336'}`,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1
-            }}
-          >
-            <Typography variant="body1" sx={{ color: tipoAlerta === 'success' ? '#2e7d32' : '#c62828' }}>
-              {tipoAlerta === 'success' ? '✅' : '❌'} {mensajeAlerta}
-            </Typography>
-            <Box sx={{ ml: 'auto' }}>
-              <button 
-                onClick={() => setMostrarAlerta(false)}
-                style={{ 
-                  background: 'none', 
-                  border: 'none', 
-                  cursor: 'pointer',
-                  color: tipoAlerta === 'success' ? '#2e7d32' : '#c62828'
-                }}
-              >
-                ✕
-              </button>
-            </Box>
+    <Container maxWidth="lg">
+      <DynamicTitle pageName="Configuración" />
+      <Box sx={{ py: 3 }}>
+        {/* Encabezado */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
+            <MdSettings style={{ verticalAlign: 'middle', marginRight: 8 }} />
+            Configuración - {nombreSistema}
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+            Gestiona todos los aspectos de la configuración del sistema IoT de monitoreo de agua.
+          </Typography>
+          
+          {/* Información de versión */}
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            <Chip 
+              label={`Versión: ${configuracion.version}`} 
+              size="small" 
+              color="primary" 
+              variant="outlined" 
+            />
+            <Chip 
+              label={`Última actualización: ${new Date(configuracion.fechaUltimaActualizacion).toLocaleDateString()}`} 
+              size="small" 
+              color="info" 
+              variant="outlined"
+            />
           </Box>
         </Box>
-      )}
 
-      {/* Configuraciones de sensores */}
-      {Object.keys(configuracion).map(sensorKey => 
-        renderSensorConfig(sensorKey as keyof ConfiguracionRangos)
-      )}
+        {/* Información importante */}
+        <Alert severity="info" sx={{ mb: 3 }}>
+          <Typography variant="body2">
+            <MdInfo style={{ verticalAlign: 'middle', marginRight: 4 }} />
+            <strong>Importante:</strong> Los cambios en la configuración se aplicarán inmediatamente en todo el sistema.
+            Asegúrate de guardar cada sección antes de cambiar de pestaña.
+          </Typography>
+        </Alert>
 
-      {/* Botones de acción */}
-      <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-        <button
-          onClick={guardarConfiguracion}
-          style={{
-            padding: '12px 24px',
-            backgroundColor: '#4caf50',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-            fontSize: '16px'
-          }}
-        >
-          💾 Guardar Configuración
-        </button>
-        
-        {hayCambiosSinGuardar && (
-          <button
-            onClick={descartarCambios}
-            style={{
-              padding: '12px 24px',
-              backgroundColor: '#ff9800',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              fontSize: '16px'
-            }}
-          >
-            🔄 Descartar Cambios
-          </button>
-        )}
-        
-        <button
-          onClick={restaurarDefecto}
-          style={{
-            padding: '12px 24px',
-            backgroundColor: '#f44336',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-            fontSize: '16px'
-          }}
-        >
-          🏭 Restaurar Defecto
-        </button>
-      </Box>
+        {/* Pestañas de configuración */}
+        <Paper sx={{ bgcolor: 'background.paper' }}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs 
+              value={tabActiva} 
+              onChange={handleChangeTab} 
+              aria-label="configuracion tabs"
+              variant="scrollable"
+              scrollButtons="auto"
+            >
+              <Tab 
+                label="Rangos de Sensores"
+                icon={<MdThermostat />}
+                iconPosition="start"
+                {...a11yProps(0)} 
+              />
+              <Tab 
+                label="Configuración General"
+                icon={<MdSettings />}
+                iconPosition="start"
+                {...a11yProps(1)} 
+              />
+              <Tab 
+                label="Importar/Exportar"
+                icon={<MdImportExport />}
+                iconPosition="start"
+                {...a11yProps(2)} 
+              />
+            </Tabs>
+          </Box>
 
-      {/* Información adicional */}
-      <Box sx={{ mt: 4, p: 3, bgcolor: '#f5f5f5', borderRadius: 2 }}>
-        <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-          📋 Información Importante
-        </Typography>
-        <Typography variant="body2" paragraph>
-          • <strong>Rango Crítico:</strong> Límites absolutos que no deben superarse para evitar daños.
-        </Typography>
-        <Typography variant="body2" paragraph>
-          • <strong>Rango Óptimo:</strong> Condiciones ideales para el máximo rendimiento y salud.
-        </Typography>
-        <Typography variant="body2" paragraph>
-          • Los valores se guardan automáticamente en tu navegador y se aplicarán a todas las alertas.
-        </Typography>
-        <Typography variant="body2">
-          • Estos rangos están basados en estándares de acuicultura chilena y pueden ajustarse según necesidades específicas.
-        </Typography>
+          {/* Panel de Rangos de Sensores */}
+          <TabPanel value={tabActiva} index={0}>
+            <ConfiguracionRangos
+              configuracion={configuracion.rangos}
+              onActualizar={actualizarRangos}
+              onRestaurar={() => restaurarDefecto('rangos')}
+            />
+          </TabPanel>
+
+          {/* Panel de Configuración General */}
+          <TabPanel value={tabActiva} index={1}>
+            <ConfiguracionGeneral
+              configuracion={configuracion.general}
+              onActualizar={actualizarConfiguracionGeneral}
+              onRestaurar={() => restaurarDefecto('general')}
+            />
+          </TabPanel>
+
+          {/* Panel de Importar/Exportar */}
+          <TabPanel value={tabActiva} index={2}>
+            <ImportExportConfig
+              onExportar={exportarConfiguracion}
+              onImportar={importarConfiguracion}
+            />
+          </TabPanel>
+        </Paper>
+
+        {/* Información adicional */}
+        <Paper sx={{ p: 3, mt: 3, bgcolor: '#f5f5f5' }}>
+          <Typography variant="h6" gutterBottom>
+            Información del Sistema
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {nombreSistema} - Sistema de monitoreo IoT para calidad del agua. 
+            Esta configuración centralizada permite gestionar todos los aspectos del sistema desde una sola ubicación.
+            Para soporte técnico o consultas, contacta al administrador del sistema.
+          </Typography>
+        </Paper>
       </Box>
     </Container>
   );

@@ -113,11 +113,17 @@ export default function PhChart({ data, title = "Análisis de pH" }: PhChartProp
     max: Math.max(...phValues) || 0
   };
 
-  // Determinar estado del pH actual
+  // Determinar estado del pH actual usando configuración
   const getPhStatus = (ph: number) => {
-    if (ph < 6.5) return { text: 'Ácido', color: 'error', bgColor: '#ffebee' };
-    if (ph > 8.5) return { text: 'Alcalino', color: 'warning', bgColor: '#fff3e0' };
-    return { text: 'Neutro', color: 'success', bgColor: '#e8f5e8' };
+    const rango = configuracion.ph;
+    
+    if (ph < rango.minimo || ph > rango.maximo) {
+      return { text: 'Crítico', color: 'error', bgColor: '#ffebee' };
+    }
+    if (ph >= rango.minimoOptimo && ph <= rango.maximoOptimo) {
+      return { text: 'Óptimo', color: 'success', bgColor: '#e8f5e8' };
+    }
+    return { text: 'Aceptable', color: 'warning', bgColor: '#fff3e0' };
   };
 
   const currentStatus = getPhStatus(stats.current);
@@ -261,7 +267,13 @@ export default function PhChart({ data, title = "Análisis de pH" }: PhChartProp
               <Typography variant="h6" gutterBottom>Rangos Configurados</Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <Chip 
-                  label={`Crítico: ${configuracion.ph.minimo} - ${configuracion.ph.maximo} pH`} 
+                  label={`Crítico: < ${configuracion.ph.minimo} o > ${configuracion.ph.maximo} pH`} 
+                  color="error" 
+                  variant="outlined" 
+                  size="small" 
+                />
+                <Chip 
+                  label={`Aceptable: ${configuracion.ph.minimo} - ${configuracion.ph.minimoOptimo} y ${configuracion.ph.maximoOptimo} - ${configuracion.ph.maximo} pH`} 
                   color="warning" 
                   variant="outlined" 
                   size="small" 

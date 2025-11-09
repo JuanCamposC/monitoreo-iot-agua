@@ -117,9 +117,15 @@ export default function TemperatureChart({
 
   // ======= ESTADO DE TEMPERATURA =======
   const getCurrentStatus = (temp: number) => {
-    if (temp < 18) return { text: 'Frío', color: 'info', bgColor: '#e3f2fd' };
-    if (temp > 25) return { text: 'Caliente', color: 'error', bgColor: '#ffebee' };
-    return { text: 'Normal', color: 'success', bgColor: '#e8f5e8' };
+    const rango = configuracion.temperatura;
+    
+    if (temp < rango.minimo || temp > rango.maximo) {
+      return { text: 'Crítico', color: 'error', bgColor: '#ffebee' };
+    }
+    if (temp >= rango.minimoOptimo && temp <= rango.maximoOptimo) {
+      return { text: 'Óptimo', color: 'success', bgColor: '#e8f5e8' };
+    }
+    return { text: 'Aceptable', color: 'warning', bgColor: '#fff3e0' };
   };
   const currentStatus = getCurrentStatus(stats.current);
 
@@ -297,7 +303,13 @@ export default function TemperatureChart({
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <Chip 
-                  label={`Crítico: ${configuracion.temperatura.minimo}°C - ${configuracion.temperatura.maximo}°C`} 
+                  label={`Crítico: < ${configuracion.temperatura.minimo}°C o > ${configuracion.temperatura.maximo}°C`} 
+                  color="error" 
+                  variant="outlined" 
+                  size="small" 
+                />
+                <Chip 
+                  label={`Aceptable: ${configuracion.temperatura.minimo}°C - ${configuracion.temperatura.minimoOptimo}°C y ${configuracion.temperatura.maximoOptimo}°C - ${configuracion.temperatura.maximo}°C`} 
                   color="warning" 
                   variant="outlined" 
                   size="small" 

@@ -1,62 +1,28 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  TextField,
-  Button,
-  Grid,
-  Alert,
-  Snackbar,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Switch,
-  FormControlLabel,
-  Paper,
-  Slider,
-  Chip,
-  Divider,
-  CircularProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  IconButton,
-  Tooltip
-} from '@mui/material';
-import {
-  MdPlayArrow,
-  MdStop,
-  MdSettings,
-  MdTrendingUp,
-  MdTrendingDown,
-  MdWarning,
-  MdInfo,
-  MdRefresh,
-  MdTimer,
-  MdThermostat,
-  MdScience,
-  MdAir
-} from 'react-icons/md';
-
-interface ConfiguracionSensor {
-  activo: boolean;
-  min: number;
-  max: number;
-  tendencia: 'normal' | 'subiendo' | 'bajando' | 'critico';
-}
+import {Box,Typography,Card,CardContent,TextField,Button,Grid,Alert,Snackbar,FormControl,InputLabel,Select,MenuItem,Switch,FormControlLabel,Paper,Slider,Chip, Divider, CircularProgress,Dialog,DialogTitle,DialogContent,DialogActions,IconButton,Tooltip} from '@mui/material';
+import {MdPlayArrow,MdStop,MdSettings,MdTrendingUp,MdTrendingDown,MdWarning,MdInfo,MdRefresh,MdTimer,MdThermostat,MdScience,MdAir,MdHelp, MdError} from 'react-icons/md';
+import { useConfiguracionRangos } from '../hooks/useConfiguracionRangos';
+import { useNombreSistema } from '../hooks/useNombreSistema';
+import DynamicTitle from '../components/DynamicTitle';
+import { Black_Han_Sans } from 'next/font/google';
 
 interface ConfiguracionSimulador {
   activo: boolean;
   intervalo: number; // en segundos
-  temperatura: ConfiguracionSensor;
-  ph: ConfiguracionSensor;
-  oxigeno: ConfiguracionSensor;
+  temperatura: {
+    activo: boolean;
+    tendencia: 'normal' | 'subiendo' | 'bajando' | 'critico';
+  };
+  ph: {
+    activo: boolean;
+    tendencia: 'normal' | 'subiendo' | 'bajando' | 'critico';
+  };
+  oxigeno: {
+    activo: boolean;
+    tendencia: 'normal' | 'subiendo' | 'bajando' | 'critico';
+  };
 }
 
 interface DatoSimulacion {
@@ -68,25 +34,22 @@ interface DatoSimulacion {
 }
 
 export default function SimuladorPage() {
+  const { configuracion: rangosConfiguracion } = useConfiguracionRangos();
+  const nombreSistema = useNombreSistema();
+  
   const [configuracion, setConfiguracion] = useState<ConfiguracionSimulador>({
     activo: false,
     intervalo: 30,
     temperatura: {
       activo: true,
-      min: 15,
-      max: 25,
       tendencia: 'normal'
     },
     ph: {
       activo: true,
-      min: 6.5,
-      max: 8.5,
       tendencia: 'normal'
     },
     oxigeno: {
       activo: true,
-      min: 5,
-      max: 12,
       tendencia: 'normal'
     }
   });
@@ -98,7 +61,7 @@ export default function SimuladorPage() {
   const [mensaje, setMensaje] = useState('');
   const [tipoMensaje, setTipoMensaje] = useState<'success' | 'error' | 'info'>('info');
   const [mostrarSnackbar, setMostrarSnackbar] = useState(false);
-  const [modalConfiguracion, setModalConfiguracion] = useState(false);
+  const [modalAyuda, setModalAyuda] = useState(false);
   const [estadisticas, setEstadisticas] = useState({
     totalEnviados: 0,
     errores: 0,
@@ -108,6 +71,28 @@ export default function SimuladorPage() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const contadorRef = useRef<NodeJS.Timeout | null>(null);
   const inicioSimulacionRef = useRef<Date | null>(null);
+
+  // Efecto para actualizar rangos cuando cambie la configuración
+  useEffect(() => {
+    setConfiguracion(prev => ({
+      ...prev,
+      temperatura: {
+        ...prev.temperatura,
+        min: rangosConfiguracion.temperatura.minimo,
+        max: rangosConfiguracion.temperatura.maximo
+      },
+      ph: {
+        ...prev.ph,
+        min: rangosConfiguracion.ph.minimo,
+        max: rangosConfiguracion.ph.maximo
+      },
+      oxigeno: {
+        ...prev.oxigeno,
+        min: rangosConfiguracion.oxigeno.minimo,
+        max: rangosConfiguracion.oxigeno.maximo
+      }
+    }));
+  }, [rangosConfiguracion]);
 
   // Efecto para manejar el temporizador del simulador
   useEffect(() => {
@@ -163,7 +148,7 @@ export default function SimuladorPage() {
       enviarDatoSimulado();
     }, configuracion.intervalo * 1000);
 
-    mostrarMensaje('🚀 Simulador iniciado correctamente', 'success');
+    mostrarMensaje('Simulador iniciado correctamente', 'success');
   };
 
   const detenerSimulador = () => {
@@ -187,39 +172,67 @@ export default function SimuladorPage() {
       inicioSimulacionRef.current = null;
     }
 
-    mostrarMensaje('⏹️ Simulador detenido', 'info');
+    mostrarMensaje('Simulador detenido', 'info');
   };
 
-  const generarValorSensor = (config: ConfiguracionSensor, valorAnterior?: number): number => {
+  const generarValorSensor = (tendencia: 'normal' | 'subiendo' | 'bajando' | 'critico', tipoSensor: 'temperatura' | 'ph' | 'oxigeno', valorAnterior?: number): number => {
     let valor: number;
+    const rangosReales = rangosConfiguracion[tipoSensor];
     
-    switch (config.tendencia) {
+    switch (tendencia) {
       case 'subiendo':
-        // Tendencia hacia valores más altos
-        const rangoAlto = (config.max - config.min) * 0.7;
-        valor = config.min + rangoAlto + Math.random() * (config.max - config.min - rangoAlto);
+        // Tendencia hacia la zona alta aceptable/óptima
+        const zonaAlta = Math.random() > 0.7 
+          ? rangosReales.maximoOptimo + Math.random() * (rangosReales.maximo - rangosReales.maximoOptimo) // Zona aceptable alta
+          : rangosReales.minimoOptimo + Math.random() * (rangosReales.maximoOptimo - rangosReales.minimoOptimo); // Zona óptima
+        valor = zonaAlta;
         break;
         
       case 'bajando':
-        // Tendencia hacia valores más bajos
-        const rangoBajo = (config.max - config.min) * 0.3;
-        valor = config.min + Math.random() * rangoBajo;
+        // Tendencia hacia la zona baja aceptable/óptima
+        const zonaBaja = Math.random() > 0.7 
+          ? rangosReales.minimo + Math.random() * (rangosReales.minimoOptimo - rangosReales.minimo) // Zona aceptable baja
+          : rangosReales.minimoOptimo + Math.random() * (rangosReales.maximoOptimo - rangosReales.minimoOptimo); // Zona óptima
+        valor = zonaBaja;
         break;
         
       case 'critico':
-        // Valores extremos (críticos)
-        valor = Math.random() > 0.5 
-          ? config.min - Math.random() * (config.min * 0.2) // Por debajo del mínimo
-          : config.max + Math.random() * (config.max * 0.2); // Por encima del máximo
+        // Valores en zona crítica (fuera del rango configurado)
+        if (Math.random() > 0.5) {
+          // Crítico bajo
+          const margenBajo = rangosReales.minimo * 0.2;
+          valor = Math.max(0, rangosReales.minimo - Math.random() * margenBajo);
+        } else {
+          // Crítico alto
+          const margenAlto = rangosReales.maximo * 0.2;
+          valor = rangosReales.maximo + Math.random() * margenAlto;
+        }
         break;
         
       default: // 'normal'
-        valor = config.min + Math.random() * (config.max - config.min);
+        // Distribución normal que favorece la zona óptima (70% del tiempo)
+        if (Math.random() > 0.3) {
+          // Zona óptima (70% probabilidad)
+          valor = rangosReales.minimoOptimo + Math.random() * (rangosReales.maximoOptimo - rangosReales.minimoOptimo);
+        } else {
+          // Zona aceptable (30% probabilidad)
+          if (Math.random() > 0.5) {
+            // Aceptable baja
+            valor = rangosReales.minimo + Math.random() * (rangosReales.minimoOptimo - rangosReales.minimo);
+          } else {
+            // Aceptable alta
+            valor = rangosReales.maximoOptimo + Math.random() * (rangosReales.maximo - rangosReales.maximoOptimo);
+          }
+        }
         break;
     }
 
     // Redondear según el tipo de sensor
-    return Math.round(valor * 100) / 100;
+    if (tipoSensor === 'ph') {
+      return Math.round(valor * 10) / 10; // 1 decimal para pH
+    } else {
+      return Math.round(valor * 100) / 100; // 2 decimales para temperatura y oxígeno
+    }
   };
 
   const enviarDatoSimulado = async () => {
@@ -233,17 +246,17 @@ export default function SimuladorPage() {
         usuario: 'simulador_web'
       };
 
-      // Generar valores para sensores activos
+      // Generar valores para sensores activos usando configuración global
       if (configuracion.temperatura.activo) {
-        datoSimulado.temperatura = generarValorSensor(configuracion.temperatura);
+        datoSimulado.temperatura = generarValorSensor(configuracion.temperatura.tendencia, 'temperatura');
       }
       
       if (configuracion.ph.activo) {
-        datoSimulado.ph = generarValorSensor(configuracion.ph);
+        datoSimulado.ph = generarValorSensor(configuracion.ph.tendencia, 'ph');
       }
       
       if (configuracion.oxigeno.activo) {
-        datoSimulado.oxigeno = generarValorSensor(configuracion.oxigeno);
+        datoSimulado.oxigeno = generarValorSensor(configuracion.oxigeno.tendencia, 'oxigeno');
       }
 
       // Enviar datos al endpoint manual
@@ -279,14 +292,14 @@ export default function SimuladorPage() {
         }));
 
         // Log de éxito
-        console.log('📡 Dato simulado enviado:', datoSimulado);
+        console.log('Dato simulado enviado:', datoSimulado);
         
       } else {
         throw new Error(`Error HTTP: ${respuesta.status}`);
       }
       
     } catch (error: any) {
-      console.error('❌ Error enviando dato simulado:', error);
+      console.error('Error enviando dato simulado:', error);
       
       // Agregar error al historial
       const registroError: DatoSimulacion = {
@@ -302,7 +315,7 @@ export default function SimuladorPage() {
         errores: prev.errores + 1
       }));
 
-      mostrarMensaje(`❌ Error al enviar datos: ${error.message}`, 'error');
+      mostrarMensaje(`Error al enviar datos: ${error.message}`, 'error');
     } finally {
       setEnviando(false);
     }
@@ -321,10 +334,10 @@ export default function SimuladorPage() {
       tiempoActivo: 0
     });
     setHistorialDatos([]);
-    mostrarMensaje('📊 Estadísticas reiniciadas', 'info');
+    mostrarMensaje('Estadísticas reiniciadas', 'info');
   };
 
-  const aplicarTendencia = (sensor: keyof Pick<ConfiguracionSimulador, 'temperatura' | 'ph' | 'oxigeno'>, tendencia: ConfiguracionSensor['tendencia']) => {
+  const aplicarTendencia = (sensor: keyof Pick<ConfiguracionSimulador, 'temperatura' | 'ph' | 'oxigeno'>, tendencia: 'normal' | 'subiendo' | 'bajando' | 'critico') => {
     setConfiguracion(prev => ({
       ...prev,
       [sensor]: {
@@ -334,14 +347,15 @@ export default function SimuladorPage() {
     }));
     
     const nombreSensor = sensor === 'temperatura' ? 'Temperatura' : sensor === 'ph' ? 'pH' : 'Oxígeno';
-    const descripcionTendencia = {
+    const descripcionTendencia: Record<string, string> = {
       'normal': 'valores normales',
       'subiendo': 'valores altos',
       'bajando': 'valores bajos',
       'critico': 'valores críticos'
-    }[tendencia];
+    };
+    const descripcion = descripcionTendencia[tendencia];
     
-    mostrarMensaje(`🎯 ${nombreSensor}: ${descripcionTendencia}`, 'info');
+    mostrarMensaje(`${nombreSensor}: ${descripcion}`, 'info');
   };
 
   const formatearTiempo = (segundos: number): string => {
@@ -358,7 +372,7 @@ export default function SimuladorPage() {
     }
   };
 
-  const getColorTendencia = (tendencia: ConfiguracionSensor['tendencia']) => {
+  const getColorTendencia = (tendencia: 'normal' | 'subiendo' | 'bajando' | 'critico') => {
     switch (tendencia) {
       case 'normal': return 'success';
       case 'subiendo': return 'warning';
@@ -368,7 +382,7 @@ export default function SimuladorPage() {
     }
   };
 
-  const getIconoTendencia = (tendencia: ConfiguracionSensor['tendencia']) => {
+  const getIconoTendencia = (tendencia: 'normal' | 'subiendo' | 'bajando' | 'critico') => {
     switch (tendencia) {
       case 'subiendo': return <MdTrendingUp />;
       case 'bajando': return <MdTrendingDown />;
@@ -379,16 +393,17 @@ export default function SimuladorPage() {
 
   return (
     <Box sx={{ p: 3, maxWidth: 1400, mx: 'auto' }}>
+      <DynamicTitle pageName="Simulador" />
       {/* Header */}
       <Paper sx={{ p: 3, mb: 3, bgcolor: 'primary.main', color: 'white' }}>
         <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-          Simulador de Sensores
+          Simulador - {nombreSistema}
         </Typography>
         <Typography variant="h6">
-          Configuración avanzada para pruebas y validación del sistema de monitoreo
+          Generador de datos IoT basado en configuraciones globales del sistema
         </Typography>
         <Typography variant="body2" sx={{ mt: 1, opacity: 0.9 }}>
-          • Configure intervalos de envío • Establezca rangos de valores • Simule criticidad para probar alertas
+          • Usa rangos configurados automáticamente • Configure intervalos de envío • Simule tendencias para probar alertas
         </Typography>
       </Paper>
 
@@ -451,15 +466,16 @@ export default function SimuladorPage() {
               {/* Estado de Sensores */}
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body2" gutterBottom sx={{ fontWeight: 'bold' }}>
-                  Estado de Sensores:
+                  Estado de Sensores (Rangos Configurados):
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="body2">🌡️ Temperatura:</Typography>
+                    <Typography variant="body2">Temperatura:</Typography>
                     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                       {configuracion.temperatura.activo ? (
                         <>
-                          <Chip size="small" label={`${configuracion.temperatura.min}-${configuracion.temperatura.max}°C`} />
+                          <Chip size="small" label={`Rango: ${rangosConfiguracion.temperatura.minimo}-${rangosConfiguracion.temperatura.maximo}°C`} />
+                          <Chip size="small" label={`Óptimo: ${rangosConfiguracion.temperatura.minimoOptimo}-${rangosConfiguracion.temperatura.maximoOptimo}°C`} color="success" />
                           <Chip 
                             size="small" 
                             label={configuracion.temperatura.tendencia} 
@@ -472,11 +488,12 @@ export default function SimuladorPage() {
                     </Box>
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="body2">🧪 pH:</Typography>
+                    <Typography variant="body2">pH:</Typography>
                     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                       {configuracion.ph.activo ? (
                         <>
-                          <Chip size="small" label={`${configuracion.ph.min}-${configuracion.ph.max}`} />
+                          <Chip size="small" label={`Rango: ${rangosConfiguracion.ph.minimo}-${rangosConfiguracion.ph.maximo}`} />
+                          <Chip size="small" label={`Óptimo: ${rangosConfiguracion.ph.minimoOptimo}-${rangosConfiguracion.ph.maximoOptimo}`} color="success" />
                           <Chip 
                             size="small" 
                             label={configuracion.ph.tendencia} 
@@ -489,11 +506,12 @@ export default function SimuladorPage() {
                     </Box>
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="body2">💨 Oxígeno:</Typography>
+                    <Typography variant="body2">Oxígeno:</Typography>
                     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                       {configuracion.oxigeno.activo ? (
                         <>
-                          <Chip size="small" label={`${configuracion.oxigeno.min}-${configuracion.oxigeno.max} mg/L`} />
+                          <Chip size="small" label={`Rango: ${rangosConfiguracion.oxigeno.minimo}-${rangosConfiguracion.oxigeno.maximo} mg/L`} />
+                          <Chip size="small" label={`Óptimo: ${rangosConfiguracion.oxigeno.minimoOptimo}-${rangosConfiguracion.oxigeno.maximoOptimo} mg/L`} color="success" />
                           <Chip 
                             size="small" 
                             label={configuracion.oxigeno.tendencia} 
@@ -523,25 +541,28 @@ export default function SimuladorPage() {
                     {configuracion.activo ? 'Detener Simulador' : 'Iniciar Simulador'}
                   </Button>
                 </Grid>
-                <Grid size={{ xs: 6 }}>
+                <Grid size={{ xs: 4 }}>
                   <Button
                     fullWidth
                     variant="outlined"
                     onClick={enviarDatoSimulado}
                     disabled={enviando}
                     startIcon={enviando ? <CircularProgress size={16} /> : <MdRefresh />}
+                    size="small"
                   >
-                    {enviando ? 'Enviando...' : 'Enviar Ahora'}
+                    {enviando ? 'Enviando...' : 'Enviar'}
                   </Button>
                 </Grid>
                 <Grid size={{ xs: 6 }}>
                   <Button
                     fullWidth
                     variant="outlined"
-                    onClick={() => setModalConfiguracion(true)}
-                    startIcon={<MdSettings />}
+                    onClick={() => setModalAyuda(true)}
+                    startIcon={<MdHelp />}
+                    size="small"
+                    color="info"
                   >
-                    Configurar
+                    Cómo usar
                   </Button>
                 </Grid>
               </Grid>
@@ -552,7 +573,7 @@ export default function SimuladorPage() {
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                📊 Estadísticas
+                Estadísticas
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <Typography variant="body2">
@@ -586,7 +607,7 @@ export default function SimuladorPage() {
           <Card sx={{ mb: 3 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                🎯 Control de Tendencias (Simulación de Criticidad)
+                Control de Tendencias (Simulación de Criticidad)
               </Typography>
               
               <Grid container spacing={2}>
@@ -777,7 +798,7 @@ export default function SimuladorPage() {
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                📋 Historial de Envíos (Últimos 10)
+                Historial de Envíos (Últimos 10)
               </Typography>
               
               {historialDatos.length === 0 ? (
@@ -800,13 +821,13 @@ export default function SimuladorPage() {
                           ) : (
                             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                               {dato.temperatura && (
-                                <Chip label={`🌡️ ${dato.temperatura}°C`} size="small" />
+                                <Chip label={`${dato.temperatura}°C`} size="small" />
                               )}
                               {dato.ph && (
-                                <Chip label={`🧪 ${dato.ph}`} size="small" />
+                                <Chip label={`${dato.ph}`} size="small" />
                               )}
                               {dato.oxigeno && (
-                                <Chip label={`💨 ${dato.oxigeno} mg/L`} size="small" />
+                                <Chip label={`${dato.oxigeno} mg/L`} size="small" />
                               )}
                             </Box>
                           )}
@@ -828,143 +849,192 @@ export default function SimuladorPage() {
         </Grid>
       </Grid>
 
-      {/* Modal de Configuración Avanzada */}
-      <Dialog open={modalConfiguracion} onClose={() => setModalConfiguracion(false)} maxWidth="md" fullWidth>
-        <DialogTitle>⚙️ Configuración Avanzada de Sensores</DialogTitle>
+      {/* Modal de Ayuda - Cómo usar el simulador */}
+      <Dialog open={modalAyuda} onClose={() => setModalAyuda(false)} maxWidth="lg" fullWidth>
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <MdHelp color="#2196f3" />
+            Cómo usar el Simulador de Sensores IoT
+          </Box>
+        </DialogTitle>
         <DialogContent>
-          <Grid container spacing={3} sx={{ mt: 1 }}>
-            {/* Configuración Temperatura */}
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="subtitle1" gutterBottom>🌡️ Temperatura</Typography>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={configuracion.temperatura.activo}
-                    onChange={(e) => setConfiguracion(prev => ({
-                      ...prev,
-                      temperatura: { ...prev.temperatura, activo: e.target.checked }
-                    }))}
-                  />
-                }
-                label="Activo"
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                fullWidth
-                label="Valor Mínimo (°C)"
-                type="number"
-                value={configuracion.temperatura.min}
-                onChange={(e) => setConfiguracion(prev => ({
-                  ...prev,
-                  temperatura: { ...prev.temperatura, min: parseFloat(e.target.value) || 0 }
-                }))}
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                fullWidth
-                label="Valor Máximo (°C)"
-                type="number"
-                value={configuracion.temperatura.max}
-                onChange={(e) => setConfiguracion(prev => ({
-                  ...prev,
-                  temperatura: { ...prev.temperatura, max: parseFloat(e.target.value) || 0 }
-                }))}
-              />
-            </Grid>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            
+            {/* Introducción */}
+            <Alert severity="info">
+              <Typography variant="body1" gutterBottom>
+                <strong>El Simulador de Sensores IoT</strong> te permite generar datos de prueba realistas para temperatura, pH y oxígeno disuelto,
+                basándose automáticamente en los rangos configurados en tu sistema.
+              </Typography>
+            </Alert>
 
-            {/* Configuración pH */}
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="subtitle1" gutterBottom>🧪 pH</Typography>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={configuracion.ph.activo}
-                    onChange={(e) => setConfiguracion(prev => ({
-                      ...prev,
-                      ph: { ...prev.ph, activo: e.target.checked }
-                    }))}
-                  />
-                }
-                label="Activo"
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                fullWidth
-                label="Valor Mínimo"
-                type="number"
-                inputProps={{ step: 0.1 }}
-                value={configuracion.ph.min}
-                onChange={(e) => setConfiguracion(prev => ({
-                  ...prev,
-                  ph: { ...prev.ph, min: parseFloat(e.target.value) || 0 }
-                }))}
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                fullWidth
-                label="Valor Máximo"
-                type="number"
-                inputProps={{ step: 0.1 }}
-                value={configuracion.ph.max}
-                onChange={(e) => setConfiguracion(prev => ({
-                  ...prev,
-                  ph: { ...prev.ph, max: parseFloat(e.target.value) || 0 }
-                }))}
-              />
-            </Grid>
+            {/* Paso 1 */}
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <span style={{ backgroundColor: '#2196f3', color: 'white', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>1</span>
+                  Configurar Rangos del Sistema
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  Antes de usar el simulador, asegúrate de que los rangos de sensores estén configurados correctamente en la página de <strong>Configuración</strong>.
+                </Typography>
+                <Box sx={{ ml: 3 }}>
+                  <Typography variant="body2" sx={{ mb: 1 }}>• Ve a la página de <strong>Configuración</strong> desde el menú lateral</Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>• Define los rangos mínimo, máximo, mínimo óptimo y máximo óptimo para cada sensor</Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>• El simulador usará automáticamente estos rangos para generar valores realistas</Typography>
+                </Box>
+                <Alert severity="warning" sx={{ mt: 2 }}>
+                  <Typography variant="body2">
+                    <strong>Importante:</strong> El simulador se sincroniza automáticamente con la configuración de rangos. 
+                    Si cambias los rangos, el simulador se actualizará inmediatamente.
+                  </Typography>
+                </Alert>
+              </CardContent>
+            </Card>
 
-            {/* Configuración Oxígeno */}
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="subtitle1" gutterBottom>💨 Oxígeno</Typography>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={configuracion.oxigeno.activo}
-                    onChange={(e) => setConfiguracion(prev => ({
-                      ...prev,
-                      oxigeno: { ...prev.oxigeno, activo: e.target.checked }
-                    }))}
-                  />
-                }
-                label="Activo"
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                fullWidth
-                label="Valor Mínimo (mg/L)"
-                type="number"
-                inputProps={{ step: 0.1 }}
-                value={configuracion.oxigeno.min}
-                onChange={(e) => setConfiguracion(prev => ({
-                  ...prev,
-                  oxigeno: { ...prev.oxigeno, min: parseFloat(e.target.value) || 0 }
-                }))}
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                fullWidth
-                label="Valor Máximo (mg/L)"
-                type="number"
-                inputProps={{ step: 0.1 }}
-                value={configuracion.oxigeno.max}
-                onChange={(e) => setConfiguracion(prev => ({
-                  ...prev,
-                  oxigeno: { ...prev.oxigeno, max: parseFloat(e.target.value) || 0 }
-                }))}
-              />
-            </Grid>
-          </Grid>
+            {/* Paso 2 */}
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <span style={{ backgroundColor: '#2196f3', color: 'white', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>2</span>
+                  Configurar Sensores y Tendencias
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  El simulador usa automáticamente las <strong>configuraciones globales</strong> del sistema para generar datos realistas.
+                </Typography>
+                <Box sx={{ ml: 3 }}>
+                  <Typography variant="body2" sx={{ mb: 1 }}>• <strong>Rangos automáticos:</strong> Utiliza los rangos configurados en la página de Configuración</Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>• <strong>Activar/Desactivar sensores:</strong> Elige cuáles sensores quieres simular</Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>• <strong>Intervalo de envío:</strong> Define cada cuántos segundos se envían los datos (5s - 5min)</Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>• <strong>Configurar tendencias:</strong> Personaliza el comportamiento de los datos generados</Typography>
+                </Box>
+                <Box sx={{ mt: 2, ml: 3 }}>
+                  <Typography variant="subtitle2" gutterBottom>Tipos de Tendencias:</Typography>
+                  <Box sx={{ ml: 2 }}>
+                    <Typography variant="body2" sx={{ mb: 1 }} color='green'><strong>Normal:</strong> 70% valores óptimos, 30% aceptables (recomendado para pruebas generales)</Typography>
+                    <Typography variant="body2" sx={{ mb: 1 }} color='#B1B807'><strong>Subiendo:</strong> Valores en zona alta aceptable/óptima</Typography>
+                    <Typography variant="body2" sx={{ mb: 1 }} color='blue'><strong>Bajando:</strong> Valores en zona baja aceptable/óptima</Typography>
+                    <Typography variant="body2" sx={{ mb: 1 }} color='red'><strong>Crítico:</strong> Valores fuera del rango configurado (para probar alertas)</Typography>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+
+            {/* Paso 3 */}
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <span style={{ backgroundColor: '#2196f3', color: 'white', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>3</span>
+                  Iniciar y Controlar la Simulación
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  Una vez configurado, controla la simulación con los botones de acción.
+                </Typography>
+                <Box sx={{ ml: 3 }}>
+                  <Typography variant="body2" sx={{ mb: 1 }}><strong>Iniciar Simulador:</strong> Comienza la generación automática de datos</Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}><strong>Detener Simulador:</strong> Pausa la generación automática</Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}><strong>Enviar Ahora:</strong> Genera y envía un dato inmediatamente</Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}><strong>Configurar:</strong> Ajusta tendencias y sensores activos</Typography>
+                </Box>
+                <Alert severity="info" sx={{ mt: 2 }}>
+                  <Typography variant="body2">
+                    El simulador mostrará un contador regresivo hasta el próximo envío automático cuando esté activo.
+                  </Typography>
+                </Alert>
+              </CardContent>
+            </Card>
+
+            {/* Paso 4 */}
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <span style={{ backgroundColor: '#2196f3', color: 'white', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>4</span>
+                  Monitorear y Verificar Datos
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  El simulador te proporciona información detallada sobre los datos generados y su estado.
+                </Typography>
+                <Box sx={{ ml: 3 }}>
+                  <Typography variant="body2" sx={{ mb: 1 }}><strong>Estadísticas:</strong> Total enviados, errores y tiempo activo</Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}><strong>Historial:</strong> Últimos datos enviados con timestamps</Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}><strong>Estado:</strong> Confirmación de envío exitoso o errores</Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}><strong>Verificación:</strong> Ve a las páginas de sensores para ver los datos en tiempo real</Typography>
+                </Box>
+              </CardContent>
+            </Card>
+
+            {/* Consideraciones importantes */}
+            <Card variant="outlined" sx={{ bgcolor: '#fff3e0' }}>
+              <CardContent>
+                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#f57c00' }}>
+                  <MdWarning />
+                  Consideraciones Importantes
+                </Typography>
+                <Box sx={{ ml: 1 }}>
+                    <Typography variant="body1" sx={{ mb: 2 }}>
+                      <strong>El simulador funciona únicamente mientras te encuentres en esta página. Si navegas a otra sección, la simulación se detendrá automáticamente.</strong>
+                    </Typography>
+                  <Typography variant="body2" sx={{ mb: 2 }}>
+                    <strong>Datos Realistas:</strong> Los valores generados respetan las zonas configuradas (óptimo, aceptable, crítico)
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 2 }}>
+                    <strong>Intervalo Mínimo:</strong> El intervalo mínimo es 5 segundos para evitar sobrecarga del sistema
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 2 }}>
+                    <strong>Sincronización:</strong> Los rangos se sincronizan automáticamente con la configuración del sistema
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 2 }}>
+                    <strong>Pruebas:</strong> Usa la tendencia &quot;Crítico&quot; para probar sistemas de alertas y notificaciones
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Monitoreo:</strong> Los datos simulados aparecen en todas las páginas de sensores y gráficos en tiempo real
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+
+            {/* Casos de uso */}
+            <Card variant="outlined" sx={{ bgcolor: '#e8f5e8' }}>
+              <CardContent>
+                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#2e7d32' }}>
+                  <MdInfo />
+                  Casos de Uso Comunes
+                </Typography>
+                <Box sx={{ ml: 1 }}>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    <strong>Desarrollo:</strong> Genera datos para probar nuevas funcionalidades sin sensores físicos
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    <strong>Pruebas de Alertas:</strong> Usa tendencia &quot;Crítico&quot; para verificar notificaciones de emergencia
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    <strong>Análisis de Tendencias:</strong> Genera patrones específicos para probar algoritmos de análisis
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    <strong>Demostraciones:</strong> Presenta el sistema con datos dinámicos y realistas
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Validación:</strong> Comprueba que los rangos configurados funcionen correctamente en toda la aplicación
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setModalConfiguracion(false)}>Cerrar</Button>
-          <Button
-            variant="contained"
+          <Button onClick={() => setModalAyuda(false)} color="primary">
+            Entendido
+          </Button>
+          <Button 
+            variant="contained" 
             onClick={() => {
-              setModalConfiguracion(false);
-              mostrarMensaje('⚙️ Configuración guardada', 'success');
+              setModalAyuda(false);
+              window.location.href = '/configuracion';
             }}
+            startIcon={<MdSettings />}
           >
-            Guardar
+            Ir a Configuración Global
           </Button>
         </DialogActions>
       </Dialog>

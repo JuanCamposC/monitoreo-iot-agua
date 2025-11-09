@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { apiRequestJson, API_ENDPOINTS } from '../config/api';
+import { apiRequestJson, apiRequest, API_ENDPOINTS } from '../config/api';
 
 interface User {
   id: string;
@@ -16,16 +16,8 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
-  register: (userData: RegisterData) => Promise<{ success: boolean; message?: string }>;
   updateProfile: (profileData: UpdateProfileData) => Promise<{ success: boolean; message?: string }>;
   isAuthenticated: boolean;
-}
-
-interface RegisterData {
-  email: string;
-  password: string;
-  nombre: string;
-  confirmPassword: string;
 }
 
 interface UpdateProfileData {
@@ -112,27 +104,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error('Error en login:', error);
-      return { success: false, message: 'Error de conexión. Intente nuevamente.' };
+      return { success: false, message: 'Contraseña o Correo incorrectos, Intente nuevamente' };
     }
   };
 
-  const register = async (userData: RegisterData): Promise<{ success: boolean; message?: string }> => {
-    try {
-      const data = await apiRequestJson(API_ENDPOINTS.AUTH.REGISTER, {
-        method: 'POST',
-        body: JSON.stringify(userData),
-      });
 
-      if (data.success) {
-        return { success: true, message: 'Usuario registrado exitosamente' };
-      } else {
-        return { success: false, message: data.message || 'Error en el registro' };
-      }
-    } catch (error) {
-      console.error('Error en registro:', error);
-      return { success: false, message: 'Error de conexión. Intente nuevamente.' };
-    }
-  };
 
   const logout = () => {
     safeLocalStorage.removeItem('auth-token');
@@ -148,14 +124,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       console.log('Enviando datos de actualización:', profileData);
+      console.log('Token:', token);
+      console.log('Endpoint:', API_ENDPOINTS.AUTH.UPDATE_PROFILE);
 
-      const data = await apiRequestJson(API_ENDPOINTS.AUTH.UPDATE_PROFILE, {
+      // Usar apiRequest en lugar de apiRequestJson para manejar manualmente
+      const response = await apiRequest(API_ENDPOINTS.AUTH.UPDATE_PROFILE, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(profileData)
       });
+
+      // Manejar respuesta manualmente
+      if (!response.ok) {
+        let errorMessage = `API Error: ${response.status} ${response.statusText}`;
+        
+        try {
+          const errorData = await response.json();
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          } else if (errorData.error) {
+            errorMessage = errorData.error;
+          }
+        } catch (e) {
+          // Si no se puede parsear, usar mensaje por defecto
+        }
+
+        // Caso especial: "No se realizaron cambios"
+        if (errorMessage.includes('No se realizaron cambios') || errorMessage.includes('no se detectaron cambios')) {
+          return { 
+            success: true, 
+            message: 'No se detectaron cambios. Los datos ingresados son iguales a los actuales.' 
+          };
+        }
+
+        // Para otros errores, retornar como error
+        return { success: false, message: errorMessage };
+      }
+
+      const data = await response.json();
 
       console.log('Respuesta del servidor:', data);
 
@@ -180,10 +189,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error en updateProfile:', error);
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      
       if (errorMessage.includes('CORS')) {
         return { success: false, message: 'Error de configuración del servidor (CORS). Contacte al administrador.' };
       }
-      return { success: false, message: 'Error de conexión. Verifique que el backend esté funcionando.' };
+      
+      // Caso especial: No se realizaron cambios (no es realmente un error)
+      if (errorMessage.includes('No se realizaron cambios') || errorMessage.includes('no se detectaron cambios')) {
+        return { 
+          success: true, 
+          message: 'No se detectaron cambios. Los datos ingresados son iguales a los actuales.' 
+        };
+      }
+      
+      // Retornar el mensaje de error específico del servidor
+      return { success: false, message: errorMessage };
     }
   };
 
@@ -192,7 +212,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     login,
     logout,
-    register,
     updateProfile,
     isAuthenticated: !!user,
   };

@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import PHChart from '../../components/graficos/PhChart';
+import PhChart from '../../components/graficos/PhChart';
 import { useConfiguracionRangos } from '../../hooks/useConfiguracionRangos';
+import { useNombreSistema } from '../../hooks/useNombreSistema';
+import DynamicTitle from '../../components/DynamicTitle';
 import InfoRangos from '../../components/InfoRangos';
 import { MdScience } from 'react-icons/md';
 
@@ -14,12 +16,13 @@ interface PHData {
   timestamp?: string;
 }
 
-export default function PHPage() {
+export default function PhPage() {
   const [phActual, setPhActual] = useState<number | null>(null);
   const [historial, setHistorial] = useState<PHData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { evaluarEstadoSensor, configuracion } = useConfiguracionRangos();
+  const nombreSistema = useNombreSistema();
 
   useEffect(() => {
     const fetchPH = async () => {
@@ -85,9 +88,9 @@ export default function PHPage() {
   const getEstadoColor = (ph: number) => {
     const estado = evaluarEstadoSensor('ph', ph);
     const colorMap: Record<string, string> = {
-      'crítico': 'bg-red-100 text-red-800',
+      'critico': 'bg-red-100 text-red-800',
       'aceptable': 'bg-yellow-100 text-yellow-800',
-      'óptimo': 'bg-green-100 text-green-800'
+      'optimo': 'bg-green-100 text-green-800'
     };
     return colorMap[estado] || 'bg-gray-100 text-gray-800';
   };
@@ -126,8 +129,9 @@ export default function PHPage() {
 
   return (
     <div className="bg-gray-100 p-6 min-h-screen">
+      <DynamicTitle pageName="Sensor de pH" />
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Sensor de pH</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">pH - {nombreSistema}</h1>
         
         {/* Información de rangos configurados */}
         <InfoRangos
@@ -143,7 +147,7 @@ export default function PHPage() {
         {/* Gráfico histórico (prioridad principal) */}
         <div className="mb-6 bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold text-gray-700 mb-4">Análisis Histórico del pH</h2>
-          <PHChart data={historial} title="Variaciones de pH en el Tiempo" />
+          <PhChart data={historial} title="Variaciones de pH en el Tiempo" />
         </div>
 
         {/* Grid con historial detallado y lectura actual */}
@@ -228,21 +232,147 @@ export default function PHPage() {
               </p>
             </div>
 
-            {/* Escala de pH visual */}
+            {/* Escala de pH visual con rangos configurados */}
             <div className="mb-4">
               <div className="text-sm text-gray-600 mb-2">Escala de pH:</div>
-              <div className="h-4 rounded-full bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 relative">
+              <div className="relative h-4 rounded-full overflow-hidden border border-gray-200">
+                {/* Fondo con zonas de color según rangos configurados */}
+                <div className="absolute inset-0 flex">
+                  {(() => {
+                    const rangoTotal = configuracion.ph.maximo - configuracion.ph.minimo;
+                    const anchoCriticoBajo = ((configuracion.ph.minimoOptimo - configuracion.ph.minimo) / rangoTotal) * 50;
+                    const anchoOptimo = ((configuracion.ph.maximoOptimo - configuracion.ph.minimoOptimo) / rangoTotal) * 100;
+                    const anchoCriticoAlto = ((configuracion.ph.maximo - configuracion.ph.maximoOptimo) / rangoTotal) * 50;
+                    const anchoAceptableBajo = 50 - anchoCriticoBajo;
+                    const anchoAceptableAlto = 50 - anchoCriticoAlto;
+                    
+                    return (
+                      <>
+                        {/* Zona crítica baja */}
+                        <div 
+                          className="bg-red-400" 
+                          style={{ 
+                            width: `${anchoCriticoBajo}%`
+                          }}
+                        ></div>
+                        {/* Zona aceptable baja */}
+                        <div 
+                          className="bg-yellow-400" 
+                          style={{ 
+                            width: `${anchoAceptableBajo}%`
+                          }}
+                        ></div>
+                        {/* Zona óptima */}
+                        <div 
+                          className="bg-green-400" 
+                          style={{ 
+                            width: `${anchoOptimo}%`
+                          }}
+                        ></div>
+                        {/* Zona aceptable alta */}
+                        <div 
+                          className="bg-yellow-400" 
+                          style={{ 
+                            width: `${anchoAceptableAlto}%`
+                          }}
+                        ></div>
+                        {/* Zona crítica alta */}
+                        <div 
+                          className="bg-red-400" 
+                          style={{ 
+                            width: `${anchoCriticoAlto}%`
+                          }}
+                        ></div>
+                      </>
+                    );
+                  })()}
+                </div>
+                
+                {/* Indicador de pH actual */}
                 {phActual && (
                   <div 
-                    className="absolute top-0 w-2 h-4 bg-black rounded-full transform -translate-x-1" 
-                    style={{ left: `${(phActual / 14) * 100}%` }}
+                    className="absolute top-0 w-1 h-4 bg-black shadow-lg" 
+                    style={{ 
+                      left: `${Math.max(0, Math.min(100, ((phActual - configuracion.ph.minimo) / (configuracion.ph.maximo - configuracion.ph.minimo)) * 100))}%` 
+                    }}
                   ></div>
                 )}
               </div>
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
-                <span>0 (Ácido)</span>
-                <span>7 (Neutro)</span>
-                <span>14 (Alcalino)</span>
+              
+              {/* Etiquetas de valores con posiciones dinámicas */}
+              <div className="relative mt-1 h-4">
+                <span 
+                  className="absolute text-xs text-gray-500 transform -translate-x-1/2" 
+                  style={{ left: '0%' }}
+                >
+                  {configuracion.ph.minimo}
+                </span>
+                <span 
+                  className="absolute text-xs text-yellow-600 font-medium transform -translate-x-1/2" 
+                  style={{ 
+                    left: `${((configuracion.ph.minimoOptimo - configuracion.ph.minimo) / (configuracion.ph.maximo - configuracion.ph.minimo)) * 100}%` 
+                  }}
+                >
+                  {configuracion.ph.minimoOptimo}
+                </span>
+                <span 
+                  className="absolute text-xs text-green-600 font-bold transform -translate-x-1/2" 
+                  style={{ 
+                    left: `${((configuracion.ph.minimoOptimo + configuracion.ph.maximoOptimo) / 2 - configuracion.ph.minimo) / (configuracion.ph.maximo - configuracion.ph.minimo) * 100}%` 
+                  }}
+                >
+                  ÓPTIMO
+                </span>
+                <span 
+                  className="absolute text-xs text-yellow-600 font-medium transform -translate-x-1/2" 
+                  style={{ 
+                    left: `${((configuracion.ph.maximoOptimo - configuracion.ph.minimo) / (configuracion.ph.maximo - configuracion.ph.minimo)) * 100}%` 
+                  }}
+                >
+                  {configuracion.ph.maximoOptimo}
+                </span>
+                <span 
+                  className="absolute text-xs text-gray-500 transform -translate-x-1/2" 
+                  style={{ left: '100%' }}
+                >
+                  {configuracion.ph.maximo}
+                </span>
+              </div>
+              
+              {/* Etiquetas de zonas con posiciones dinámicas */}
+              <div className="relative mt-2 h-4">
+                <span 
+                  className="absolute text-xs text-red-600 font-medium transform -translate-x-1/2" 
+                  style={{ 
+                    left: `${((configuracion.ph.minimo + configuracion.ph.minimoOptimo) / 2 - configuracion.ph.minimo) / (configuracion.ph.maximo - configuracion.ph.minimo) * 50}%` 
+                  }}
+                >
+                  Crítico
+                </span>
+                <span 
+                  className="absolute text-xs text-yellow-600 font-medium transform -translate-x-1/2" 
+                  style={{ 
+                    left: `${25 + ((configuracion.ph.minimoOptimo - configuracion.ph.minimo) / (configuracion.ph.maximo - configuracion.ph.minimo)) * 25}%` 
+                  }}
+                >
+                  Aceptable
+                </span>
+                <span 
+                  className="absolute text-xs text-yellow-600 font-medium transform -translate-x-1/2" 
+                  style={{ 
+                    left: `${75 - ((configuracion.ph.maximo - configuracion.ph.maximoOptimo) / (configuracion.ph.maximo - configuracion.ph.minimo)) * 25}%` 
+                  }}
+                >
+                  Aceptable
+                </span>
+                <span 
+                  className="absolute text-xs text-red-600 font-medium transform -translate-x-1/2" 
+                  style={{ 
+                    left: `${50 + ((configuracion.ph.maximoOptimo + configuracion.ph.maximo) / 2 - configuracion.ph.minimo) / (configuracion.ph.maximo - configuracion.ph.minimo) * 50}%` 
+                  }}
+                >
+                  Crítico
+                </span>
               </div>
             </div>
 
@@ -292,7 +422,7 @@ export default function PHPage() {
           <h3 className="text-lg font-semibold text-gray-700 mb-4">Información Técnica del Sensor</h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <p className="text-lg font-bold text-purple-600">Electrodo de Vidrio</p>
+              <p className="text-lg font-bold text-purple-600">Sensor de pH SIMULADO</p>
               <p className="text-sm text-gray-600">Tipo de Sensor</p>
             </div>
             <div className="text-center p-4 bg-blue-50 rounded-lg">

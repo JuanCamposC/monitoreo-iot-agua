@@ -189,7 +189,7 @@ export const useNotificaciones = (): UseNotificacionesReturn => {
 
     try {
       const notification = new Notification(
-        `🚨 CIMARQ - ${alerta.nivel} ${alerta.sensor.toUpperCase()}`,
+        `CIMARQ - ${alerta.nivel} ${alerta.sensor.toUpperCase()}`,
         {
           body: `${alerta.mensaje}\nValor actual: ${alerta.valor_actual}`,
           icon: '/favicon.ico',
@@ -265,7 +265,7 @@ export const useNotificaciones = (): UseNotificacionesReturn => {
       enviarNotificacionEmail(alerta).catch(console.error);
     }
 
-    console.log(`📢 Alerta ${alerta.nivel} procesada:`, alerta.mensaje);
+    console.log(`Alerta ${alerta.nivel} procesada:`, alerta.mensaje);
   }, [
     configuracion,
     mostrarNotificacionWeb,
@@ -329,7 +329,7 @@ export const useNotificaciones = (): UseNotificacionesReturn => {
         return true;
       } else {
         const errorMsg = result.errores?.join(', ') || 'Error desconocido';
-        console.error('❌ Error enviando email:', {
+        console.error('Error enviando email:', {
           errores: result.errores,
           mensaje: result.mensaje,
           configuracion_activa: result.configuracion || 'No disponible'
@@ -337,7 +337,7 @@ export const useNotificaciones = (): UseNotificacionesReturn => {
         
         // Mostrar notificación de error si las notificaciones están habilitadas
         if (notificacionesHabilitadas) {
-          new Notification('❌ Error enviando Email', {
+          new Notification('Error enviando Email', {
             body: `No se pudo enviar: ${errorMsg}`,
             icon: '/favicon.ico',
             tag: 'email-error'
@@ -357,7 +357,7 @@ export const useNotificaciones = (): UseNotificacionesReturn => {
       
       // Mostrar notificación de error de conexión
       if (notificacionesHabilitadas) {
-        new Notification('🚨 Error de Conexión', {
+        new Notification('Error de Conexión', {
           body: 'No se pudo conectar al servidor para enviar email',
           icon: '/favicon.ico',
           tag: 'connection-error'
@@ -374,14 +374,14 @@ export const useNotificaciones = (): UseNotificacionesReturn => {
    * Diagnosticar configuración del sistema
    */
   const diagnosticarSistema = useCallback(async () => {
-    console.log('🔍 === DIAGNÓSTICO SISTEMA NOTIFICACIONES ===');
+    console.log('=== DIAGNÓSTICO SISTEMA NOTIFICACIONES ===');
     
     try {
       // 1. Verificar configuración del servidor
       const configResponse = await fetch(`${API_BASE}/notificaciones/configuracion`);
       const configData = await configResponse.json();
       
-      console.log('📊 Configuración servidor:', {
+      console.log('Configuración servidor:', {
         success: configData.success,
         email_habilitado: configData.configuracion?.email?.habilitado,
         smtp_server: configData.configuracion?.email?.servidor_smtp,
@@ -390,19 +390,19 @@ export const useNotificaciones = (): UseNotificacionesReturn => {
       });
       
       // 2. Verificar permisos del navegador
-      console.log('🌐 Permisos navegador:', {
+      console.log('Permisos navegador:', {
         notificaciones_soportadas: 'Notification' in window,
         permiso_actual: Notification.permission,
         habilitadas: notificacionesHabilitadas
       });
       
       // 3. Verificar configuración local
-      console.log('⚙️ Configuración local:', configuracion);
+      console.log('Configuración local:', configuracion);
       
       return configData;
       
     } catch (error) {
-      console.error('❌ Error en diagnóstico:', error);
+      console.error('Error en diagnóstico:', error);
       return null;
     }
   }, [notificacionesHabilitadas, configuracion]);
@@ -416,7 +416,7 @@ export const useNotificaciones = (): UseNotificacionesReturn => {
     try {
       // Probar notificación web
       if (configuracion.habilitarWebPush && notificacionesHabilitadas) {
-        const testNotification = new Notification('🧪 CIMARQ - Prueba del Sistema', {
+        const testNotification = new Notification('CIMARQ - Prueba del Sistema', {
           body: 'Si ves este mensaje, las notificaciones web están funcionando correctamente.',
           icon: '/favicon.ico',
           tag: 'test-notification'
@@ -446,7 +446,7 @@ export const useNotificaciones = (): UseNotificacionesReturn => {
         }
       }
 
-      console.log('✅ Prueba de notificaciones completada');
+      console.log('Prueba de notificaciones completada');
       return true;
 
     } catch (error) {

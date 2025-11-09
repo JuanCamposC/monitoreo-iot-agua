@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import TemperatureChart from '../../components/graficos/TemperaturaChart';
 import { useConfiguracionRangos } from '../../hooks/useConfiguracionRangos';
+import { useNombreSistema } from '../../hooks/useNombreSistema';
+import DynamicTitle from '../../components/DynamicTitle';
 import InfoRangos from '../../components/InfoRangos';
 import { MdThermostat } from 'react-icons/md';
 
@@ -20,6 +22,7 @@ export default function TemperaturaPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { evaluarEstadoSensor, configuracion } = useConfiguracionRangos();
+  const nombreSistema = useNombreSistema();
 
   useEffect(() => {
     const fetchTemperatura = async () => {
@@ -85,9 +88,9 @@ export default function TemperaturaPage() {
   const getEstadoColor = (temperatura: number) => {
     const estado = evaluarEstadoSensor('temperatura', temperatura);
     const colorMap: Record<string, string> = {
-      'crítico': 'bg-red-100 text-red-800',
+      'critico': 'bg-red-100 text-red-800',
       'aceptable': 'bg-yellow-100 text-yellow-800',
-      'óptimo': 'bg-green-100 text-green-800'
+      'optimo': 'bg-green-100 text-green-800'
     };
     return colorMap[estado] || 'bg-gray-100 text-gray-800';
   };
@@ -126,8 +129,9 @@ export default function TemperaturaPage() {
 
   return (
     <div className="bg-gray-100 p-6 min-h-screen">
+      <DynamicTitle pageName="Sensor de Temperatura" />
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Sensor de Temperatura</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Temperatura - {nombreSistema}</h1>
         
         {/* Información de rangos configurados */}
         <InfoRangos
@@ -228,21 +232,147 @@ export default function TemperaturaPage() {
               </p>
             </div>
 
-            {/* Termómetro visual */}
+            {/* Termómetro visual con rangos configurados */}
             <div className="mb-4">
               <div className="text-sm text-gray-600 mb-2">Escala de Temperatura:</div>
-              <div className="relative h-4 rounded-full bg-gradient-to-r from-blue-500 via-green-500 to-red-500">
+              <div className="relative h-4 rounded-full overflow-hidden border border-gray-200">
+                {/* Fondo con zonas de color según rangos configurados */}
+                <div className="absolute inset-0 flex">
+                  {(() => {
+                    const rangoTotal = configuracion.temperatura.maximo - configuracion.temperatura.minimo;
+                    const anchoCriticoBajo = ((configuracion.temperatura.minimoOptimo - configuracion.temperatura.minimo) / rangoTotal) * 50; // 50% para la mitad izquierda
+                    const anchoOptimo = ((configuracion.temperatura.maximoOptimo - configuracion.temperatura.minimoOptimo) / rangoTotal) * 100;
+                    const anchoCriticoAlto = ((configuracion.temperatura.maximo - configuracion.temperatura.maximoOptimo) / rangoTotal) * 50; // 50% para la mitad derecha
+                    const anchoAceptableBajo = 50 - anchoCriticoBajo;
+                    const anchoAceptableAlto = 50 - anchoCriticoAlto;
+                    
+                    return (
+                      <>
+                        {/* Zona crítica baja */}
+                        <div 
+                          className="bg-red-400" 
+                          style={{ 
+                            width: `${anchoCriticoBajo}%`
+                          }}
+                        ></div>
+                        {/* Zona aceptable baja */}
+                        <div 
+                          className="bg-yellow-400" 
+                          style={{ 
+                            width: `${anchoAceptableBajo}%`
+                          }}
+                        ></div>
+                        {/* Zona óptima */}
+                        <div 
+                          className="bg-green-400" 
+                          style={{ 
+                            width: `${anchoOptimo}%`
+                          }}
+                        ></div>
+                        {/* Zona aceptable alta */}
+                        <div 
+                          className="bg-yellow-400" 
+                          style={{ 
+                            width: `${anchoAceptableAlto}%`
+                          }}
+                        ></div>
+                        {/* Zona crítica alta */}
+                        <div 
+                          className="bg-red-400" 
+                          style={{ 
+                            width: `${anchoCriticoAlto}%`
+                          }}
+                        ></div>
+                      </>
+                    );
+                  })()}
+                </div>
+                
+                {/* Indicador de temperatura actual */}
                 {temperaturaActual && (
                   <div 
-                    className="absolute top-0 w-2 h-4 bg-black rounded-full transform -translate-x-1" 
-                    style={{ left: `${Math.max(0, Math.min(100, ((temperaturaActual + 10) / 60) * 100))}%` }}
+                    className="absolute top-0 w-1 h-4 bg-black shadow-lg" 
+                    style={{ 
+                      left: `${Math.max(0, Math.min(100, ((temperaturaActual - configuracion.temperatura.minimo) / (configuracion.temperatura.maximo - configuracion.temperatura.minimo)) * 100))}%` 
+                    }}
                   ></div>
                 )}
               </div>
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
-                <span>-10°C</span>
-                <span>25°C</span>
-                <span>50°C</span>
+              
+              {/* Etiquetas de valores con posiciones dinámicas */}
+              <div className="relative mt-1 h-4">
+                <span 
+                  className="absolute text-xs text-gray-500 transform -translate-x-1/2" 
+                  style={{ left: '0%' }}
+                >
+                  {configuracion.temperatura.minimo}°C
+                </span>
+                <span 
+                  className="absolute text-xs text-yellow-600 font-medium transform -translate-x-1/2" 
+                  style={{ 
+                    left: `${((configuracion.temperatura.minimoOptimo - configuracion.temperatura.minimo) / (configuracion.temperatura.maximo - configuracion.temperatura.minimo)) * 100}%` 
+                  }}
+                >
+                  {configuracion.temperatura.minimoOptimo}°C
+                </span>
+                <span 
+                  className="absolute text-xs text-green-600 font-bold transform -translate-x-1/2" 
+                  style={{ 
+                    left: `${((configuracion.temperatura.minimoOptimo + configuracion.temperatura.maximoOptimo) / 2 - configuracion.temperatura.minimo) / (configuracion.temperatura.maximo - configuracion.temperatura.minimo) * 100}%` 
+                  }}
+                >
+                  ÓPTIMO
+                </span>
+                <span 
+                  className="absolute text-xs text-yellow-600 font-medium transform -translate-x-1/2" 
+                  style={{ 
+                    left: `${((configuracion.temperatura.maximoOptimo - configuracion.temperatura.minimo) / (configuracion.temperatura.maximo - configuracion.temperatura.minimo)) * 100}%` 
+                  }}
+                >
+                  {configuracion.temperatura.maximoOptimo}°C
+                </span>
+                <span 
+                  className="absolute text-xs text-gray-500 transform -translate-x-1/2" 
+                  style={{ left: '100%' }}
+                >
+                  {configuracion.temperatura.maximo}°C
+                </span>
+              </div>
+              
+              {/* Etiquetas de zonas con posiciones dinámicas */}
+              <div className="relative mt-2 h-4">
+                <span 
+                  className="absolute text-xs text-red-600 font-medium transform -translate-x-1/2" 
+                  style={{ 
+                    left: `${((configuracion.temperatura.minimo + configuracion.temperatura.minimoOptimo) / 2 - configuracion.temperatura.minimo) / (configuracion.temperatura.maximo - configuracion.temperatura.minimo) * 50}%` 
+                  }}
+                >
+                  Crítico
+                </span>
+                <span 
+                  className="absolute text-xs text-yellow-600 font-medium transform -translate-x-1/2" 
+                  style={{ 
+                    left: `${25 + ((configuracion.temperatura.minimoOptimo - configuracion.temperatura.minimo) / (configuracion.temperatura.maximo - configuracion.temperatura.minimo)) * 25}%` 
+                  }}
+                >
+                  Aceptable
+                </span>
+                <span 
+                  className="absolute text-xs text-yellow-600 font-medium transform -translate-x-1/2" 
+                  style={{ 
+                    left: `${75 - ((configuracion.temperatura.maximo - configuracion.temperatura.maximoOptimo) / (configuracion.temperatura.maximo - configuracion.temperatura.minimo)) * 25}%` 
+                  }}
+                >
+                  Aceptable
+                </span>
+                <span 
+                  className="absolute text-xs text-red-600 font-medium transform -translate-x-1/2" 
+                  style={{ 
+                    left: `${50 + ((configuracion.temperatura.maximoOptimo + configuracion.temperatura.maximo) / 2 - configuracion.temperatura.minimo) / (configuracion.temperatura.maximo - configuracion.temperatura.minimo) * 50}%` 
+                  }}
+                >
+                  Crítico
+                </span>
               </div>
             </div>
 
@@ -292,7 +422,7 @@ export default function TemperaturaPage() {
           <h3 className="text-lg font-semibold text-gray-700 mb-4">Información Técnica del Sensor</h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <p className="text-lg font-bold text-blue-600">Termómetro Digital</p>
+              <p className="text-lg font-bold text-blue-600">Termómetro SIMULADO</p>
               <p className="text-sm text-gray-600">Tipo de Sensor</p>
             </div>
             <div className="text-center p-4 bg-green-50 rounded-lg">

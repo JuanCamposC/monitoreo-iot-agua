@@ -390,7 +390,7 @@ export default function IngresoManualPage() {
           <Card sx={{ mb: 2 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                💡 Información
+                Información
               </Typography>
               <Typography variant="body2" color="text.secondary" paragraph>
                 Los datos ingresados manualmente se almacenarán con la marca de tiempo especificada y serán incluidos en todos los análisis y gráficos.
@@ -409,20 +409,20 @@ export default function IngresoManualPage() {
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                🔍 Vista Previa
+                Vista Previa
               </Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 Fecha/Hora: {datos.fecha} {datos.hora}
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <Typography variant="body2">
-                  🌡️ Temperatura: {datos.temperatura || '--'} °C
+                  Temperatura: {datos.temperatura || '--'} °C
                 </Typography>
                 <Typography variant="body2">
-                  ⚗️ pH: {datos.ph || '--'}
+                  pH: {datos.ph || '--'}
                 </Typography>
                 <Typography variant="body2">
-                  💨 Oxígeno: {datos.oxigeno || '--'} mg/L
+                  Oxígeno: {datos.oxigeno || '--'} mg/L
                 </Typography>
               </Box>
             </CardContent>

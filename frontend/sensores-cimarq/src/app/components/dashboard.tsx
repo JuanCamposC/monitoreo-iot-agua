@@ -9,7 +9,8 @@ import GeneralChart from './graficos/GeneralChart';
 import { useConfiguracionRangos } from '../hooks/useConfiguracionRangos';
 import { useNotificaciones, AlertaNotificacion } from '../hooks/useNotificaciones';
 import { useMonitoreoAutomatico } from '../hooks/useMonitoreoAutomatico';
-import { ModalAlertaEmergencia } from './ModalAlertaEmergencia';
+import { useNombreSistema } from '../hooks/useNombreSistema';
+import DynamicTitle from './DynamicTitle';
 import ThermostatIcon from '@mui/icons-material/Thermostat';
 import WaterIcon from '@mui/icons-material/Water';
 import AirIcon from '@mui/icons-material/Air';
@@ -59,6 +60,7 @@ export default function SensoresPage() {
   const [data, setData] = useState<DashboardData>({ temperatura: [], ph: [], oxigeno: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const nombreSistema = useNombreSistema();
   const [mqttStatus, setMqttStatus] = useState<{ connected: boolean; last_message: string | null }>({ 
     connected: false, 
     last_message: null 
@@ -82,15 +84,7 @@ export default function SensoresPage() {
   
   // Hook de notificaciones
   const {
-    alertaActiva,
-    modalAbierto,
-    mostrarAlerta,
-    cerrarModal,
-    enviarNotificacionEmail,
-    enviandoEmail,
-    solicitarPermisos,
-    diagnosticarSistema,
-    probarNotificaciones
+    solicitarPermisos
   } = useNotificaciones();
 
   // Hook de monitoreo automático
@@ -182,10 +176,9 @@ export default function SensoresPage() {
               new Date().getTime() - new Date(alerta.fecha_creacion).getTime() < 2 * 60 * 1000
           );
           
-          // Mostrar notificación para la primera alerta crítica nueva
+          // Las alertas críticas se detectan pero ya no se muestra el modal
           if (alertasCriticas.length > 0) {
-            const alertaCritica = alertasCriticas[0] as AlertaNotificacion;
-            mostrarAlerta(alertaCritica);
+            console.log('Alerta crítica detectada:', alertasCriticas[0]);
           }
           
         } else {
@@ -202,7 +195,7 @@ export default function SensoresPage() {
     // Actualizar alertas cada 30 segundos
     const alertasInterval = setInterval(fetchAlertas, 30000);
     return () => clearInterval(alertasInterval);
-  }, [mostrarAlerta]);
+  }, []);
 
   // Solicitar permisos de notificación al cargar
   useEffect(() => {
@@ -300,7 +293,7 @@ export default function SensoresPage() {
     const colorMap: Record<string, string> = {
       'crítico': 'error',
       'aceptable': 'warning', 
-      'óptimo': 'success'
+      'optimo': 'success'
     };
     return { 
       color: colorMap[estado] || 'default', 
@@ -313,7 +306,7 @@ export default function SensoresPage() {
     const colorMap: Record<string, string> = {
       'crítico': 'error',
       'aceptable': 'warning', 
-      'óptimo': 'success'
+      'optimo': 'success'
     };
     return { 
       color: colorMap[estado] || 'default', 
@@ -326,7 +319,7 @@ export default function SensoresPage() {
     const colorMap: Record<string, string> = {
       'crítico': 'error',
       'aceptable': 'warning', 
-      'óptimo': 'success'
+      'optimo': 'success'
     };
     return { 
       color: colorMap[estado] || 'default', 
@@ -390,11 +383,12 @@ export default function SensoresPage() {
   const latestOxigeno = getLatestValue(data.oxigeno, 'oxigeno');
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 lg:p-6">
+    <div className="bg-gray-50 p-4 lg:p-6">
+      <DynamicTitle pageName="Dashboard" />
       <div className="max-w-7xl mx-auto">
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
           <Typography variant="h3" component="h1" sx={{ color: '#1f2937', flexGrow: 1, textAlign: { xs: 'center', md: 'left' } }}>
-            Dashboard de Sensores CIMARQ
+            Dashboard - {nombreSistema}
           </Typography>
           
           {/* Selector de período */}
@@ -413,19 +407,6 @@ export default function SensoresPage() {
             </Select>
           </FormControl>
         </Box>
-        
-        {/* Estado MQTT */}
-        <Paper sx={{ p: 3, mb: 4, borderRadius: 2, boxShadow: 3 }}>
-          <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Typography variant="h6">Estado de los Sensores</Typography>
-            <Chip label={mqttStatus.connected ? "Conectado" : "Desconectado"} color={mqttStatus.connected ? "success" : "error"} size="small"/>
-          </Box>
-          {mqttStatus.last_message && (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1, textAlign: "right" }}>
-              Último registro: {new Date(mqttStatus.last_message).toLocaleString()}
-            </Typography>
-          )}
-        </Paper>
 
         {/* Cards de sensores */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -586,23 +567,6 @@ export default function SensoresPage() {
                   Gestionar Alertas
                 </Button>
               </Link>
-              
-              {/* Botón de diagnóstico integrado */}
-              <Button
-                variant="text"
-                size="small"
-                onClick={async () => {
-                  console.log('🔧 Ejecutando diagnóstico completo...');
-                  console.log('📊 Estadísticas de monitoreo:', estadisticas);
-                  console.log('⚡ Estado MQTT:', mqttStatus);
-                  await diagnosticarSistema();
-                  await probarNotificaciones();
-                }}
-                sx={{ mt: 1 }}
-                fullWidth
-              >
-                🔧 Diagnóstico
-              </Button>
             </Box>
           </Paper>
         </Grid>
@@ -865,44 +829,27 @@ export default function SensoresPage() {
         <Grid container spacing={2}>
           <Grid size= {{xs: 12, md: 3}}>
             <Typography variant="body2" color="text.secondary" textAlign="center">
-              🔄 Actualización: cada 5 segundos
+              Actualización: cada 5 segundos
             </Typography>
           </Grid>
           <Grid size= {{xs: 12, md: 3}}>
             <Typography variant="body2" color="text.secondary" textAlign="center">
-              📊 Período: {timeFilter === '1h' ? 'Última hora' : timeFilter === '6h' ? 'Últimas 6h' : timeFilter === '24h' ? 'Últimas 24h' : timeFilter === '7d' ? 'Últimos 7 días' : 'Todos los datos'}
+              Período: {timeFilter === '1h' ? 'Última hora' : timeFilter === '6h' ? 'Últimas 6h' : timeFilter === '24h' ? 'Últimas 24h' : timeFilter === '7d' ? 'Últimos 7 días' : 'Todos los datos'}
             </Typography>
           </Grid>
           <Grid size= {{xs: 12, md: 3}}>
             <Typography variant="body2" color="text.secondary" textAlign="center">
-              🚨 Monitoreo: {monitoreoActivo ? '✅ Activo' : '❌ Inactivo'}
+              Monitoreo: {monitoreoActivo ? 'Activo' : 'Inactivo'}
             </Typography>
           </Grid>
           <Grid size= {{xs: 12, md: 3}}>
-            <Typography variant="body2" color="text.secondary" textAlign="center">
-              ⚡ CIMARQ v2.0.0 - Sistema Inteligente
-            </Typography>
-          </Grid>
-          <Grid size= {{xs: 12}} sx={{ mt: 1 }}>
             <Typography variant="caption" color="text.secondary" textAlign="center" display="block">
-              🕒 Última actualización: {new Date().toLocaleTimeString()} | 
-              🤖 Alertas Automáticas: {estadisticas.total} | 
-              📧 Notificaciones: {mqttStatus.connected ? 'Activas' : 'Inactivas'} |
-              � Última revisión: {ultimaRevision ? ultimaRevision.toLocaleTimeString() : 'Nunca'}
+              Última actualización: {new Date().toLocaleTimeString()}
             </Typography>
           </Grid>
         </Grid>
       </Paper>
 
-      {/* Modal de Alerta de Emergencia */}
-      <ModalAlertaEmergencia
-        open={modalAbierto}
-        alerta={alertaActiva}
-        onClose={cerrarModal}
-        onEnviarEmail={alertaActiva ? async () => { await enviarNotificacionEmail(alertaActiva); } : undefined}
-        enviandoEmail={enviandoEmail}
-      />
-      
       </div>
     </div>
   );

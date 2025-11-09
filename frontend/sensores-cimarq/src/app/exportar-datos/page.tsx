@@ -11,8 +11,6 @@ interface DatoSensor {
   ph?: number;
   oxigeno?: number;
   fecha: string;
-  fuente?: string;
-  usuario?: string;
 }
 
 interface FiltrosExportacion {
@@ -82,7 +80,7 @@ export default function ExportarDatosPage() {
         : process.env.BACKEND_URL || 'http://localhost:5000';
       
       const url = `${backendUrl}/api/v1/sensores`;
-      console.log('🔄 Cargando datos desde:', url, `(intentos restantes: ${reintentos})`);
+      console.log('Cargando datos desde:', url, `(intentos restantes: ${reintentos})`);
       
       const respuesta = await fetch(url, {
         headers: {
@@ -90,7 +88,7 @@ export default function ExportarDatosPage() {
         }
       });
       
-      console.log('📡 Respuesta recibida:', respuesta.status, respuesta.statusText);
+      console.log('Respuesta recibida:', respuesta.status, respuesta.statusText);
       
       if (respuesta.ok) {
         const resultado = await respuesta.json();
@@ -105,8 +103,7 @@ export default function ExportarDatosPage() {
             if (!registrosAgrupados[claveFecha]) {
               registrosAgrupados[claveFecha] = {
                 _id: item._id,
-                fecha: item.fecha,
-                fuente: 'automatico'
+                fecha: item.fecha
               };
             }
             registrosAgrupados[claveFecha].temperatura = item.temperatura;
@@ -120,8 +117,7 @@ export default function ExportarDatosPage() {
             if (!registrosAgrupados[claveFecha]) {
               registrosAgrupados[claveFecha] = {
                 _id: item._id,
-                fecha: item.fecha,
-                fuente: 'automatico'
+                fecha: item.fecha
               };
             }
             registrosAgrupados[claveFecha].ph = item.ph;
@@ -135,8 +131,7 @@ export default function ExportarDatosPage() {
             if (!registrosAgrupados[claveFecha]) {
               registrosAgrupados[claveFecha] = {
                 _id: item._id,
-                fecha: item.fecha,
-                fuente: 'automatico'
+                fecha: item.fecha
               };
             }
             registrosAgrupados[claveFecha].oxigeno = item.oxigeno;
@@ -152,25 +147,25 @@ export default function ExportarDatosPage() {
         throw new Error(`Error HTTP: ${respuesta.status} - ${respuesta.statusText}`);
       }
     } catch (error: any) {
-      console.error('🚨 Error completo:', error);
-      console.error('🔍 Tipo de error:', error.name);
-      console.error('💬 Mensaje de error:', error.message);
+      console.error('Error completo:', error);
+      console.error('Tipo de error:', error.name);
+      console.error('Mensaje de error:', error.message);
       
-      let mensajeError = '❌ Error al cargar los datos del servidor';
+      let mensajeError = 'Error al cargar los datos del servidor';
       
       if (error.name === 'TypeError' && (error.message.includes('fetch') || error.message === 'Failed to fetch')) {
-        mensajeError = '🔌 No se pudo conectar al servidor. Verifica que:\n• El backend esté ejecutándose en http://localhost:5000\n• No haya problemas de red o firewall\n• El servidor de desarrollo del frontend esté iniciado';
+        mensajeError = 'No se pudo conectar al servidor. Verifica que:\n• El backend esté ejecutándose en http://localhost:5000\n• No haya problemas de red o firewall\n• El servidor de desarrollo del frontend esté iniciado';
       } else if (error.message.includes('HTTP:')) {
-        mensajeError = `❌ Error del servidor: ${error.message}`;
+        mensajeError = `Error del servidor: ${error.message}`;
       } else if (error.message.includes('timeout')) {
-        mensajeError = '⏱️ Tiempo de espera agotado. El servidor no responde';
+        mensajeError = 'Tiempo de espera agotado. El servidor no responde';
       } else {
-        mensajeError = `❌ Error desconocido: ${error.message}`;
+        mensajeError = `Error desconocido: ${error.message}`;
       }
       
       // Reintentar si es un error de conexión y quedan reintentos
       if (reintentos > 1 && (error.name === 'TypeError' && (error.message.includes('fetch') || error.message === 'Failed to fetch'))) {
-        console.log(`🔄 Reintentando... quedan ${reintentos - 1} intentos`);
+        console.log(`Reintentando... quedan ${reintentos - 1} intentos`);
         await new Promise(resolve => setTimeout(resolve, 2000)); // Esperar 2 segundos
         return cargarDatosInterno(reintentos - 1);
       }
@@ -215,7 +210,7 @@ export default function ExportarDatosPage() {
     }
 
     // Debug: mostrar información de filtrado
-    console.log('🔍 Filtrado de fechas:', {
+    console.log('Filtrado de fechas:', {
       fechaInicio: filtros.fechaInicio,
       fechaFin: filtros.fechaFin,
       totalDatos: datos.length,
@@ -232,7 +227,7 @@ export default function ExportarDatosPage() {
 
   const exportarDatos = async () => {
     if (datosFiltrados.length === 0) {
-      setMensaje('⚠️ No hay datos para exportar con los filtros actuales');
+      setMensaje('No hay datos para exportar con los filtros actuales');
       setTipoMensaje('error');
       setMostrarSnackbar(true);
       return;
@@ -247,8 +242,6 @@ export default function ExportarDatosPage() {
         Temperatura: dato.temperatura || '',
         pH: dato.ph || '',
         Oxigeno: dato.oxigeno || '',
-        Fuente: dato.fuente || 'automatico',
-        Usuario: dato.usuario || '',
         Estado_Temperatura: dato.temperatura ? evaluarEstadoSensor('temperatura', dato.temperatura) : '',
         Estado_pH: dato.ph ? evaluarEstadoSensor('ph', dato.ph) : '',
         Estado_Oxigeno: dato.oxigeno ? evaluarEstadoSensor('oxigeno', dato.oxigeno) : ''
@@ -260,12 +253,12 @@ export default function ExportarDatosPage() {
         exportarExcel(datosExportacion);
       }
 
-      setMensaje(`✅ Datos exportados exitosamente (${datosFiltrados.length} registros)`);
+      setMensaje(`Datos exportados exitosamente (${datosFiltrados.length} registros)`);
       setTipoMensaje('success');
       setMostrarSnackbar(true);
     } catch (error) {
       console.error('Error en exportación:', error);
-      setMensaje('❌ Error al exportar los datos');
+      setMensaje('Error al exportar los datos');
       setTipoMensaje('error');
       setMostrarSnackbar(true);
     } finally {
@@ -299,14 +292,14 @@ export default function ExportarDatosPage() {
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
         
-        setMensaje('✅ CSV descargado exitosamente');
+        setMensaje('CSV descargado exitosamente');
         setTipoMensaje('success');
       } else {
         throw new Error(`Error HTTP: ${respuesta.status}`);
       }
     } catch (error) {
       console.error('Error descargando CSV:', error);
-      setMensaje('❌ Error al descargar CSV');
+      setMensaje('Error al descargar CSV');
       setTipoMensaje('error');
     } finally {
       setExportando(false);
@@ -339,14 +332,14 @@ export default function ExportarDatosPage() {
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
         
-        setMensaje('✅ Excel descargado exitosamente');
+        setMensaje('Excel descargado exitosamente');
         setTipoMensaje('success');
       } else {
         throw new Error(`Error HTTP: ${respuesta.status}`);
       }
     } catch (error) {
       console.error('Error descargando Excel:', error);
-      setMensaje('❌ Error al descargar Excel');
+      setMensaje('Error al descargar Excel');
       setTipoMensaje('error');
     } finally {
       setExportando(false);
@@ -355,14 +348,14 @@ export default function ExportarDatosPage() {
 
   const enviarPorEmail = async () => {
     if (!emailDestino) {
-      setMensaje('⚠️ Ingrese un email de destino');
+      setMensaje('Ingrese un email de destino');
       setTipoMensaje('error');
       setMostrarSnackbar(true);
       return;
     }
 
     if (datosFiltrados.length === 0) {
-      setMensaje('⚠️ No hay datos para enviar');
+      setMensaje('No hay datos para enviar');
       setTipoMensaje('error');
       setMostrarSnackbar(true);
       return;
@@ -380,8 +373,6 @@ export default function ExportarDatosPage() {
         Temperatura: dato.temperatura || '',
         pH: dato.ph || '',
         Oxigeno: dato.oxigeno || '',
-        Fuente: dato.fuente || 'automatico',
-        Usuario: dato.usuario || '',
         Estado_Temperatura: dato.temperatura ? evaluarEstadoSensor('temperatura', dato.temperatura) : '',
         Estado_pH: dato.ph ? evaluarEstadoSensor('ph', dato.ph) : '',
         Estado_Oxigeno: dato.oxigeno ? evaluarEstadoSensor('oxigeno', dato.oxigeno) : ''
@@ -406,7 +397,7 @@ Este reporte incluye datos de temperatura, pH y oxígeno disuelto del sistema de
       });
 
       if (respuesta.ok) {
-        setMensaje(`✅ Datos enviados exitosamente a ${emailDestino}`);
+        setMensaje(`Datos enviados exitosamente a ${emailDestino}`);
         setTipoMensaje('success');
         setModalEmail(false);
         setEmailDestino('');
@@ -415,7 +406,7 @@ Este reporte incluye datos de temperatura, pH y oxígeno disuelto del sistema de
       }
     } catch (error) {
       console.error('Error:', error);
-      setMensaje('❌ Error al enviar el email. Verifique la configuración del servidor');
+      setMensaje('Error al enviar el email. Verifique la configuración del servidor');
       setTipoMensaje('error');
     } finally {
       setEnviandoEmail(false);
@@ -439,9 +430,9 @@ Este reporte incluye datos de temperatura, pH y oxígeno disuelto del sistema de
     if (valor === undefined) return 'default';
     const estado = evaluarEstadoSensor(tipo, valor);
     const colorMap: Record<string, 'success' | 'warning' | 'error'> = {
-      'óptimo': 'success',
+      'optimo': 'success',
       'aceptable': 'warning',
-      'crítico': 'error'
+      'critico': 'error'
     };
     return colorMap[estado] || 'default';
   };
@@ -456,7 +447,7 @@ Este reporte incluye datos de temperatura, pH y oxígeno disuelto del sistema de
       {/* Header */}
       <Paper sx={{ p: 3, mb: 3, bgcolor: 'primary.main', color: 'white' }}>
         <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-          📊 Exportación de Datos
+          Exportación de Datos
         </Typography>
         <Typography variant="h6">
           Visualice, filtre y exporte todos los datos del sistema de monitoreo
@@ -569,8 +560,8 @@ Este reporte incluye datos de temperatura, pH y oxígeno disuelto del sistema de
                   label="Formato de Exportación"
                   onChange={(e) => setFiltros(prev => ({ ...prev, formatoExportacion: e.target.value as 'csv' | 'excel' }))}
                 >
-                  <MenuItem value="csv">📄 CSV</MenuItem>
-                  <MenuItem value="excel">📊 Excel</MenuItem>
+                  <MenuItem value="csv">CSV</MenuItem>
+                  <MenuItem value="excel">Excel</MenuItem>
                 </Select>
               </FormControl>
 
@@ -619,7 +610,7 @@ Este reporte incluye datos de temperatura, pH y oxígeno disuelto del sistema de
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                📈 Estadísticas
+                Estadísticas
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <Typography variant="body2">
@@ -665,10 +656,9 @@ Este reporte incluye datos de temperatura, pH y oxígeno disuelto del sistema de
                   <TableHead>
                     <TableRow>
                       <TableCell>Fecha</TableCell>
-                      <TableCell align="center">🌡️ Temp</TableCell>
-                      <TableCell align="center">🧪 pH</TableCell>
-                      <TableCell align="center">💨 O₂</TableCell>
-                      <TableCell align="center">Fuente</TableCell>
+                      <TableCell align="center">Temp</TableCell>
+                      <TableCell align="center">pH</TableCell>
+                      <TableCell align="center">OD</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -712,14 +702,6 @@ Este reporte incluye datos de temperatura, pH y oxígeno disuelto del sistema de
                             <Typography variant="body2" color="text.secondary">Sin datos</Typography>
                           )}
                         </TableCell>
-                        <TableCell align="center">
-                          <Chip
-                            label={dato.fuente || 'auto'}
-                            variant="outlined"
-                            size="small"
-                            color="primary"
-                          />
-                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -745,7 +727,7 @@ Este reporte incluye datos de temperatura, pH y oxígeno disuelto del sistema de
 
       {/* Modal de Email */}
       <Dialog open={modalEmail} onClose={() => setModalEmail(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>📧 Enviar Datos por Email</DialogTitle>
+        <DialogTitle>Enviar Datos por Email</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2 }}>
             <TextField
