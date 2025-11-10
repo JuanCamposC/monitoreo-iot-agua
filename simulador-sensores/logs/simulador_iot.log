@@ -1087,3 +1087,743 @@
 2025-10-14 02:11:56,367 - SimuladorCIMARQ - INFO - 📡 MQTT desconectado
 2025-10-14 02:11:56,464 - SimuladorCIMARQ - INFO - 💾 MongoDB desconectado
 2025-10-14 02:11:56,465 - SimuladorCIMARQ - INFO - ✅ Simulador cerrado correctamente
+2025-10-28 13:05:40,721 - SimuladorCIMARQ - INFO - ⚙️ Configuración cargada - Intervalo: 300.0s, Sensores especializados: 3
+2025-10-28 13:05:40,722 - SimuladorCIMARQ - INFO - 🚀 Simulador CIMARQ inicializado
+2025-10-28 13:05:40,722 - SimuladorCIMARQ - INFO - 🚀 Iniciando simulador continuo CIMARQ
+2025-10-28 13:05:40,723 - SimuladorCIMARQ - INFO - 📍 Zona: Central Chile (Valparaíso/Quintay)
+2025-10-28 13:05:40,723 - SimuladorCIMARQ - INFO - ⏱️ Intervalo: 300.0s (5.0 min)
+2025-10-28 13:05:40,724 - SimuladorCIMARQ - INFO - 🔢 Sensores especializados: 3 (Temperatura, pH, Oxígeno)
+2025-10-28 13:05:41,470 - SimuladorCIMARQ - INFO - ✅ MongoDB conectado: cimarqdb
+2025-10-28 13:05:41,713 - SimuladorCIMARQ - INFO - 📡 MQTT conectado: test.mosquitto.org:1883
+2025-10-28 13:05:41,714 - SimuladorCIMARQ - INFO - ✅ Simulador iniciado correctamente - Modo 24/7 activo
+2025-10-28 13:05:41,714 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-10-28 13:05:41,715 - SimuladorCIMARQ - WARNING - ⚠️ MQTT no conectado, no se puede enviar datos unificados
+2025-10-28 13:05:41,716 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=14.72°C, pH=8.035, O2=8.03mg/L | MQTT=❌ | MongoDB=Via Backend
+2025-10-28 13:05:41,716 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 14.72, ph: 8.035, oxigeno: 8.03, fecha: 1761667541716}
+2025-10-28 13:05:41,716 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 0.0% (0/1)
+2025-10-28 13:05:41,717 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 13:10:41
+2025-10-28 13:05:41,991 - SimuladorCIMARQ - INFO - ✅ MQTT broker conectado exitosamente
+2025-10-28 13:10:42,375 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-10-28 13:10:42,383 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=14.62°C, pH=8.026, O2=8.05mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-10-28 13:10:42,384 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 14.62, ph: 8.026, oxigeno: 8.05, fecha: 1761667842384}
+2025-10-28 13:10:42,386 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.01s | Éxito: 100.0% (1/1)
+2025-10-28 13:10:42,387 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 13:15:42
+2025-10-28 13:15:42,379 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-10-28 13:15:42,382 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=14.67°C, pH=8.03, O2=8.03mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-10-28 13:15:42,383 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 14.67, ph: 8.03, oxigeno: 8.03, fecha: 1761668142383}
+2025-10-28 13:15:42,383 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-10-28 13:15:42,384 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 13:20:42
+2025-10-28 13:20:42,611 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-10-28 13:20:42,614 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=14.56°C, pH=8.021, O2=8.05mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-10-28 13:20:42,614 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 14.56, ph: 8.021, oxigeno: 8.05, fecha: 1761668442614}
+2025-10-28 13:20:42,615 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-10-28 13:20:42,616 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 13:25:42
+2025-10-28 13:25:42,924 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-10-28 13:25:42,930 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=14.67°C, pH=8.02, O2=8.01mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-10-28 13:25:42,931 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 14.67, ph: 8.02, oxigeno: 8.01, fecha: 1761668742930}
+2025-10-28 13:25:42,931 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.01s | Éxito: 100.0% (1/1)
+2025-10-28 13:25:42,932 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 13:30:42
+2025-10-28 13:30:43,344 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-10-28 13:30:43,347 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=14.69°C, pH=8.02, O2=8.03mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-10-28 13:30:43,347 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 14.69, ph: 8.02, oxigeno: 8.03, fecha: 1761669043347}
+2025-10-28 13:30:43,348 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-10-28 13:30:43,348 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 13:35:43
+2025-10-28 13:35:43,863 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-10-28 13:35:43,866 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=14.69°C, pH=8.019, O2=8.02mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-10-28 13:35:43,867 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 14.69, ph: 8.019, oxigeno: 8.02, fecha: 1761669343867}
+2025-10-28 13:35:43,867 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-10-28 13:35:43,868 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 13:40:43
+2025-10-28 13:40:44,627 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-10-28 13:40:44,648 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=14.65°C, pH=8.006, O2=8.02mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-10-28 13:40:44,650 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 14.65, ph: 8.006, oxigeno: 8.02, fecha: 1761669644650}
+2025-10-28 13:40:44,650 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.02s | Éxito: 100.0% (1/1)
+2025-10-28 13:40:44,651 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 13:45:44
+2025-10-28 13:45:45,462 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-10-28 13:45:45,465 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=14.73°C, pH=8.012, O2=8.02mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-10-28 13:45:45,466 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 14.73, ph: 8.012, oxigeno: 8.02, fecha: 1761669945466}
+2025-10-28 13:45:45,467 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.01s | Éxito: 100.0% (1/1)
+2025-10-28 13:45:45,467 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 13:50:45
+2025-10-28 13:48:53,363 - SimuladorCIMARQ - INFO - 🛑 Señal de parada recibida, cerrando simulador...
+2025-10-28 13:48:53,404 - SimuladorCIMARQ - INFO - 🧹 Cerrando conexiones...
+2025-10-28 13:48:53,489 - SimuladorCIMARQ - WARNING - ⚠️ MQTT desconectado, código: 0
+2025-10-28 13:48:53,490 - SimuladorCIMARQ - INFO - 📡 MQTT desconectado
+2025-10-28 13:48:53,553 - SimuladorCIMARQ - INFO - 💾 MongoDB desconectado
+2025-10-28 13:48:53,555 - SimuladorCIMARQ - INFO - ✅ Simulador cerrado correctamente
+2025-11-03 19:04:02,853 - SimuladorCIMARQ - INFO - ⚙️ Configuración cargada - Intervalo: 300.0s, Sensores especializados: 3
+2025-11-03 19:04:02,854 - SimuladorCIMARQ - INFO - 🚀 Simulador CIMARQ inicializado
+2025-11-03 19:04:02,855 - SimuladorCIMARQ - INFO - 🚀 Iniciando simulador continuo CIMARQ
+2025-11-03 19:04:02,855 - SimuladorCIMARQ - INFO - 📍 Zona: Central Chile (Valparaíso/Quintay)
+2025-11-03 19:04:02,856 - SimuladorCIMARQ - INFO - ⏱️ Intervalo: 300.0s (5.0 min)
+2025-11-03 19:04:02,856 - SimuladorCIMARQ - INFO - 🔢 Sensores especializados: 3 (Temperatura, pH, Oxígeno)
+2025-11-03 19:04:04,042 - SimuladorCIMARQ - INFO - ✅ MongoDB conectado: cimarqdb
+2025-11-03 19:04:05,509 - SimuladorCIMARQ - INFO - 📡 MQTT conectado: test.mosquitto.org:1883
+2025-11-03 19:04:05,519 - SimuladorCIMARQ - INFO - ✅ Simulador iniciado correctamente - Modo 24/7 activo
+2025-11-03 19:04:05,519 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 19:04:05,523 - SimuladorCIMARQ - WARNING - ⚠️ MQTT no conectado, no se puede enviar datos unificados
+2025-11-03 19:04:05,525 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.46°C, pH=8.155, O2=7.83mg/L | MQTT=❌ | MongoDB=Via Backend
+2025-11-03 19:04:05,527 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.46, ph: 8.155, oxigeno: 7.83, fecha: 1762207445527}
+2025-11-03 19:04:05,527 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.01s | Éxito: 0.0% (0/1)
+2025-11-03 19:04:05,528 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:09:05
+2025-11-03 19:04:05,737 - SimuladorCIMARQ - INFO - ✅ MQTT broker conectado exitosamente
+2025-11-03 19:09:05,738 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 19:09:05,741 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.39°C, pH=8.153, O2=7.85mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 19:09:05,742 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.39, ph: 8.153, oxigeno: 7.85, fecha: 1762207745742}
+2025-11-03 19:09:05,743 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 19:09:05,743 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:14:05
+2025-11-03 19:14:05,770 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 19:14:05,773 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.57°C, pH=8.156, O2=7.82mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 19:14:05,774 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.57, ph: 8.156, oxigeno: 7.82, fecha: 1762208045774}
+2025-11-03 19:14:05,775 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 19:14:05,775 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:19:05
+2025-11-03 19:19:05,932 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 19:19:05,934 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.58°C, pH=8.15, O2=7.84mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 19:19:05,936 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.58, ph: 8.15, oxigeno: 7.84, fecha: 1762208345936}
+2025-11-03 19:19:05,936 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 19:19:05,937 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:24:05
+2025-11-03 19:24:06,350 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 19:24:06,352 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.55°C, pH=8.157, O2=7.87mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 19:24:06,352 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.55, ph: 8.157, oxigeno: 7.87, fecha: 1762208646352}
+2025-11-03 19:24:06,353 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 19:24:06,353 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:29:06
+2025-11-03 19:29:06,485 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 19:29:06,486 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.41°C, pH=8.159, O2=7.87mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 19:29:06,487 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.41, ph: 8.159, oxigeno: 7.87, fecha: 1762208946487}
+2025-11-03 19:29:06,488 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 19:29:06,488 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:34:06
+2025-11-03 19:34:07,187 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 19:34:07,189 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.39°C, pH=8.167, O2=7.85mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 19:34:07,190 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.39, ph: 8.167, oxigeno: 7.85, fecha: 1762209247190}
+2025-11-03 19:34:07,190 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 19:34:07,191 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:39:07
+2025-11-03 19:39:07,862 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 19:39:07,863 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.48°C, pH=8.165, O2=7.83mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 19:39:07,864 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.48, ph: 8.165, oxigeno: 7.83, fecha: 1762209547864}
+2025-11-03 19:39:07,864 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 19:39:07,865 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:44:07
+2025-11-03 19:44:07,980 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 19:44:07,981 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.52°C, pH=8.163, O2=7.84mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 19:44:07,982 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.52, ph: 8.163, oxigeno: 7.84, fecha: 1762209847982}
+2025-11-03 19:44:07,983 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 19:44:07,983 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:49:07
+2025-11-03 19:49:08,525 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 19:49:08,526 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.41°C, pH=8.156, O2=7.82mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 19:49:08,527 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.41, ph: 8.156, oxigeno: 7.82, fecha: 1762210148527}
+2025-11-03 19:49:08,528 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 19:49:08,528 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:54:08
+2025-11-03 19:54:09,465 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 19:54:09,467 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.43°C, pH=8.162, O2=7.79mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 19:54:09,468 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.43, ph: 8.162, oxigeno: 7.79, fecha: 1762210449468}
+2025-11-03 19:54:09,469 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 19:54:09,470 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:59:09
+2025-11-03 19:59:09,678 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 19:59:09,679 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.49°C, pH=8.166, O2=7.78mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 19:59:09,680 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.49, ph: 8.166, oxigeno: 7.78, fecha: 1762210749680}
+2025-11-03 19:59:09,680 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 19:59:09,681 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:04:09
+2025-11-03 20:04:10,282 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 20:04:10,284 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.2°C, pH=8.158, O2=7.47mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 20:04:10,285 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.2, ph: 8.158, oxigeno: 7.47, fecha: 1762211050285}
+2025-11-03 20:04:10,285 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 20:04:10,286 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:09:10
+2025-11-03 20:09:11,193 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 20:09:11,194 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.16°C, pH=8.157, O2=7.44mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 20:09:11,206 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.16, ph: 8.157, oxigeno: 7.44, fecha: 1762211351206}
+2025-11-03 20:09:11,219 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.03s | Éxito: 100.0% (1/1)
+2025-11-03 20:09:11,228 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:14:11
+2025-11-03 20:14:11,601 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 20:14:11,602 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.13°C, pH=8.161, O2=7.49mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 20:14:11,603 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.13, ph: 8.161, oxigeno: 7.49, fecha: 1762211651602}
+2025-11-03 20:14:11,603 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 20:14:11,604 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:19:11
+2025-11-03 20:19:12,609 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 20:19:12,610 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.14°C, pH=8.161, O2=7.51mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 20:19:12,611 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.14, ph: 8.161, oxigeno: 7.51, fecha: 1762211952611}
+2025-11-03 20:19:12,611 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 20:19:12,612 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:24:12
+2025-11-03 20:24:12,817 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 20:24:12,818 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.08°C, pH=8.157, O2=7.48mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 20:24:12,818 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.08, ph: 8.157, oxigeno: 7.48, fecha: 1762212252818}
+2025-11-03 20:24:12,819 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 20:24:12,819 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:29:12
+2025-11-03 20:29:13,178 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 20:29:13,179 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.18°C, pH=8.159, O2=7.51mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 20:29:13,181 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.18, ph: 8.159, oxigeno: 7.51, fecha: 1762212553181}
+2025-11-03 20:29:13,181 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 20:29:13,182 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:34:13
+2025-11-03 20:34:13,344 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 20:34:13,345 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.16°C, pH=8.162, O2=7.48mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 20:34:13,346 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.16, ph: 8.162, oxigeno: 7.48, fecha: 1762212853345}
+2025-11-03 20:34:13,346 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 20:34:13,346 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:39:13
+2025-11-03 20:39:13,924 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 20:39:13,933 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.05°C, pH=8.162, O2=7.52mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 20:39:13,939 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.05, ph: 8.162, oxigeno: 7.52, fecha: 1762213153939}
+2025-11-03 20:39:13,940 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.02s | Éxito: 100.0% (1/1)
+2025-11-03 20:39:13,943 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:44:13
+2025-11-03 20:44:14,176 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 20:44:14,178 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.08°C, pH=8.164, O2=7.5mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 20:44:14,178 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.08, ph: 8.164, oxigeno: 7.5, fecha: 1762213454178}
+2025-11-03 20:44:14,179 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 20:44:14,179 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:49:14
+2025-11-03 20:49:15,142 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 20:49:15,143 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.06°C, pH=8.156, O2=7.48mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 20:49:15,143 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.06, ph: 8.156, oxigeno: 7.48, fecha: 1762213755143}
+2025-11-03 20:49:15,144 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 20:49:15,145 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:54:15
+2025-11-03 20:54:15,300 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 20:54:15,302 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.05°C, pH=8.156, O2=7.49mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 20:54:15,303 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.05, ph: 8.156, oxigeno: 7.49, fecha: 1762214055302}
+2025-11-03 20:54:15,304 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 20:54:15,317 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:59:15
+2025-11-03 22:15:43,699 - SimuladorCIMARQ - WARNING - ⚠️ MQTT desconectado, código: 7
+2025-11-03 22:15:43,779 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 22:15:43,794 - SimuladorCIMARQ - WARNING - ⚠️ MQTT no conectado, no se puede enviar datos unificados
+2025-11-03 22:15:43,794 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.095, O2=6.74mg/L | MQTT=❌ | MongoDB=Via Backend
+2025-11-03 22:15:43,795 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.095, oxigeno: 6.74, fecha: 1762218943795}
+2025-11-03 22:15:43,800 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.02s | Éxito: 0.0% (0/1)
+2025-11-03 22:15:43,800 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 22:20:43
+2025-11-03 22:22:28,763 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 22:22:28,942 - SimuladorCIMARQ - WARNING - ⚠️ MQTT no conectado, no se puede enviar datos unificados
+2025-11-03 22:22:28,970 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.094, O2=6.78mg/L | MQTT=❌ | MongoDB=Via Backend
+2025-11-03 22:22:29,042 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.094, oxigeno: 6.78, fecha: 1762219349042}
+2025-11-03 22:22:29,069 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.31s | Éxito: 0.0% (0/1)
+2025-11-03 22:22:29,090 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 22:27:28
+2025-11-03 22:22:30,125 - SimuladorCIMARQ - INFO - ✅ MQTT broker conectado exitosamente
+2025-11-03 22:27:29,173 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 22:27:29,180 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.088, O2=6.75mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 22:27:29,181 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.088, oxigeno: 6.75, fecha: 1762219649181}
+2025-11-03 22:27:29,182 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.01s | Éxito: 100.0% (1/1)
+2025-11-03 22:27:29,182 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 22:32:29
+2025-11-03 22:32:29,294 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 22:32:29,297 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.093, O2=6.79mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 22:32:29,297 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.093, oxigeno: 6.79, fecha: 1762219949297}
+2025-11-03 22:32:29,298 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 22:32:29,298 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 22:37:29
+2025-11-03 22:37:30,084 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 22:37:30,086 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.088, O2=6.77mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 22:37:30,087 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.088, oxigeno: 6.77, fecha: 1762220250087}
+2025-11-03 22:37:30,087 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 22:37:30,088 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 22:42:30
+2025-11-03 22:42:30,791 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 22:42:30,794 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.082, O2=6.74mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 22:42:30,794 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.082, oxigeno: 6.74, fecha: 1762220550794}
+2025-11-03 22:42:30,795 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 22:42:30,796 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 22:47:30
+2025-11-03 22:47:31,445 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 22:47:31,447 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.091, O2=6.76mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 22:47:31,448 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.091, oxigeno: 6.76, fecha: 1762220851447}
+2025-11-03 22:47:31,448 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 22:47:31,448 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 22:52:31
+2025-11-03 22:52:31,672 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 22:52:31,674 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.08, O2=6.76mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 22:52:31,674 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.08, oxigeno: 6.76, fecha: 1762221151674}
+2025-11-03 22:52:31,675 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 22:52:31,676 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 22:57:31
+2025-11-03 22:57:31,850 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 22:57:31,852 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.084, O2=6.75mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 22:57:31,855 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.084, oxigeno: 6.75, fecha: 1762221451854}
+2025-11-03 22:57:31,855 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.01s | Éxito: 100.0% (1/1)
+2025-11-03 22:57:31,856 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 23:02:31
+2025-11-03 23:02:32,193 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 23:02:32,198 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.042, O2=6.4mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 23:02:32,198 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.042, oxigeno: 6.4, fecha: 1762221752198}
+2025-11-03 23:02:32,198 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.01s | Éxito: 100.0% (1/1)
+2025-11-03 23:02:32,199 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 23:07:32
+2025-11-03 23:07:33,036 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 23:07:33,037 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.031, O2=6.41mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 23:07:33,038 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.031, oxigeno: 6.41, fecha: 1762222053038}
+2025-11-03 23:07:33,039 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 23:07:33,039 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 23:12:33
+2025-11-03 23:12:33,990 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 23:12:33,992 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.025, O2=6.41mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 23:12:33,993 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.025, oxigeno: 6.41, fecha: 1762222353992}
+2025-11-03 23:12:33,993 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 23:12:33,994 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 23:17:33
+2025-11-03 23:17:34,040 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 23:17:34,042 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.017, O2=6.38mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 23:17:34,043 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.017, oxigeno: 6.38, fecha: 1762222654043}
+2025-11-03 23:17:34,043 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 23:17:34,044 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 23:22:34
+2025-11-03 23:22:34,793 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 23:22:34,797 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.013, O2=6.41mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 23:22:34,798 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.013, oxigeno: 6.41, fecha: 1762222954798}
+2025-11-03 23:22:34,798 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.01s | Éxito: 100.0% (1/1)
+2025-11-03 23:22:34,799 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 23:27:34
+2025-11-03 23:27:38,688 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 23:27:38,691 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.024, O2=6.4mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 23:27:38,691 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.024, oxigeno: 6.4, fecha: 1762223258691}
+2025-11-03 23:27:38,691 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 23:27:38,692 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 23:32:38
+2025-11-03 23:32:39,433 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 23:32:39,434 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.03, O2=6.42mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 23:32:39,435 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.03, oxigeno: 6.42, fecha: 1762223559434}
+2025-11-03 23:32:39,435 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 23:32:39,435 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 23:37:39
+2025-11-03 23:37:39,443 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 23:37:39,444 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.036, O2=6.43mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 23:37:39,446 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.036, oxigeno: 6.43, fecha: 1762223859445}
+2025-11-03 23:37:39,446 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 23:37:39,447 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 23:42:39
+2025-11-03 23:42:39,496 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 23:42:39,501 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.039, O2=6.38mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 23:42:39,502 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.039, oxigeno: 6.38, fecha: 1762224159502}
+2025-11-03 23:42:39,502 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.01s | Éxito: 100.0% (1/1)
+2025-11-03 23:42:39,503 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 23:47:39
+2025-11-03 23:47:39,555 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 23:47:39,559 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.039, O2=6.36mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 23:47:39,560 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.039, oxigeno: 6.36, fecha: 1762224459560}
+2025-11-03 23:47:39,560 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 23:47:39,561 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 23:52:39
+2025-11-03 23:52:39,598 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 23:52:39,600 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.033, O2=6.4mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 23:52:39,600 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.033, oxigeno: 6.4, fecha: 1762224759600}
+2025-11-03 23:52:39,601 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 23:52:39,601 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 23:57:39
+2025-11-03 23:57:39,646 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-03 23:57:39,648 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.026, O2=6.37mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-03 23:57:39,648 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.026, oxigeno: 6.37, fecha: 1762225059648}
+2025-11-03 23:57:39,649 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-03 23:57:39,649 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:02:39
+2025-11-04 00:02:39,683 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 00:02:39,684 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.983, O2=6.04mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 00:02:39,685 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.983, oxigeno: 6.04, fecha: 1762225359685}
+2025-11-04 00:02:39,685 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 00:02:39,685 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:07:39
+2025-11-04 00:07:39,727 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 00:07:39,728 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.981, O2=6.05mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 00:07:39,730 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.981, oxigeno: 6.05, fecha: 1762225659728}
+2025-11-04 00:07:39,730 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 00:07:39,731 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:12:39
+2025-11-04 00:12:39,776 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 00:12:39,778 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.992, O2=6.03mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 00:12:39,778 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.992, oxigeno: 6.03, fecha: 1762225959778}
+2025-11-04 00:12:39,778 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 00:12:39,779 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:17:39
+2025-11-04 00:17:39,790 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 00:17:39,792 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.996, O2=6.01mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 00:17:39,792 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.996, oxigeno: 6.01, fecha: 1762226259792}
+2025-11-04 00:17:39,792 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 00:17:39,793 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:22:39
+2025-11-04 00:22:39,836 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 00:22:39,838 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.0, O2=6.01mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 00:22:39,840 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.0, oxigeno: 6.01, fecha: 1762226559840}
+2025-11-04 00:22:39,840 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 00:22:39,841 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:27:39
+2025-11-04 00:27:39,887 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 00:27:39,889 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.99, O2=6.01mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 00:27:39,889 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.99, oxigeno: 6.01, fecha: 1762226859889}
+2025-11-04 00:27:39,890 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 00:27:39,890 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:32:39
+2025-11-04 00:32:39,931 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 00:32:39,932 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.99, O2=6.04mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 00:32:39,932 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.99, oxigeno: 6.04, fecha: 1762227159932}
+2025-11-04 00:32:39,933 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 00:32:39,933 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:37:39
+2025-11-04 00:37:39,969 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 00:37:39,971 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.988, O2=6.02mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 00:37:39,971 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.988, oxigeno: 6.02, fecha: 1762227459971}
+2025-11-04 00:37:39,972 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 00:37:39,972 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:42:39
+2025-11-04 00:42:40,016 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 00:42:40,017 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.992, O2=6.03mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 00:42:40,018 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.992, oxigeno: 6.03, fecha: 1762227760018}
+2025-11-04 00:42:40,018 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 00:42:40,019 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:47:40
+2025-11-04 00:47:40,996 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 00:47:40,996 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.989, O2=6.01mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 00:47:40,997 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.989, oxigeno: 6.01, fecha: 1762228060997}
+2025-11-04 00:47:40,997 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 00:47:40,997 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:52:40
+2025-11-04 00:52:41,040 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 00:52:41,041 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.983, O2=6.03mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 00:52:41,041 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.983, oxigeno: 6.03, fecha: 1762228361041}
+2025-11-04 00:52:41,041 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 00:52:41,042 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 00:57:41
+2025-11-04 00:57:41,083 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 00:57:41,084 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.991, O2=6.02mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 00:57:41,085 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.991, oxigeno: 6.02, fecha: 1762228661085}
+2025-11-04 00:57:41,086 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 00:57:41,086 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:02:41
+2025-11-04 01:02:41,127 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 01:02:41,128 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.965, O2=5.78mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 01:02:41,129 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.965, oxigeno: 5.78, fecha: 1762228961128}
+2025-11-04 01:02:41,129 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 01:02:41,129 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:07:41
+2025-11-04 01:07:42,116 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 01:07:42,116 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.968, O2=5.78mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 01:07:42,117 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.968, oxigeno: 5.78, fecha: 1762229262117}
+2025-11-04 01:07:42,117 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 01:07:42,117 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:12:42
+2025-11-04 01:12:42,159 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 01:12:42,160 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.977, O2=5.77mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 01:12:42,162 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.977, oxigeno: 5.77, fecha: 1762229562162}
+2025-11-04 01:12:42,162 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 01:12:42,162 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:17:42
+2025-11-04 01:17:42,203 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 01:17:42,204 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.978, O2=5.79mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 01:17:42,204 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.978, oxigeno: 5.79, fecha: 1762229862204}
+2025-11-04 01:17:42,204 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 01:17:42,204 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:22:42
+2025-11-04 01:22:42,246 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 01:22:42,247 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.971, O2=5.77mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 01:22:42,247 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.971, oxigeno: 5.77, fecha: 1762230162247}
+2025-11-04 01:22:42,248 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 01:22:42,248 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:27:42
+2025-11-04 01:27:42,294 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 01:27:42,295 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.97, O2=5.74mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 01:27:42,296 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.97, oxigeno: 5.74, fecha: 1762230462296}
+2025-11-04 01:27:42,297 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 01:27:42,297 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:32:42
+2025-11-04 01:32:42,352 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 01:32:42,354 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.97, O2=5.75mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 01:32:42,355 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.97, oxigeno: 5.75, fecha: 1762230762355}
+2025-11-04 01:32:42,356 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 01:32:42,356 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:37:42
+2025-11-04 01:37:42,413 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 01:37:42,414 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.967, O2=5.75mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 01:37:42,414 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.967, oxigeno: 5.75, fecha: 1762231062414}
+2025-11-04 01:37:42,415 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 01:37:42,415 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:42:42
+2025-11-04 01:42:42,441 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 01:42:42,444 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.973, O2=5.76mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 01:42:42,445 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.973, oxigeno: 5.76, fecha: 1762231362445}
+2025-11-04 01:42:42,446 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 01:42:42,446 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:47:42
+2025-11-04 01:47:42,511 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-04 01:47:42,512 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.971, O2=5.82mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-04 01:47:42,513 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.971, oxigeno: 5.82, fecha: 1762231662513}
+2025-11-04 01:47:42,513 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-04 01:47:42,514 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 01:52:42
+2025-11-04 01:49:37,319 - SimuladorCIMARQ - INFO - 🛑 Señal de parada recibida, cerrando simulador...
+2025-11-04 01:49:37,400 - SimuladorCIMARQ - INFO - 🧹 Cerrando conexiones...
+2025-11-04 01:49:38,083 - SimuladorCIMARQ - WARNING - ⚠️ MQTT desconectado, código: 0
+2025-11-04 01:49:38,087 - SimuladorCIMARQ - INFO - 📡 MQTT desconectado
+2025-11-04 01:49:38,187 - SimuladorCIMARQ - INFO - 💾 MongoDB desconectado
+2025-11-04 01:49:38,188 - SimuladorCIMARQ - INFO - ✅ Simulador cerrado correctamente
+2025-11-06 17:56:00,289 - SimuladorCIMARQ - INFO - ⚙️ Configuración cargada - Intervalo: 300.0s, Sensores especializados: 3
+2025-11-06 17:56:00,290 - SimuladorCIMARQ - INFO - 🚀 Simulador CIMARQ inicializado
+2025-11-06 17:56:00,290 - SimuladorCIMARQ - INFO - 🚀 Iniciando simulador continuo CIMARQ
+2025-11-06 17:56:00,290 - SimuladorCIMARQ - INFO - 📍 Zona: Central Chile (Valparaíso/Quintay)
+2025-11-06 17:56:00,291 - SimuladorCIMARQ - INFO - ⏱️ Intervalo: 300.0s (5.0 min)
+2025-11-06 17:56:00,291 - SimuladorCIMARQ - INFO - 🔢 Sensores especializados: 3 (Temperatura, pH, Oxígeno)
+2025-11-06 17:56:01,115 - SimuladorCIMARQ - INFO - ✅ MongoDB conectado: cimarqdb
+2025-11-06 17:56:01,764 - SimuladorCIMARQ - INFO - 📡 MQTT conectado: test.mosquitto.org:1883
+2025-11-06 17:56:01,765 - SimuladorCIMARQ - INFO - ✅ Simulador iniciado correctamente - Modo 24/7 activo
+2025-11-06 17:56:01,765 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 17:56:01,766 - SimuladorCIMARQ - WARNING - ⚠️ MQTT no conectado, no se puede enviar datos unificados
+2025-11-06 17:56:01,766 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=13.2°C, pH=8.113, O2=8.2mg/L | MQTT=❌ | MongoDB=Via Backend
+2025-11-06 17:56:01,767 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 13.2, ph: 8.113, oxigeno: 8.2, fecha: 1762462561767}
+2025-11-06 17:56:01,767 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 0.0% (0/1)
+2025-11-06 17:56:01,768 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 18:01:01
+2025-11-06 17:56:02,005 - SimuladorCIMARQ - INFO - ✅ MQTT broker conectado exitosamente
+2025-11-06 18:01:01,994 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 18:01:01,996 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.76°C, pH=8.12, O2=8.02mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 18:01:01,997 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.76, ph: 8.12, oxigeno: 8.02, fecha: 1762462861997}
+2025-11-06 18:01:01,997 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 18:01:01,998 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 18:06:01
+2025-11-06 18:06:02,588 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 18:06:02,594 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.78°C, pH=8.112, O2=8.01mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 18:06:02,595 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.78, ph: 8.112, oxigeno: 8.01, fecha: 1762463162595}
+2025-11-06 18:06:02,596 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.01s | Éxito: 100.0% (1/1)
+2025-11-06 18:06:02,596 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 18:11:02
+2025-11-06 18:11:02,772 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 18:11:02,775 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.74°C, pH=8.111, O2=8.03mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 18:11:02,776 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.74, ph: 8.111, oxigeno: 8.03, fecha: 1762463462776}
+2025-11-06 18:11:02,777 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.01s | Éxito: 100.0% (1/1)
+2025-11-06 18:11:02,778 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 18:16:02
+2025-11-06 18:16:03,351 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 18:16:03,353 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.78°C, pH=8.099, O2=8.0mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 18:16:03,354 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.78, ph: 8.099, oxigeno: 8.0, fecha: 1762463763354}
+2025-11-06 18:16:03,355 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 18:16:03,356 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 18:21:03
+2025-11-06 18:21:03,894 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 18:21:03,897 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.71°C, pH=8.102, O2=7.99mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 18:21:03,898 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.71, ph: 8.102, oxigeno: 7.99, fecha: 1762464063898}
+2025-11-06 18:21:03,898 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 18:21:03,899 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 18:26:03
+2025-11-06 18:26:04,451 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 18:26:04,453 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.78°C, pH=8.113, O2=7.97mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 18:26:04,454 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.78, ph: 8.113, oxigeno: 7.97, fecha: 1762464364454}
+2025-11-06 18:26:04,454 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 18:26:04,455 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 18:31:04
+2025-11-06 18:31:04,762 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 18:31:04,765 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.71°C, pH=8.114, O2=8.0mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 18:31:04,766 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.71, ph: 8.114, oxigeno: 8.0, fecha: 1762464664766}
+2025-11-06 18:31:04,767 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 18:31:04,767 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 18:36:04
+2025-11-06 18:36:05,381 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 18:36:05,384 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.7°C, pH=8.101, O2=8.0mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 18:36:05,385 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.7, ph: 8.101, oxigeno: 8.0, fecha: 1762464965384}
+2025-11-06 18:36:05,386 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 18:36:05,386 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 18:41:05
+2025-11-06 18:41:06,159 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 18:41:06,163 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.73°C, pH=8.089, O2=7.99mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 18:41:06,164 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.73, ph: 8.089, oxigeno: 7.99, fecha: 1762465266164}
+2025-11-06 18:41:06,164 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.01s | Éxito: 100.0% (1/1)
+2025-11-06 18:41:06,166 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 18:46:06
+2025-11-06 18:46:06,732 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 18:46:06,736 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.81°C, pH=8.086, O2=8.0mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 18:46:06,736 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.81, ph: 8.086, oxigeno: 8.0, fecha: 1762465566736}
+2025-11-06 18:46:06,737 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 18:46:06,739 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 18:51:06
+2025-11-06 18:51:07,129 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 18:51:07,136 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.83°C, pH=8.085, O2=8.01mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 18:51:07,137 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.83, ph: 8.085, oxigeno: 8.01, fecha: 1762465867137}
+2025-11-06 18:51:07,138 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.01s | Éxito: 100.0% (1/1)
+2025-11-06 18:51:07,140 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 18:56:07
+2025-11-06 18:56:07,580 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 18:56:07,584 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.84°C, pH=8.098, O2=8.0mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 18:56:07,585 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.84, ph: 8.098, oxigeno: 8.0, fecha: 1762466167585}
+2025-11-06 18:56:07,585 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.01s | Éxito: 100.0% (1/1)
+2025-11-06 18:56:07,586 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:01:07
+2025-11-06 19:01:08,166 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 19:01:08,168 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.43°C, pH=8.101, O2=7.71mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 19:01:08,169 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.43, ph: 8.101, oxigeno: 7.71, fecha: 1762466468169}
+2025-11-06 19:01:08,169 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 19:01:08,170 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:06:08
+2025-11-06 19:06:09,016 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 19:06:09,019 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.5°C, pH=8.103, O2=7.68mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 19:06:09,019 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.5, ph: 8.103, oxigeno: 7.68, fecha: 1762466769019}
+2025-11-06 19:06:09,020 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 19:06:09,021 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:11:09
+2025-11-06 19:11:09,088 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 19:11:09,090 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.44°C, pH=8.11, O2=7.71mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 19:11:09,091 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.44, ph: 8.11, oxigeno: 7.71, fecha: 1762467069091}
+2025-11-06 19:11:09,091 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 19:11:09,092 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:16:09
+2025-11-06 19:16:09,661 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 19:16:09,665 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.45°C, pH=8.114, O2=7.7mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 19:16:09,665 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.45, ph: 8.114, oxigeno: 7.7, fecha: 1762467369665}
+2025-11-06 19:16:09,666 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 19:16:09,666 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:21:09
+2025-11-06 19:21:10,049 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 19:21:10,052 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.46°C, pH=8.113, O2=7.71mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 19:21:10,053 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.46, ph: 8.113, oxigeno: 7.71, fecha: 1762467670053}
+2025-11-06 19:21:10,054 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 19:21:10,054 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:26:10
+2025-11-06 19:26:10,534 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 19:26:10,536 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.37°C, pH=8.122, O2=7.7mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 19:26:10,537 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.37, ph: 8.122, oxigeno: 7.7, fecha: 1762467970537}
+2025-11-06 19:26:10,538 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 19:26:10,538 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:31:10
+2025-11-06 19:31:11,118 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 19:31:11,119 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.39°C, pH=8.122, O2=7.72mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 19:31:11,120 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.39, ph: 8.122, oxigeno: 7.72, fecha: 1762468271119}
+2025-11-06 19:31:11,120 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 19:31:11,120 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:36:11
+2025-11-06 19:36:11,836 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 19:36:11,839 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.45°C, pH=8.115, O2=7.73mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 19:36:11,839 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.45, ph: 8.115, oxigeno: 7.73, fecha: 1762468571839}
+2025-11-06 19:36:11,840 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 19:36:11,840 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:41:11
+2025-11-06 19:41:11,948 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 19:41:11,950 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.39°C, pH=8.119, O2=7.71mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 19:41:11,951 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.39, ph: 8.119, oxigeno: 7.71, fecha: 1762468871950}
+2025-11-06 19:41:11,952 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 19:41:11,953 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:46:11
+2025-11-06 19:46:12,074 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 19:46:12,077 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.4°C, pH=8.111, O2=7.73mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 19:46:12,078 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.4, ph: 8.111, oxigeno: 7.73, fecha: 1762469172078}
+2025-11-06 19:46:12,078 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 19:46:12,079 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:51:12
+2025-11-06 19:51:12,220 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 19:51:12,222 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.41°C, pH=8.113, O2=7.71mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 19:51:12,223 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.41, ph: 8.113, oxigeno: 7.71, fecha: 1762469472223}
+2025-11-06 19:51:12,224 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 19:51:12,225 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 19:56:12
+2025-11-06 19:56:13,472 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 19:56:13,473 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.51°C, pH=8.115, O2=7.72mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 19:56:13,474 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.51, ph: 8.115, oxigeno: 7.72, fecha: 1762469773474}
+2025-11-06 19:56:13,475 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 19:56:13,475 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:01:13
+2025-11-06 20:01:14,008 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 20:01:14,011 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.06°C, pH=8.097, O2=7.4mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 20:01:14,012 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.06, ph: 8.097, oxigeno: 7.4, fecha: 1762470074012}
+2025-11-06 20:01:14,015 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.01s | Éxito: 100.0% (1/1)
+2025-11-06 20:01:14,016 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:06:14
+2025-11-06 20:06:14,486 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 20:06:14,487 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.03°C, pH=8.098, O2=7.37mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 20:06:14,488 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.03, ph: 8.098, oxigeno: 7.37, fecha: 1762470374488}
+2025-11-06 20:06:14,488 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 20:06:14,489 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:11:14
+2025-11-06 20:11:15,152 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 20:11:15,153 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.09°C, pH=8.098, O2=7.38mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 20:11:15,155 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.09, ph: 8.098, oxigeno: 7.38, fecha: 1762470675155}
+2025-11-06 20:11:15,156 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 20:11:15,157 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:16:15
+2025-11-06 20:16:16,962 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 20:16:16,963 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.05°C, pH=8.1, O2=7.35mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 20:16:16,964 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.05, ph: 8.1, oxigeno: 7.35, fecha: 1762470976964}
+2025-11-06 20:16:16,965 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 20:16:16,965 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:21:16
+2025-11-06 20:21:17,939 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 20:21:17,941 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.03°C, pH=8.086, O2=7.33mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 20:21:17,942 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.03, ph: 8.086, oxigeno: 7.33, fecha: 1762471277942}
+2025-11-06 20:21:17,942 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 20:21:17,943 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:26:17
+2025-11-06 20:26:18,840 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 20:26:18,843 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.08°C, pH=8.08, O2=7.34mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 20:26:18,843 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.08, ph: 8.08, oxigeno: 7.34, fecha: 1762471578843}
+2025-11-06 20:26:18,844 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 20:26:18,844 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:31:18
+2025-11-06 20:31:18,900 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 20:31:18,901 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.01°C, pH=8.075, O2=7.34mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 20:31:18,901 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.01, ph: 8.075, oxigeno: 7.34, fecha: 1762471878901}
+2025-11-06 20:31:18,902 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 20:31:18,902 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:36:18
+2025-11-06 20:36:19,198 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 20:36:19,233 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.03°C, pH=8.072, O2=7.36mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 20:36:19,234 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.03, ph: 8.072, oxigeno: 7.36, fecha: 1762472179234}
+2025-11-06 20:36:19,235 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.04s | Éxito: 100.0% (1/1)
+2025-11-06 20:36:19,235 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:41:19
+2025-11-06 20:41:20,374 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 20:41:20,376 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.072, O2=7.35mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 20:41:20,376 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.072, oxigeno: 7.35, fecha: 1762472480376}
+2025-11-06 20:41:20,377 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.41s | Éxito: 100.0% (1/1)
+2025-11-06 20:41:20,377 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:46:19
+2025-11-06 20:46:20,207 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 20:46:20,208 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.084, O2=7.33mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 20:46:20,209 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.084, oxigeno: 7.33, fecha: 1762472780209}
+2025-11-06 20:46:20,209 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 20:46:20,210 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:51:20
+2025-11-06 20:51:20,659 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 20:51:20,661 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.04°C, pH=8.086, O2=7.31mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 20:51:20,661 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.04, ph: 8.086, oxigeno: 7.31, fecha: 1762473080661}
+2025-11-06 20:51:20,663 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 20:51:20,663 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 20:56:20
+2025-11-06 20:56:21,303 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 20:56:21,305 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.086, O2=7.31mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 20:56:21,306 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.086, oxigeno: 7.31, fecha: 1762473381306}
+2025-11-06 20:56:21,307 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 20:56:21,308 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 21:01:21
+2025-11-06 21:01:22,159 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 21:01:22,161 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.054, O2=6.93mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 21:01:22,162 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.054, oxigeno: 6.93, fecha: 1762473682162}
+2025-11-06 21:01:22,163 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 21:01:22,164 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 21:06:22
+2025-11-06 21:06:23,151 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 21:06:23,156 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.053, O2=6.9mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 21:06:23,157 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.053, oxigeno: 6.9, fecha: 1762473983157}
+2025-11-06 21:06:23,158 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.01s | Éxito: 100.0% (1/1)
+2025-11-06 21:06:23,158 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 21:11:23
+2025-11-06 21:11:23,185 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 21:11:23,187 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.063, O2=6.93mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 21:11:23,188 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.063, oxigeno: 6.93, fecha: 1762474283188}
+2025-11-06 21:11:23,189 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 21:11:23,190 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 21:16:23
+2025-11-06 21:16:23,218 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 21:16:23,220 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.063, O2=6.92mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 21:16:23,221 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.063, oxigeno: 6.92, fecha: 1762474583221}
+2025-11-06 21:16:23,222 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 21:16:23,223 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 21:21:23
+2025-11-06 21:21:23,388 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 21:21:23,390 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.053, O2=6.91mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 21:21:23,392 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.053, oxigeno: 6.91, fecha: 1762474883392}
+2025-11-06 21:21:23,392 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 21:21:23,393 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 21:26:23
+2025-11-06 21:26:23,671 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 21:26:23,671 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.057, O2=6.89mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 21:26:23,672 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.057, oxigeno: 6.89, fecha: 1762475183672}
+2025-11-06 21:26:23,672 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 21:26:23,673 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 21:31:23
+2025-11-06 21:31:24,166 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 21:31:24,168 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.054, O2=6.89mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 21:31:24,168 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.054, oxigeno: 6.89, fecha: 1762475484168}
+2025-11-06 21:31:24,170 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 21:31:24,170 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 21:36:24
+2025-11-06 21:36:24,672 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 21:36:24,673 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.055, O2=6.87mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 21:36:24,675 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.055, oxigeno: 6.87, fecha: 1762475784675}
+2025-11-06 21:36:24,676 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 21:36:24,676 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 21:41:24
+2025-11-06 21:41:25,207 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 21:41:25,208 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.048, O2=6.87mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 21:41:25,210 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.048, oxigeno: 6.87, fecha: 1762476085210}
+2025-11-06 21:41:25,212 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 21:41:25,213 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 21:46:25
+2025-11-06 21:46:25,890 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 21:46:25,891 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.055, O2=6.85mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 21:46:25,892 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.055, oxigeno: 6.85, fecha: 1762476385892}
+2025-11-06 21:46:25,892 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 21:46:25,893 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 21:51:25
+2025-11-06 21:51:26,809 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 21:51:26,811 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.048, O2=6.87mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 21:51:26,811 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.048, oxigeno: 6.87, fecha: 1762476686811}
+2025-11-06 21:51:26,812 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 21:51:26,813 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 21:56:26
+2025-11-06 21:56:28,754 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 21:56:28,755 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.044, O2=6.84mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 21:56:28,756 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.044, oxigeno: 6.84, fecha: 1762476988756}
+2025-11-06 21:56:28,756 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 21:56:28,757 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 22:01:28
+2025-11-06 22:01:29,670 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 22:01:29,672 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.015, O2=6.42mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 22:01:29,672 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.015, oxigeno: 6.42, fecha: 1762477289672}
+2025-11-06 22:01:29,673 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 22:01:29,673 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 22:06:29
+2025-11-06 22:06:29,856 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 22:06:29,857 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.012, O2=6.43mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 22:06:29,858 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.012, oxigeno: 6.43, fecha: 1762477589857}
+2025-11-06 22:06:29,858 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 22:06:29,859 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 22:11:29
+2025-11-06 22:11:31,098 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 22:11:31,100 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.997, O2=6.4mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 22:11:31,100 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.997, oxigeno: 6.4, fecha: 1762477891100}
+2025-11-06 22:11:31,101 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 22:11:31,102 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 22:16:31
+2025-11-06 22:16:31,357 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 22:16:31,358 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.985, O2=6.36mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 22:16:31,359 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.985, oxigeno: 6.36, fecha: 1762478191359}
+2025-11-06 22:16:31,359 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 22:16:31,360 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 22:21:31
+2025-11-06 22:21:31,835 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 22:21:31,836 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.002, O2=6.41mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 22:21:31,837 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.002, oxigeno: 6.41, fecha: 1762478491837}
+2025-11-06 22:21:31,838 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 22:21:31,838 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 22:26:31
+2025-11-06 22:26:32,697 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 22:26:32,698 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.994, O2=6.41mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 22:26:32,699 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.994, oxigeno: 6.41, fecha: 1762478792699}
+2025-11-06 22:26:32,700 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 22:26:32,701 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 22:31:32
+2025-11-06 22:31:32,783 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 22:31:32,785 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.984, O2=6.37mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 22:31:32,785 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.984, oxigeno: 6.37, fecha: 1762479092785}
+2025-11-06 22:31:32,786 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 22:31:32,786 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 22:36:32
+2025-11-06 22:36:33,238 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 22:36:33,240 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.985, O2=6.41mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 22:36:33,241 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.985, oxigeno: 6.41, fecha: 1762479393241}
+2025-11-06 22:36:33,241 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 22:36:33,242 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 22:41:33
+2025-11-06 22:41:33,412 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 22:41:33,413 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.996, O2=6.38mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 22:41:33,414 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.996, oxigeno: 6.38, fecha: 1762479693414}
+2025-11-06 22:41:33,415 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 22:41:33,416 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 22:46:33
+2025-11-06 22:46:33,572 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 22:46:33,573 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.993, O2=6.41mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 22:46:33,575 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.993, oxigeno: 6.41, fecha: 1762479993574}
+2025-11-06 22:46:33,576 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 22:46:33,576 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 22:51:33
+2025-11-06 22:51:34,349 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 22:51:34,352 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.003, O2=6.36mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 22:51:34,353 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.003, oxigeno: 6.36, fecha: 1762480294353}
+2025-11-06 22:51:34,353 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 22:51:34,354 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 22:56:34
+2025-11-06 22:56:34,814 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 22:56:34,816 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=8.004, O2=6.34mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 22:56:34,817 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 8.004, oxigeno: 6.34, fecha: 1762480594817}
+2025-11-06 22:56:34,817 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 22:56:34,818 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 23:01:34
+2025-11-06 23:01:35,522 - SimuladorCIMARQ - INFO - 🔄 Iniciando ciclo de simulación - Sistema unificado
+2025-11-06 23:01:35,524 - SimuladorCIMARQ - INFO - 📊 Datos Completos sin Nulos: T=12.0°C, pH=7.955, O2=6.01mg/L | MQTT=✅ | MongoDB=Via Backend
+2025-11-06 23:01:35,524 - SimuladorCIMARQ - INFO - � MQTT Unificado: {temperatura: 12.0, ph: 7.955, oxigeno: 6.01, fecha: 1762480895524}
+2025-11-06 23:01:35,525 - SimuladorCIMARQ - INFO - ✅ Ciclo completado en 0.00s | Éxito: 100.0% (1/1)
+2025-11-06 23:01:35,525 - SimuladorCIMARQ - INFO - ⏰ Próximo ciclo: 23:06:35
+2025-11-06 23:02:03,118 - SimuladorCIMARQ - INFO - 🛑 Señal de parada recibida, cerrando simulador...
+2025-11-06 23:02:03,695 - SimuladorCIMARQ - INFO - 🧹 Cerrando conexiones...
+2025-11-06 23:02:03,923 - SimuladorCIMARQ - WARNING - ⚠️ MQTT desconectado, código: 0
+2025-11-06 23:02:03,930 - SimuladorCIMARQ - INFO - 📡 MQTT desconectado
+2025-11-06 23:02:04,039 - SimuladorCIMARQ - INFO - 💾 MongoDB desconectado
+2025-11-06 23:02:04,041 - SimuladorCIMARQ - INFO - ✅ Simulador cerrado correctamente

@@ -18,6 +18,8 @@ interface AuthContextType {
   logout: () => void;
   updateProfile: (profileData: UpdateProfileData) => Promise<{ success: boolean; message?: string }>;
   isAuthenticated: boolean;
+  sessionTimeRemaining: number; // Tiempo restante en milisegundos
+  extendSession: () => void; // Función para extender la sesión manualmente
 }
 
 interface UpdateProfileData {
@@ -28,6 +30,10 @@ interface UpdateProfileData {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Constantes para la gestión de sesión
+const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutos en milisegundos
+const ACTIVITY_CHECK_INTERVAL = 60 * 1000; // Verificar cada minuto
 
 // Helper para localStorage seguro
 const safeLocalStorage = {
@@ -52,6 +58,37 @@ const safeLocalStorage = {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sessionTimeRemaining, setSessionTimeRemaining] = useState<number>(0);
+
+  // Función para actualizar el timestamp de última actividad
+  const updateLastActivity = () => {
+    const now = Date.now().toString();
+    safeLocalStorage.setItem('last-activity', now);
+  };
+
+  // Función para verificar si la sesión ha expirado
+  const isSessionExpired = (): boolean => {
+    const lastActivity = safeLocalStorage.getItem('last-activity');
+    if (!lastActivity) return true;
+    
+    const timeSinceLastActivity = Date.now() - parseInt(lastActivity);
+    return timeSinceLastActivity > INACTIVITY_TIMEOUT;
+  };
+
+  // Función para calcular tiempo restante de sesión
+  const getSessionTimeRemaining = (): number => {
+    const lastActivity = safeLocalStorage.getItem('last-activity');
+    if (!lastActivity) return 0;
+    
+    const timeSinceLastActivity = Date.now() - parseInt(lastActivity);
+    const timeRemaining = INACTIVITY_TIMEOUT - timeSinceLastActivity;
+    return Math.max(0, timeRemaining);
+  };
+
+  // Función para extender la sesión manualmente
+  const extendSession = () => {
+    updateLastActivity();
+  };
 
   // Verificar token almacenado al cargar
   useEffect(() => {
@@ -60,21 +97,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userData = safeLocalStorage.getItem('user-data');
       
       if (token && userData) {
-        try {
-          // Verificar si el token sigue siendo válido
-          const response = await apiRequestJson(API_ENDPOINTS.AUTH.VERIFY, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-
-          // Si llega aquí, el token es válido
-          setUser(JSON.parse(userData));
-        } catch (error) {
-          console.warn('Error verificando token:', error);
-          // Token inválido o error de red, limpiar sesión
+        // Verificar si la sesión ha expirado por inactividad
+        if (isSessionExpired()) {
+          console.log('Sesión expirada por inactividad');
           safeLocalStorage.removeItem('auth-token');
           safeLocalStorage.removeItem('user-data');
+          safeLocalStorage.removeItem('last-activity');
+          setLoading(false);
+          return;
+        }
+
+        try {
+          // Intentar verificar si el token sigue siendo válido
+          // Si el endpoint VERIFY no existe, usar STATUS como fallback
+          let isValidToken = false;
+          
+          try {
+            await apiRequestJson(API_ENDPOINTS.AUTH.VERIFY, {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            isValidToken = true;
+          } catch (verifyError) {
+            // Si VERIFY falla, intentar con STATUS
+            try {
+              await apiRequestJson(API_ENDPOINTS.AUTH.STATUS, {
+                headers: {
+                  'Authorization': `Bearer ${token}`
+                }
+              });
+              isValidToken = true;
+            } catch (statusError) {
+              console.warn('Token inválido o endpoints no disponibles');
+              isValidToken = false;
+            }
+          }
+
+          if (isValidToken) {
+            // Token válido, restaurar sesión
+            setUser(JSON.parse(userData));
+            updateLastActivity(); // Actualizar última actividad
+          } else {
+            // Token inválido, limpiar sesión
+            safeLocalStorage.removeItem('auth-token');
+            safeLocalStorage.removeItem('user-data');
+            safeLocalStorage.removeItem('last-activity');
+          }
+        } catch (error) {
+          // En caso de error de red o servidor, mantener la sesión local
+          // La verificación real se hará en la próxima petición que requiera autenticación
+          console.debug('No se pudo verificar el token, manteniendo sesión local:', error);
+          setUser(JSON.parse(userData));
+          updateLastActivity();
         }
       }
       setLoading(false);
@@ -82,6 +157,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     checkAuth();
   }, []);
+
+  // Efecto para monitorear actividad del usuario y verificar expiración de sesión
+  useEffect(() => {
+    if (!user) return;
+
+    // Eventos que consideramos como actividad del usuario
+    const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+
+    // Handler para actualizar última actividad
+    const handleUserActivity = () => {
+      updateLastActivity();
+    };
+
+    // Agregar listeners de actividad
+    activityEvents.forEach(event => {
+      document.addEventListener(event, handleUserActivity, true);
+    });
+
+    // Verificar periódicamente si la sesión ha expirado y actualizar tiempo restante
+    const sessionCheckInterval = setInterval(() => {
+      const timeRemaining = getSessionTimeRemaining();
+      setSessionTimeRemaining(timeRemaining);
+      
+      if (isSessionExpired()) {
+        console.log('Sesión expirada por inactividad - desconectando usuario');
+        logout();
+      }
+    }, ACTIVITY_CHECK_INTERVAL);
+
+    // Cleanup
+    return () => {
+      activityEvents.forEach(event => {
+        document.removeEventListener(event, handleUserActivity, true);
+      });
+      clearInterval(sessionCheckInterval);
+    };
+  }, [user]);
 
   const login = async (email: string, password: string): Promise<{ success: boolean; message?: string }> => {
     try {
@@ -96,6 +208,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Guardar en localStorage
         safeLocalStorage.setItem('auth-token', token);
         safeLocalStorage.setItem('user-data', JSON.stringify(userData));
+        updateLastActivity(); // Establecer actividad inicial
         
         setUser(userData);
         return { success: true };
@@ -113,6 +226,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     safeLocalStorage.removeItem('auth-token');
     safeLocalStorage.removeItem('user-data');
+    safeLocalStorage.removeItem('last-activity');
     setUser(null);
   };
 
@@ -214,6 +328,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     logout,
     updateProfile,
     isAuthenticated: !!user,
+    sessionTimeRemaining,
+    extendSession,
   };
 
   return (

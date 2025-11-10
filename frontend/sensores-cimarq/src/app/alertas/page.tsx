@@ -1,52 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Box, Typography, Card, CardContent, Chip, Paper, IconButton, LinearProgress, FormControl, InputLabel, Select, MenuItem, Button, CircularProgress, Badge, Tabs, Tab, List, ListItem, ListItemText,ListItemIcon, Alert, Accordion, AccordionSummary, AccordionDetails, Switch, FormControlLabel} from '@mui/material';
-import { MdInfo, MdNotifications, MdThermostat, MdScience, MdAir, MdTimeline, MdRefresh, MdCheck, MdPlayArrow, MdClear, MdVisibility, MdExpandMore,MdTrendingUp, MdTrendingDown, MdTrendingFlat, MdBuild, MdEco, MdWarning as MdAlert} from 'react-icons/md';
+import { useState } from 'react';
+import { Box, Typography, Card, CardContent, Chip, Paper, IconButton, LinearProgress, Button, CircularProgress, Badge, List, ListItem, ListItemText, ListItemIcon, Alert, Accordion, AccordionSummary, AccordionDetails, Switch, FormControlLabel} from '@mui/material';
+import { MdInfo, MdNotifications, MdThermostat, MdScience, MdAir, MdTimeline, MdCheck, MdPlayArrow, MdClear, MdVisibility, MdExpandMore, MdTrendingUp, MdTrendingDown, MdTrendingFlat, MdBuild, MdEco, MdWarning as MdAlert} from 'react-icons/md';
 import { useMonitoreoAutomatico } from '../hooks/useMonitoreoAutomatico';
 import { useConfiguracionAlertas } from '../hooks/useConfiguracionAlertas';
-
-interface AlertaInterface {
-  id: string;
-  tipo?: 'temperatura' | 'ph' | 'oxigeno' | 'registro_completo';
-  sensor?: 'temperatura' | 'ph' | 'oxigeno' | 'registro_completo';
-  valor: number | null; // Puede ser null para registros completos
-  nivel?: 'normal' | 'alerta' | 'critico';
-  estado?: 'normal' | 'alerta' | 'critico';
-  mensaje: string;
-  timestamp: string;
-  leida?: boolean;
-  nivel_riesgo?: string;
-  resuelto?: boolean;
-  // Nuevos campos para alertas de registro completo
-  sensores_afectados?: {
-    sensor: 'temperatura' | 'ph' | 'oxigeno';
-    valor: number;
-    estado: string;
-    rangos: {
-      minimo: number;
-      maximo: number;
-      minimoOptimo: number;
-      maximoOptimo: number;
-    };
-  }[];
-  detalles_tecnicos?: {
-    desviacion?: number;
-    porcentaje_exceso?: number;
-    tendencia?: string;
-  };
-  rangos?: {
-    minimo: number;
-    maximo: number;
-  };
-  impacto_ambiental?: string;
-  acciones_recomendadas?: string[];
-  prediccion?: {
-    valor_futuro: number;
-    tendencia: string;
-    confianza: number;
-  };
-}
+import { useAlertasML, AlertaML } from '../hooks/useAlertasML';
 
 // Componente para mostrar alertas automáticas detalladas
 const AlertaAutomaticaDetallada = ({ alerta, onMarcarLeida }: { 
@@ -78,7 +37,7 @@ const AlertaAutomaticaDetallada = ({ alerta, onMarcarLeida }: {
       onChange={() => setExpandida(!expandida)}
       sx={{ 
         mb: 2, 
-        borderLeft: `4px solid ${alerta.nivel === 'critico' ? '#f44336' : '#ff9800'}`,
+        borderLeft: `4px solid ${alerta.estado === 'critico' ? '#f44336' : '#ff9800'}`,
         bgcolor: alerta.leida ? 'grey.50' : 'background.paper',
         opacity: alerta.leida ? 0.7 : 1
       }}
@@ -115,8 +74,8 @@ const AlertaAutomaticaDetallada = ({ alerta, onMarcarLeida }: {
             
             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
               <Chip
-                label={alerta.nivel === 'critico' ? 'crítico' : 'ALERTA'}
-                color={alerta.nivel === 'critico' ? 'error' : 'warning'}
+                label={alerta.estado === 'critico' ? 'CRÍTICO' : alerta.estado === 'aceptable' ? 'ADVERTENCIA' : 'ÓPTIMO'}
+                color={alerta.estado === 'critico' ? 'error' : alerta.estado === 'aceptable' ? 'warning' : 'success'}
                 size="small"
               />
               
@@ -145,259 +104,42 @@ const AlertaAutomaticaDetallada = ({ alerta, onMarcarLeida }: {
           </Box>
         )}
       </Box>
-      
-      <AccordionDetails>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {/* Sensores Afectados (solo para registro_completo) */}
-          {alerta.sensor === 'registro_completo' && alerta.sensores_afectados && (
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <MdAlert /> Sensores Afectados
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                  {alerta.sensores_afectados.map((sensor: any, index: number) => (
-                    <Card key={index} variant="outlined" sx={{ minWidth: '200px' }}>
-                      <CardContent sx={{ p: 2 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                          {sensor.sensor === 'temperatura' && <MdThermostat size={20} color="#ff5722" />}
-                          {sensor.sensor === 'ph' && <MdScience size={20} color="#3f51b5" />}
-                          {sensor.sensor === 'oxigeno' && <MdAir size={20} color="#00bcd4" />}
-                          <Typography variant="subtitle2">
-                            {sensor.sensor === 'temperatura' ? 'Temperatura' : 
-                             sensor.sensor === 'ph' ? 'pH' : 'Oxígeno'}
-                          </Typography>
-                        </Box>
-                        <Typography variant="body2">
-                          Valor: {sensor.valor}
-                          {sensor.sensor === 'temperatura' && '°C'}
-                          {sensor.sensor === 'oxigeno' && ' mg/L'}
-                        </Typography>
-                        <Chip
-                          label={sensor.estado}
-                          size="small"
-                          color={sensor.estado === 'critico' ? 'error' : 'warning'}
-                          sx={{ mt: 1 }}
-                        />
-                      </CardContent>
-                    </Card>
-                  ))}
-                </Box>
-              </CardContent>
-            </Card>
-          )}
-          
-          {/* Primera fila: Detalles Técnicos e Impacto Ambiental */}
-          <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-            {/* Detalles Técnicos */}
-            <Box sx={{ flex: 1, minWidth: '300px' }}>
-              <Card variant="outlined">
-                <CardContent>
-                  <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <MdBuild /> Detalles Técnicos
-                  </Typography>
-                  
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Desviación del centro: <strong>{alerta.detalles_tecnicos?.desviacion || 0}</strong>
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Exceso porcentual: <strong>{alerta.detalles_tecnicos?.porcentaje_exceso || 0}%</strong>
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-                      <Typography variant="body2" color="text.secondary">Tendencia:</Typography>
-                      {getTendenciaIcon(alerta.detalles_tecnicos?.tendencia || 'estable')}
-                      <Typography variant="body2">
-                        {alerta.detalles_tecnicos?.tendencia || 'estable'}
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    Rangos Configurados:
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Mínimo: {alerta.rangos?.minimo || 0} • Máximo: {alerta.rangos?.maximo || 0}
-                    {(alerta.sensor || alerta.tipo) === 'temperatura' && '°C'}
-                    {(alerta.sensor || alerta.tipo) === 'oxigeno' && ' mg/L'}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Box>
-
-            {/* Impacto Ambiental */}
-            <Box sx={{ flex: 1, minWidth: '300px' }}>
-              <Card variant="outlined">
-                <CardContent>
-                  <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <MdEco /> Impacto Ambiental
-                  </Typography>
-                  <Alert 
-                    severity={alerta.estado === 'critico' ? 'error' : 'warning'}
-                    sx={{ mb: 2 }}
-                  >
-                    {alerta.impacto_ambiental}
-                  </Alert>
-                  
-                  {alerta.estado === 'critico' && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                      <MdNotifications color="#1976d2" />
-                      <Typography variant="body2" color="primary">
-                        Alerta crítica registrada
-                      </Typography>
-                    </Box>
-                  )}
-                </CardContent>
-              </Card>
-            </Box>
-          </Box>
-
-          {/* Segunda fila: Acciones Recomendadas */}
-          <Box>
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <MdAlert /> Acciones Recomendadas
-                </Typography>
-                <List dense>
-                  {(alerta.acciones_recomendadas || []).map((accion: string, index: number) => (
-                    <ListItem key={index}>
-                      <ListItemIcon>
-                        <MdCheck color="#4caf50" />
-                      </ListItemIcon>
-                      <ListItemText primary={accion} />
-                    </ListItem>
-                  ))}
-                </List>
-              </CardContent>
-            </Card>
-          </Box>
-        </Box>
-      </AccordionDetails>
     </Accordion>
   );
 };
 
-interface AlertaPreventiva {
-  _id?: string;
-  sensor: 'temperatura' | 'ph' | 'oxigeno' | 'registro_completo';
-  nivel: 'critico' | 'alto' | 'medio' | 'bajo';
-  mensaje: string;
-  valor_actual: number | null; // Puede ser null para registros completos
-  fecha_creacion: string;
-  resuelto: boolean;
-  prioridad: number;
-  sugerencias: string[];
-  // Nuevos campos para alertas de registro completo
-  sensores_afectados?: {
-    sensor: 'temperatura' | 'ph' | 'oxigeno';
-    valor: number;
-    estado: string;
-    rangos: {
-      minimo: number;
-      maximo: number;
-      minimoOptimo: number;
-      maximoOptimo: number;
-    };
-  }[];
-  acciones_recomendadas: string[];
-}
-
-const API_BASE = 'http://localhost:5000/api/v1';
-
-// Función para verificar si el backend está disponible
-const verificarBackend = async (): Promise<boolean> => {
-  try {
-    const response = await fetch(`${API_BASE}/estado`, { 
-      method: 'GET',
-      signal: AbortSignal.timeout(2000) // Timeout de 2 segundos
-    });
-    return response.ok;
-  } catch (error) {
-    console.warn('Backend no disponible, funcionando en modo offline');
-    return false;
-  }
-};
-
-const obtenerAlertas = async (): Promise<AlertaPreventiva[]> => {
-  try {
-    const response = await fetch(`${API_BASE}/alertas`);
-    if (!response.ok) throw new Error('Error al obtener alertas');
-    const data = await response.json();
-    return data.alertas || [];
-  } catch (error) {
-    console.error('Error:', error);
-    return [];
-  }
-};
-
-const generarPredicciones = async (): Promise<boolean> => {
-  const backendDisponible = await verificarBackend();
-  if (!backendDisponible) {
-    console.warn('Backend no disponible - simulando predicciones');
-    return true; // Simular éxito para que la UI funcione
-  }
-
-  try {
-    const response = await fetch(`${API_BASE}/ml/sistema-completo`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({})
-    });
-    return response.ok;
-  } catch (error) {
-    console.error('Error:', error);
-    return false;
-  }
-};
-
-const monitoreoTiempoReal = async (): Promise<boolean> => {
-  const backendDisponible = await verificarBackend();
-  if (!backendDisponible) {
-    console.warn('Backend no disponible - simulando monitoreo');
-    return true; // Simular éxito para que la UI funcione
-  }
-
-  try {
-    const response = await fetch(`${API_BASE}/ml/monitoreo-tiempo-real`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({})
-    });
-    return response.ok;
-  } catch (error) {
-    console.error('Error:', error);
-    return false;
-  }
-};
-
-const marcarAlertaComoRevisada = async (alertaId: string): Promise<boolean> => {
-  try {
-    const response = await fetch(`${API_BASE}/alertas/${alertaId}/revisar`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-    });
-    return response.ok;
-  } catch (error) {
-    console.error('Error al marcar alerta como revisada:', error);
-    return false;
-  }
+// Función para agrupar alertas automáticas
+const agruparAlertasAutomaticas = (alertas: any[]) => {
+  const grupos: any[] = [];
+  
+  alertas.forEach(alerta => {
+    const clave = `${alerta.sensor}_${alerta.estado}`;
+    let grupo = grupos.find(g => g.clave === clave);
+    
+    if (!grupo) {
+      grupo = {
+        clave,
+        sensor: alerta.sensor,
+        estado: alerta.estado,
+        alertas: [],
+        timestamp: alerta.timestamp
+      };
+      grupos.push(grupo);
+    }
+    
+    grupo.alertas.push(alerta);
+    if (alerta.timestamp > grupo.timestamp) {
+      grupo.timestamp = alerta.timestamp;
+    }
+  });
+  
+  return grupos.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 };
 
 export default function AlertasPage() {
-  const [alertas, setAlertas] = useState<AlertaPreventiva[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [generando, setGenerando] = useState(false);
-  const [procesandoRevisado, setProcesandoRevisado] = useState<string | null>(null);
-  const [filtroRevisadas, setFiltroRevisadas] = useState<'todas' | 'sin_revisar' | 'revisadas'>('todas');
-  const [vistaActiva, setVistaActiva] = useState<'automaticas' | 'preventivas'>('automaticas');
   const [limpiandoAlertas, setLimpiandoAlertas] = useState(false);
-  const [limpiandoAlertasML, setLimpiandoAlertasML] = useState(false);
 
-  // const [clienteInicializado, setClienteInicializado] = useState(false);
-  
-  // Hook de monitoreo automático
-  // Hook de configuración de alertas
+  // Hooks
   const { deberMostrarAlerta } = useConfiguracionAlertas();
   const {
     alertasAutomaticas,
@@ -411,62 +153,23 @@ export default function AlertasPage() {
     limpiarTodasLasAlertas
   } = useMonitoreoAutomatico();
 
-  const cargarAlertas = async () => {
-    setLoading(true);
-    try {
-      const alertasObtenidas = await obtenerAlertas();
-      setAlertas(alertasObtenidas);
-    } catch (error) {
-      console.error('Error al cargar alertas:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    alertas: alertasML,
+    alertasNoLeidas,
+    loading: cargandoML,
+    generarAlertasML,
+    marcarComoLeida: marcarComoLeidaML,
+    limpiarAlertasLeidas: limpiarAlertasLeidasML
+  } = useAlertasML();
 
-  const handleGenerarPredicciones = async () => {
-    setGenerando(true);
-    try {
-      const resultado = await generarPredicciones();
-      if (resultado) {
-        await cargarAlertas();
-      }
-    } catch (error) {
-      console.error('Error al generar predicciones:', error);
-    } finally {
-      setGenerando(false);
-    }
-  };
-
-  const handleMonitoreoTiempoReal = async () => {
-    setGenerando(true);
-    try {
-      const resultado = await monitoreoTiempoReal();
-      if (resultado) {
-        await cargarAlertas();
-      }
-    } catch (error) {
-      console.error('Error en monitoreo tiempo real:', error);
-    } finally {
-      setGenerando(false);
-    }
-  };
-
-  const handleMarcarRevisada = async (alertaId: string) => {
-    setProcesandoRevisado(alertaId);
-    try {
-      const resultado = await marcarAlertaComoRevisada(alertaId);
-      if (resultado) {
-        setAlertas(prev => prev.map(alerta => 
-          alerta._id === alertaId 
-            ? { ...alerta, resuelto: true }
-            : alerta
-        ));
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    } finally {
-      setProcesandoRevisado(null);
-    }
+  // Estadísticas unificadas del sistema completo
+  const estadisticasUnificadas = {
+    totalAlertas: alertasAutomaticas.length + alertasML.length,
+    alertasCriticas: alertasAutomaticas.filter(a => a.estado === 'critico').length + alertasML.filter(a => a.nivel === 'critico').length,
+    alertasAdvertencia: alertasAutomaticas.filter(a => a.estado === 'aceptable').length + alertasML.filter(a => a.nivel === 'advertencia').length,
+    alertasSinLeer: estadisticas.noLeidas + alertasNoLeidas,
+    alertasAutomaticas: alertasAutomaticas.length,
+    alertasML: alertasML.length
   };
 
   const limpiarAlertasAutomaticas = async () => {
@@ -515,190 +218,12 @@ export default function AlertasPage() {
     }
   };
 
-  // Función para limpiar alertas predictivas
-  const limpiarAlertasPreventivas = async (soloRevisadas: boolean = false) => {
-    const alertasALimpiar = soloRevisadas 
-      ? alertas.filter(a => a.resuelto)
-      : alertas;
-    
-    if (alertasALimpiar.length === 0) {
-      alert(soloRevisadas ? 'No hay alertas revisadas para limpiar' : 'No hay alertas predictivas para limpiar');
-      return;
-    }
-    
-    const tipoLimpieza = soloRevisadas ? 'revisadas' : 'todas las';
-    const confirmacion = window.confirm(
-      `¿Estás seguro de que quieres eliminar ${tipoLimpieza} ${alertasALimpiar.length} alertas predictivas?\n\nEsta acción no se puede deshacer.`
-    );
-    
-    if (confirmacion) {
-      setLimpiandoAlertasML(true);
-      
-      try {
-        console.log(`Limpiando ${tipoLimpieza} alertas predictivas:`, alertasALimpiar.length);
-        
-        // Por ahora, solo limpiar del estado local (hasta que el backend esté disponible)
-        // TODO: Implementar eliminación del backend cuando esté disponible
-        try {
-          // Intentar eliminar del backend si está disponible
-          const promesas = alertasALimpiar.map(async (alerta) => {
-            try {
-              const response = await fetch(`${API_BASE}/ml/alertas/${alerta._id}`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-              });
-              if (!response.ok && response.status !== 404) {
-                throw new Error(`HTTP ${response.status}`);
-              }
-              return true;
-            } catch (error) {
-              console.warn(`No se pudo eliminar alerta ${alerta._id} del backend:`, error);
-              return false; // Continuar con limpieza local
-            }
-          });
-          
-          await Promise.all(promesas);
-        } catch (error) {
-          console.warn('Backend no disponible, limpiando solo localmente:', error);
-        }
-        
-        // Actualizar estado local (siempre funciona)
-        setAlertas(prev => prev.filter(alerta => 
-          soloRevisadas ? !alerta.resuelto : false
-        ));
-        
-        console.log('Alertas predictivas limpiadas exitosamente');
-        
-        // Mostrar notificación de éxito
-        if ('Notification' in window && Notification.permission === 'granted') {
-          new Notification('Alertas Predictivas Limpiadas', {
-            body: `Se eliminaron ${alertasALimpiar.length} alertas predictivas`,
-            icon: '/favicon.ico'
-          });
-        }
-        
-      } catch (error) {
-        console.error('Error al limpiar alertas predictivas:', error);
-        alert('Hubo un error al limpiar las alertas predictivas. Inténtalo de nuevo.');
-      } finally {
-        setLimpiandoAlertasML(false);
-      }
-    } else {
-      console.log('Usuario canceló limpiar alertas predictivas');
-    }
-  };
-
-
-
-  const limpiarSoloAlertasLeidas = async () => {
-    const alertasLeidas = alertasAutomaticas.filter(a => a.leida).length;
-    
-    if (alertasLeidas === 0) {
-      alert('No hay alertas leídas para limpiar');
-      return;
-    }
-    
-    const confirmacion = window.confirm(
-      `¿Quieres eliminar solo las ${alertasLeidas} alertas que ya fueron leídas?\n\nLas alertas sin leer se mantendrán.`
-    );
-    
-    if (confirmacion) {
-      setLimpiandoAlertas(true);
-      
-      try {
-        const eliminadas = limpiarAlertasLeidas();
-        console.log(`${eliminadas} alertas leídas eliminadas`);
-        
-        if ('Notification' in window && Notification.permission === 'granted') {
-          new Notification('Alertas Leídas Limpiadas', {
-            body: `Se eliminaron ${eliminadas} alertas leídas`,
-            icon: '/favicon.ico'
-          });
-        }
-      } catch (error) {
-        console.error('Error al limpiar alertas leídas:', error);
-        alert('Hubo un error al limpiar las alertas leídas.');
-      } finally {
-        setLimpiandoAlertas(false);
-      }
-    }
-  };
-
-
-
-  useEffect(() => {
-    cargarAlertas();
-  }, []);
-
-  const alertasFiltradas = alertas.filter(alerta => {
-    if (filtroRevisadas === 'sin_revisar') return !alerta.resuelto;
-    if (filtroRevisadas === 'revisadas') return alerta.resuelto;
-    return true;
-  });
-
-  // Función para agrupar alertas automáticas por criticidad y sensor
-  const agruparAlertasAutomaticas = (alertas: any[]) => {
-    const grupos: { [key: string]: any[] } = {};
-    
-    // Filtrar alertas según configuración antes de agrupar
-    const alertasFiltradas = alertas.filter(alerta => {
-      const nivel = alerta.nivel_riesgo || alerta.nivel || 'medio';
-      return deberMostrarAlerta(nivel);
-    });
-    
-    alertasFiltradas.forEach(alerta => {
-      const nivel = alerta.nivel_riesgo || alerta.nivel || 'medio';
-      const sensor = alerta.sensor || alerta.tipo || 'general';
-      const clave = `${nivel}-${sensor}`;
-      
-      if (!grupos[clave]) {
-        grupos[clave] = [];
-      }
-      grupos[clave].push(alerta);
-    });
-
-    // Ordenar grupos por prioridad de criticidad
-    const ordenCriticidad = ['critico', 'alto', 'medio', 'bajo'];
-    const gruposOrdenados = Object.keys(grupos).sort((a, b) => {
-      const [nivelA, sensorA] = a.split('-');
-      const [nivelB, sensorB] = b.split('-');
-      
-      const prioridadA = ordenCriticidad.indexOf(nivelA);
-      const prioridadB = ordenCriticidad.indexOf(nivelB);
-      
-      if (prioridadA !== prioridadB) {
-        return prioridadA - prioridadB;
-      }
-      
-      return sensorA.localeCompare(sensorB);
-    });
-
-    return gruposOrdenados.map(clave => ({
-      clave,
-      nivel: clave.split('-')[0],
-      sensor: clave.split('-')[1],
-      alertas: grupos[clave].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-    }));
-  };
-
-  // Función para obtener icono del sensor
-  const getSensorIcon = (sensor: string) => {
-    switch (sensor.toLowerCase()) {
-      case 'temperatura': return <MdThermostat />;
-      case 'ph': return <MdScience />;
-      case 'oxigeno': return <MdAir />;
-      default: return <MdAlert />;
-    }
-  };
-
-  // Función para obtener color del nivel de criticidad
-  const getNivelColor = (nivel: string) => {
-    switch (nivel) {
-      case 'critico': return '#d32f2f';
-      case 'alto': return '#f57c00';
-      case 'medio': return '#fbc02d';
-      case 'bajo': return '#388e3c';
-      default: return '#9e9e9e';
+  const getNivelColor = (estado: string) => {
+    switch (estado) {
+      case 'critico': return '#f44336';      // Rojo
+      case 'aceptable': return '#ff9800';    // Naranja
+      case 'optimo': return '#4caf50';       // Verde
+      default: return '#9e9e9e';             // Gris
     }
   };
 
@@ -707,17 +232,34 @@ export default function AlertasPage() {
 
   return (
     <Box sx={{ p: 3, maxWidth: 1400, mx: 'auto' }}>
-      {/* Header */}
+      {/* Header Unificado */}
       <Paper sx={{ p: 3, mb: 3, bgcolor: 'primary.main', color: 'white' }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Centro de Alertas y Monitoreo
+          Centro Unificado de Alertas
         </Typography>
         <Typography variant="body1">
-          Sistema integrado de alertas automáticas por rangos y predicciones ML
+          Sistema integrado con alertas automáticas por rangos y análisis inteligente ML
         </Typography>
-        <Typography variant="body2" sx={{ mt: 1, opacity: 0.9 }}>
-          Control global de notificaciones por email disponible en el panel de monitoreo
-        </Typography>
+        <Box sx={{ display: 'flex', gap: 3, mt: 2, alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <MdNotifications />
+            <Typography variant="body2">
+              {estadisticasUnificadas.totalAlertas} alertas totales
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <MdAlert />
+            <Typography variant="body2">
+              {estadisticasUnificadas.alertasCriticas} críticas
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <MdInfo />
+            <Typography variant="body2">
+              {estadisticasUnificadas.alertasSinLeer} sin leer
+            </Typography>
+          </Box>
+        </Box>
       </Paper>
 
       {/* Panel de Control del Monitoreo Automático */}
@@ -725,44 +267,34 @@ export default function AlertasPage() {
         <CardContent>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">
-              Monitoreo Automático en Tiempo Real
+              Control del Sistema de Alertas
             </Typography>
-            <Badge badgeContent={estadisticas.noLeidas} color="error">
+            <Badge badgeContent={estadisticasUnificadas.alertasSinLeer} color="error">
               <MdNotifications size={24} />
             </Badge>
           </Box>
 
-          {/* Debug Info - Temporal */}
-          {process.env.NODE_ENV === 'development' && (
-            <Alert severity="info" sx={{ mb: 2 }}>
-              <Typography variant="caption">
-                Debug: Alertas en estado: {alertasAutomaticas.length} | 
-                En localStorage: {localStorage.getItem('alertasAutomaticas') ? JSON.parse(localStorage.getItem('alertasAutomaticas') || '[]').length : 0} |
-                Leídas: {alertasAutomaticas.filter(a => a.leida).length} |
-                No leídas: {alertasAutomaticas.filter(a => !a.leida).length}
-              </Typography>
-            </Alert>
-          )}
-
-          <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+          {/* Estadísticas Unificadas */}
+          <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
             <Paper sx={{ flex: 1, p: 2, textAlign: 'center', bgcolor: 'info.light', color: 'white', minWidth: '150px' }}>
-              <Typography variant="h4">{estadisticas.total}</Typography>
+              <Typography variant="h4">{estadisticasUnificadas.totalAlertas}</Typography>
               <Typography variant="caption">Total Alertas</Typography>
             </Paper>
             <Paper sx={{ flex: 1, p: 2, textAlign: 'center', bgcolor: 'error.light', color: 'white', minWidth: '150px' }}>
-              <Typography variant="h4">{estadisticas.criticas}</Typography>
+              <Typography variant="h4">{estadisticasUnificadas.alertasCriticas}</Typography>
               <Typography variant="caption">Críticas</Typography>
             </Paper>
             <Paper sx={{ flex: 1, p: 2, textAlign: 'center', bgcolor: 'warning.light', color: 'white', minWidth: '150px' }}>
-              <Typography variant="h4">{estadisticas.aceptables}</Typography>
-              <Typography variant="caption">Aceptables</Typography>
+              <Typography variant="h4">{estadisticasUnificadas.alertasAutomaticas}</Typography>
+              <Typography variant="caption">Automáticas</Typography>
             </Paper>
             <Paper sx={{ flex: 1, p: 2, textAlign: 'center', bgcolor: 'success.light', color: 'white', minWidth: '150px' }}>
-              <Typography variant="h4">{estadisticas.noLeidas}</Typography>
-              <Typography variant="caption">Sin Leer</Typography>
+              <Typography variant="h4">{estadisticasUnificadas.alertasML}</Typography>
+              <Typography variant="caption">Inteligentes ML</Typography>
             </Paper>
           </Box>
 
+          {/* Controles */}
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
             <FormControlLabel
               control={
@@ -784,95 +316,66 @@ export default function AlertasPage() {
               />
             )}
 
-
+            <Button
+              variant="contained"
+              onClick={generarAlertasML}
+              disabled={cargandoML}
+              startIcon={cargandoML ? <CircularProgress size={16} /> : <MdTimeline />}
+              color="primary"
+            >
+              Generar Alertas ML
+            </Button>
 
             <Button
               variant="text"
               startIcon={<MdCheck />}
               onClick={marcarTodasComoLeidas}
-              disabled={estadisticas.noLeidas === 0 || limpiandoAlertas}
+              disabled={estadisticasUnificadas.alertasSinLeer === 0 || limpiandoAlertas}
               size="small"
             >
-              Marcar Leídas ({estadisticas.noLeidas})
+              Marcar Leídas ({estadisticasUnificadas.alertasSinLeer})
             </Button>
 
             <Button
               variant="outlined"
               startIcon={<MdClear />}
-              onClick={limpiarSoloAlertasLeidas}
+              onClick={limpiarAlertasLeidas}
               disabled={alertasAutomaticas.filter(a => a.leida).length === 0 || limpiandoAlertas}
               size="small"
               color="warning"
             >
-              Limpiar Leídas ({alertasAutomaticas.filter(a => a.leida).length})
+              Limpiar Automáticas Leídas ({alertasAutomaticas.filter(a => a.leida).length})
             </Button>
 
             <Button
               variant="outlined"
-              startIcon={limpiandoAlertas ? <CircularProgress size={16} /> : <MdClear />}
-              onClick={limpiarAlertasAutomaticas}
-              disabled={estadisticas.total === 0 || limpiandoAlertas}
+              startIcon={<MdClear />}
+              onClick={limpiarAlertasLeidasML}
+              disabled={cargandoML || alertasML.filter(a => a.leida).length === 0}
               size="small"
-              color={limpiandoAlertas ? "info" : "error"}
+              color="secondary"
             >
-              {limpiandoAlertas ? 'Limpiando...' : `Limpiar Todas (${estadisticas.total})`}
+              Limpiar ML Leídas ({alertasML.filter(a => a.leida).length})
             </Button>
           </Box>
         </CardContent>
       </Card>
 
-      {/* Pestañas de Navegación */}
-      <Card sx={{ mb: 3 }}>
-        <Tabs
-          value={vistaActiva}
-          onChange={(_, newValue) => setVistaActiva(newValue)}
-          centered
-        >
-          <Tab 
-            label={
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <MdNotifications />
-                Alertas Automáticas
-                <Badge badgeContent={estadisticas.noLeidas} color="error" />
-              </Box>
-            }
-            value="automaticas"
-          />
-          <Tab 
-            label={
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <MdTimeline />
-                Alertas Predictivas ML
-                <Badge badgeContent={alertas.filter(a => !a.resuelto).length} color="error" />
-              </Box>
-            }
-            value="preventivas"
-          />
-        </Tabs>
-      </Card>
-
-      {/* Contenido de Alertas */}
-      {vistaActiva === 'automaticas' ? (
-        /* Vista de Alertas Automáticas */
-        <Card>
+      {/* Vista Unificada de Alertas */}
+      <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', lg: 'row' } }}>
+        
+        {/* Columna izquierda: Alertas Automáticas */}
+        <Card sx={{ flex: 1 }}>
           <CardContent>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <MdNotifications />
               <Typography variant="h6">
                 Alertas Automáticas por Rangos
               </Typography>
-              {estadisticas.total > 0 && (
-                <Button
-                  size="small"
-                  variant="outlined"
-                  onClick={marcarTodasComoLeidas}
-                  startIcon={<MdVisibility />}
-                >
-                  Marcar Todas como Leídas
-                </Button>
-              )}
+              <Badge badgeContent={estadisticas.noLeidas} color="error" />
             </Box>
 
-{alertasAutomaticas.length === 0 ? (
+            {alertasAutomaticas.length === 0 ? (
               <Paper sx={{ p: 4, textAlign: 'center', bgcolor: 'grey.50' }}>
                 <MdInfo size={48} color="#9e9e9e" />
                 <Typography variant="h6" sx={{ mt: 2, color: 'text.secondary' }}>
@@ -892,57 +395,49 @@ export default function AlertasPage() {
                     <AccordionSummary 
                       expandIcon={<MdExpandMore />}
                       sx={{ 
-                        bgcolor: `${getNivelColor(grupo.nivel)}20`,
-                        '&:hover': { bgcolor: `${getNivelColor(grupo.nivel)}30` }
+                        bgcolor: `${getNivelColor(grupo.estado)}20`,
+                        '&:hover': { bgcolor: `${getNivelColor(grupo.estado)}30` }
                       }}
                     >
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          {getSensorIcon(grupo.sensor)}
-                          <Typography variant="h6" sx={{ textTransform: 'capitalize' }}>
-                            {grupo.sensor}
+                        <Box sx={{ minWidth: '40px' }}>
+                          {grupo.sensor === 'temperatura' && <MdThermostat size={24} color="#ff5722" />}
+                          {grupo.sensor === 'ph' && <MdScience size={24} color="#3f51b5" />}
+                          {grupo.sensor === 'oxigeno' && <MdAir size={24} color="#00bcd4" />}
+                        </Box>
+                        
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                            {grupo.sensor === 'temperatura' ? 'Temperatura' : 
+                             grupo.sensor === 'ph' ? 'pH' : 'Oxígeno'} - 
+                            {grupo.estado === 'critico' ? ' CRÍTICO' : grupo.estado === 'aceptable' ? ' ADVERTENCIA' : ' ÓPTIMO'}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {grupo.alertas.length} alerta{grupo.alertas.length > 1 ? 's' : ''} • 
+                            Última: {new Date(grupo.timestamp).toLocaleString()}
                           </Typography>
                         </Box>
                         
-                        <Chip
-                          label={grupo.nivel}
-                          size="small"
-                          sx={{ 
-                            bgcolor: getNivelColor(grupo.nivel),
-                            color: 'white',
-                            fontWeight: 'bold'
-                          }}
-                        />
-                        
-                        <Badge 
-                          badgeContent={grupo.alertas.length} 
-                          color="error"
-                          sx={{ ml: 'auto' }}
-                        >
-                          <Typography variant="body2" color="text.secondary">
-                            Alertas
-                          </Typography>
-                        </Badge>
-                        
-                        <Badge 
-                          badgeContent={grupo.alertas.filter(a => !a.leida).length} 
-                          color="warning"
-                        >
-                          <Typography variant="body2" color="text.secondary">
-                            Sin leer
-                          </Typography>
-                        </Badge>
+                        <Box>
+                          <Chip
+                            label={grupo.estado === 'critico' ? 'CRÍTICO' : grupo.estado === 'aceptable' ? 'ADVERTENCIA' : 'ÓPTIMO'}
+                            color={grupo.estado === 'critico' ? 'error' : grupo.estado === 'aceptable' ? 'warning' : 'success'}
+                            size="small"
+                          />
+                        </Box>
                       </Box>
                     </AccordionSummary>
                     
-                    <AccordionDetails sx={{ p: 0 }}>
-                      {grupo.alertas.map((alerta) => (
-                        <AlertaAutomaticaDetallada 
-                          key={alerta.id}
-                          alerta={alerta}
-                          onMarcarLeida={marcarComoLeida}
-                        />
-                      ))}
+                    <AccordionDetails>
+                      <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
+                        {grupo.alertas.map((alerta: any, index: number) => (
+                          <AlertaAutomaticaDetallada 
+                            key={alerta.id || index}
+                            alerta={alerta}
+                            onMarcarLeida={marcarComoLeida}
+                          />
+                        ))}
+                      </Box>
                     </AccordionDetails>
                   </Accordion>
                 ))}
@@ -950,174 +445,181 @@ export default function AlertasPage() {
             )}
           </CardContent>
         </Card>
-      ) : (
-        /* Vista de Alertas Preventivas ML */
-        <Card>
+
+        {/* Columna derecha: Alertas ML */}
+        <Card sx={{ flex: 1 }}>
           <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Alertas Predictivas con Machine Learning
-            </Typography>
-            
-            {/* Controles ML */}
-            <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
-              <Button
-                variant="contained"
-                onClick={cargarAlertas}
-                disabled={loading}
-                startIcon={loading ? <CircularProgress size={16} /> : <MdRefresh />}
-              >
-                Actualizar
-              </Button>
-              <Button
-                variant="outlined"
-                onClick={handleMonitoreoTiempoReal}
-                disabled={generando}
-                startIcon={generando ? <CircularProgress size={16} /> : <MdNotifications />}
-                color="warning"
-              >
-                Monitorear Valores Actuales
-              </Button>
-              <Button
-                variant="outlined"
-                onClick={handleGenerarPredicciones}
-                disabled={generando}
-                startIcon={generando ? <CircularProgress size={16} /> : <MdTimeline />}
-                color="info"
-              >
-                Generar Predicciones (24h)
-              </Button>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <MdTimeline />
+              <Typography variant="h6">
+                Alertas Inteligentes ML
+              </Typography>
+              <Badge badgeContent={alertasNoLeidas} color="error" />
             </Box>
 
-            {/* Controles de limpieza y configuración ML */}
-            <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap', alignItems: 'center' }}>
-              <Button
-                variant="outlined"
-                startIcon={<MdClear />}
-                onClick={() => limpiarAlertasPreventivas(true)}
-                disabled={limpiandoAlertasML || alertas.filter(a => a.resuelto).length === 0}
-                color="secondary"
-                size="small"
-              >
-                Limpiar Revisadas ({alertas.filter(a => a.resuelto).length})
-              </Button>
-              <Button
-                variant="outlined"
-                startIcon={limpiandoAlertasML ? <CircularProgress size={16} /> : <MdClear />}
-                onClick={() => limpiarAlertasPreventivas(false)}
-                disabled={limpiandoAlertasML || alertas.length === 0}
-                color="error"
-                size="small"
-              >
-                Limpiar Todas ({alertas.length})
-              </Button>
-              
-            </Box>
-
-            {/* Filtros ML */}
-            <Box sx={{ mb: 3 }}>
-              <FormControl size="small" sx={{ minWidth: 200 }}>
-                <InputLabel>Filtrar alertas ML</InputLabel>
-                <Select
-                  value={filtroRevisadas}
-                  label="Filtrar alertas ML"
-                  onChange={(e) => setFiltroRevisadas(e.target.value as any)}
-                >
-                  <MenuItem value="todas">Todas ({alertas.length})</MenuItem>
-                  <MenuItem value="sin_revisar">Sin revisar ({alertas.filter(a => !a.resuelto).length})</MenuItem>
-                  <MenuItem value="revisadas">Revisadas ({alertas.filter(a => a.resuelto).length})</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-
-            {loading && (
+            {cargandoML && (
               <Box sx={{ width: '100%', mb: 2 }}>
                 <LinearProgress />
               </Box>
             )}
 
-            {/* Lista de alertas ML */}
-            {alertas.length === 0 ? (
+            {alertasML.length === 0 ? (
               <Paper sx={{ p: 4, textAlign: 'center', bgcolor: 'grey.50' }}>
                 <MdTimeline size={48} color="#9e9e9e" />
                 <Typography variant="h6" sx={{ mt: 2, color: 'text.secondary' }}>
-                  No hay alertas predictivas ML
+                  No hay alertas inteligentes ML
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>
-                  Ejecute el monitoreo o genere predicciones para obtener alertas
+                  Haga clic en &quot;Generar Alertas ML&quot; para analizar los datos con ML
                 </Typography>
               </Paper>
             ) : (
               <Box sx={{ maxHeight: 600, overflow: 'auto' }}>
-                {alertasFiltradas.map((alerta, index) => (
-                  <Paper 
-                    key={alerta._id || index}
+                {alertasML.map((alerta: AlertaML) => (
+                  <Accordion key={alerta.id} 
                     sx={{ 
-                      p: 2, 
                       mb: 2, 
                       borderLeft: `4px solid ${
                         alerta.nivel === 'critico' ? '#f44336' : 
-                        alerta.nivel === 'alto' ? '#ff9800' : 
-                        alerta.nivel === 'medio' ? '#2196f3' : '#4caf50'
+                        alerta.nivel === 'advertencia' ? '#ff9800' : '#2196f3'
                       }`,
-                      bgcolor: alerta.resuelto ? 'grey.50' : 'background.paper',
-                      opacity: alerta.resuelto ? 0.7 : 1
+                      bgcolor: alerta.leida ? 'grey.50' : 'background.paper',
+                      opacity: alerta.leida ? 0.7 : 1
                     }}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Box sx={{ minWidth: '40px' }}>
-                        {alerta.sensor === 'temperatura' && <MdThermostat size={24} color="#ff5722" />}
-                        {alerta.sensor === 'ph' && <MdScience size={24} color="#3f51b5" />}
-                        {alerta.sensor === 'oxigeno' && <MdAir size={24} color="#00bcd4" />}
-                        {alerta.sensor === 'registro_completo' && <MdAlert size={24} color="#ff9800" />}
-                      </Box>
-                      
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="body1" sx={{ fontWeight: alerta.resuelto ? 'normal' : 'bold' }}>
-                          {alerta.mensaje}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {new Date(alerta.fecha_creacion).toLocaleString()} • 
-                          Valor: {alerta.valor_actual}
-                          {alerta.sensor === 'temperatura' && '°C'}
-                          {alerta.sensor === 'oxigeno' && ' mg/L'}
-                        </Typography>
-                      </Box>
-                      
-                      <Box>
-                        <Chip
-                          label={alerta.nivel}
-                          color={
-                            alerta.nivel === 'critico' ? 'error' : 
-                            alerta.nivel === 'alto' ? 'warning' : 
-                            alerta.nivel === 'medio' ? 'info' : 'success'
-                          }
-                          size="small"
-                        />
-                      </Box>
-                      
-                      <Box sx={{ minWidth: '50px' }}>
-                        {!alerta.resuelto && (
-                          <IconButton
-                            size="small"
-                            onClick={() => handleMarcarRevisada(alerta._id!)}
-                            disabled={procesandoRevisado === alerta._id}
-                            title="Marcar como revisada"
-                          >
-                            {procesandoRevisado === alerta._id ? 
-                              <CircularProgress size={16} /> : 
-                              <MdCheck />
+                    <AccordionSummary expandIcon={<MdExpandMore />}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                        <Box sx={{ minWidth: '40px' }}>
+                          {alerta.sensor === 'temperatura' && <MdThermostat size={24} color="#ff5722" />}
+                          {alerta.sensor === 'ph' && <MdScience size={24} color="#3f51b5" />}
+                          {alerta.sensor === 'oxigeno' && <MdAir size={24} color="#00bcd4" />}
+                          {!['temperatura', 'ph', 'oxigeno'].includes(alerta.sensor) && <MdAlert size={24} color="#ff9800" />}
+                        </Box>
+                        
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="body1" sx={{ fontWeight: alerta.leida ? 'normal' : 'bold' }}>
+                            {alerta.mensaje}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(alerta.timestamp).toLocaleString()} • 
+                            Confianza: {(alerta.confianza * 100).toFixed(1)}%
+                          </Typography>
+                        </Box>
+                        
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                          <Chip
+                            label={alerta.nivel.toUpperCase()}
+                            color={
+                              alerta.nivel === 'critico' ? 'error' : 
+                              alerta.nivel === 'advertencia' ? 'warning' : 'info'
                             }
-                          </IconButton>
-                        )}
+                            size="small"
+                          />
+                          
+                          {!alerta.leida && (
+                            <Box
+                              component="div"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                marcarComoLeidaML(alerta.id);
+                              }}
+                              sx={{
+                                display: 'inline-flex',
+                                cursor: 'pointer',
+                                padding: '4px',
+                                borderRadius: '50%',
+                                transition: 'background-color 0.2s',
+                                '&:hover': {
+                                  bgcolor: 'action.hover'
+                                }
+                              }}
+                              title="Marcar como leída"
+                            >
+                              <MdCheck size={20} />
+                            </Box>
+                          )}
+                        </Box>
                       </Box>
-                    </Box>
-                  </Paper>
+                    </AccordionSummary>
+                    
+                    <AccordionDetails>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {/* Información del sensor y valor */}
+                        <Card variant="outlined">
+                          <CardContent sx={{ p: 2 }}>
+                            <Typography variant="subtitle2" gutterBottom>Detalles del Sensor</Typography>
+                            <Typography variant="body2">
+                              <strong>Sensor:</strong> {alerta.sensor === 'temperatura' ? 'Temperatura' : 
+                                                       alerta.sensor === 'ph' ? 'pH' : 
+                                                       alerta.sensor === 'oxigeno' ? 'Oxígeno' : alerta.sensor}
+                            </Typography>
+                            <Typography variant="body2">
+                              <strong>Valor Actual:</strong> {alerta.valor_actual}
+                              {alerta.sensor === 'temperatura' && '°C'}
+                              {alerta.sensor === 'oxigeno' && ' mg/L'}
+                            </Typography>
+                            <Typography variant="body2">
+                              <strong>Predicción:</strong> {alerta.valor_predicho}
+                              {alerta.sensor === 'temperatura' && '°C'}
+                              {alerta.sensor === 'oxigeno' && ' mg/L'}
+                            </Typography>
+                            <Typography variant="body2">
+                              <strong>Tendencia:</strong> {alerta.tendencia.direccion} ({alerta.tendencia.cambio_porcentual.toFixed(1)}%)
+                            </Typography>
+                            <Typography variant="body2">
+                              <strong>Confianza:</strong> {alerta.nivel_confianza} ({(alerta.confianza * 100).toFixed(1)}%)
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                        
+                        {/* Acciones recomendadas */}
+                        {alerta.acciones_recomendadas && alerta.acciones_recomendadas.length > 0 && (
+                          <Card variant="outlined">
+                            <CardContent sx={{ p: 2 }}>
+                              <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <MdBuild /> Acciones Recomendadas
+                              </Typography>
+                              <List dense>
+                                {alerta.acciones_recomendadas.map((accion: string, index: number) => (
+                                  <ListItem key={index} sx={{ py: 0 }}>
+                                    <ListItemIcon sx={{ minWidth: '30px' }}>
+                                      <MdPlayArrow size={16} />
+                                    </ListItemIcon>
+                                    <ListItemText 
+                                      primary={accion}
+                                      primaryTypographyProps={{ variant: 'body2' }}
+                                    />
+                                  </ListItem>
+                                ))}
+                              </List>
+                            </CardContent>
+                          </Card>
+                        )}
+                        
+                        {/* Información adicional */}
+                        <Card variant="outlined">
+                          <CardContent sx={{ p: 2 }}>
+                            <Typography variant="subtitle2" gutterBottom>Análisis Adicional</Typography>
+                            <Typography variant="body2">
+                              <strong>Tipo de Alerta:</strong> {alerta.tipo}
+                            </Typography>
+                            <Typography variant="body2">
+                              <strong>Impacto Estimado:</strong> {alerta.impacto_estimado}
+                            </Typography>
+                            <Typography variant="body2">
+                              <strong>Tiempo de Respuesta:</strong> {alerta.tiempo_respuesta}
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      </Box>
+                    </AccordionDetails>
+                  </Accordion>
                 ))}
               </Box>
             )}
           </CardContent>
         </Card>
-      )}
+      </Box>
     </Box>
   );
 }

@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { apiRequestJson } from '../config/api';
 
 export interface AlertaNotificacion {
   _id: string;
@@ -65,8 +66,6 @@ const CONFIGURACION_DEFAULT: ConfiguracionNotificaciones = {
   },
   destinatariosEmail: []
 };
-
-const API_BASE = 'http://localhost:5000/api/v1';
 
 export const useNotificaciones = (): UseNotificacionesReturn => {
   // Estados principales
@@ -299,11 +298,8 @@ export const useNotificaciones = (): UseNotificacionesReturn => {
     setEnviandoEmail(true);
 
     try {
-      const response = await fetch(`${API_BASE}/notificaciones/enviar`, {
+      const result = await apiRequestJson<any>('/notificaciones/enviar', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           tipo: 'critica',
           alerta_id: alerta._id,
@@ -312,14 +308,12 @@ export const useNotificaciones = (): UseNotificacionesReturn => {
         })
       });
 
-      const result = await response.json();
-
       if (result.success) {
-        console.log('📧 Email enviado exitosamente:', result);
+        console.log('Email enviado exitosamente:', result);
         
         // Mostrar notificación de éxito
         if (notificacionesHabilitadas) {
-          new Notification('✅ Email Enviado', {
+          new Notification('Email Enviado', {
             body: `Notificación de ${alerta.sensor.toUpperCase()} enviada por email`,
             icon: '/favicon.ico',
             tag: 'email-success'
@@ -348,9 +342,9 @@ export const useNotificaciones = (): UseNotificacionesReturn => {
       }
 
     } catch (error) {
-      console.error('🚨 Error de conexión al enviar email:', {
+      console.error('Error de conexión al enviar email:', {
         error: error,
-        endpoint: `${API_BASE}/notificaciones/enviar`,
+        endpoint: '/notificaciones/enviar',
         alerta_id: alerta._id,
         sensor: alerta.sensor
       });
@@ -378,8 +372,7 @@ export const useNotificaciones = (): UseNotificacionesReturn => {
     
     try {
       // 1. Verificar configuración del servidor
-      const configResponse = await fetch(`${API_BASE}/notificaciones/configuracion`);
-      const configData = await configResponse.json();
+      const configData = await apiRequestJson<any>('/notificaciones/configuracion');
       
       console.log('Configuración servidor:', {
         success: configData.success,
@@ -434,12 +427,10 @@ export const useNotificaciones = (): UseNotificacionesReturn => {
       let emailExitoso = false;
       if (configuracion.habilitarEmail) {
         try {
-          const response = await fetch(`${API_BASE}/notificaciones/probar`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
+          const result = await apiRequestJson<any>('/notificaciones/probar', {
+            method: 'POST'
           });
 
-          const result = await response.json();
           emailExitoso = result.success;
         } catch (error) {
           console.error('Error probando email:', error);

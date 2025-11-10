@@ -66,9 +66,14 @@ export default function LoginPage() {
               alt="Logo CIMARQ"
               width={200}
               height={200}
+              priority
               style={{
                 filter: 'brightness(0) invert(1)',
-                objectFit: 'contain'
+                objectFit: 'contain',
+                width: 'auto',
+                height: 'auto',
+                maxWidth: '200px',
+                maxHeight: '200px'
               }}
             />
           </Box>

@@ -52,11 +52,12 @@ api = Api(
     **Zona horaria**: Chile GMT-3 (America/Santiago)  
     **Base de datos**: MongoDB con estructura unificada  
     **Comunicación IoT**: MQTT para datos en tiempo real
+    **Machine Learning**: API externa en Railway (https://ml-acuicultura.railway.app)
     
     ## Endpoints principales:
     - **/sensores**: Datos unificados de todos los sensores (recomendado)
-    - **/alertas**: Sistema de alertas inteligentes con Machine Learning
-    - **/auth**: Autenticación y gestión de usuarios
+    - **/alertas**: Sistema de alertas y notificaciones
+    - **/auth**: Autenticación JWT y gestión de usuarios
     - **/health**: Diagnóstico del sistema
     """,
     prefix='/api/v1'
@@ -65,9 +66,6 @@ api = Api(
 # Configuración MongoDB
 MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://cimarq:eGEr87FyYHIadm4p@proyectotitulo.idqwtmo.mongodb.net/")
 DB_NAME = os.getenv("DB_NAME", "cimarqdb")
-
-# Variables globales
-sistema_ml = None
 
 # Configurar cliente MongoDB con opciones específicas para Docker
 try:
@@ -90,20 +88,11 @@ try:
     servicio_email.set_database(db)
     print("Servicio de email configurado con base de datos")
     
-    # Inicializar sistema preventivo ML
-    try:
-        sistema_ml = SistemaPreventivoML(MONGO_URI, DB_NAME)
-        print("Sistema preventivo ML inicializado")
-    except Exception as e:
-        print(f"Error inicializando sistema ML: {e}")
-        sistema_ml = None
-    
 except Exception as e:
     print(f"Error conectando a MongoDB: {e}")
     print(f"URI utilizada: {MONGO_URI[:50]}...")
     client = None
     db = None
-    sistema_ml = None
 
 # Función para reconectar a MongoDB
 def reconnect_mongodb():
@@ -249,7 +238,6 @@ oxigeno_ns = Namespace('oxigeno', description='Datos específicos de oxígeno di
 mqtt_ns = Namespace('mqtt', description='Publicación manual MQTT para testing')
 health_ns = Namespace('health', description='Diagnóstico y estado del sistema')
 alertas_ns = Namespace('alertas', description='Sistema de alertas inteligentes con ML')
-ml_ns = Namespace('ml', description='Análisis predictivo y Machine Learning')
 notificaciones_ns = Namespace('notificaciones', description='Notificaciones automáticas por email')
 
 # Registrar namespaces
@@ -261,7 +249,6 @@ api.add_namespace(oxigeno_ns, path='/oxigeno')
 api.add_namespace(mqtt_ns, path='/mqtt')
 api.add_namespace(health_ns, path='/health')
 api.add_namespace(alertas_ns, path='/alertas')
-api.add_namespace(ml_ns, path='/ml')
 api.add_namespace(notificaciones_ns, path='/notificaciones')
 
 # ============================================================================
@@ -616,18 +603,6 @@ def on_message(client, userdata, msg):
                     print(f"Datos unificados guardados: T={complete_data['temperatura']}°C, "
                           f"pH={complete_data['ph']}, O2={complete_data['oxigeno']}mg/L - ID: {result.inserted_id}")
                     
-                    # Ejecutar monitoreo en tiempo real tras guardar nuevos datos
-                    if sistema_ml and sistema_ml.monitoreo_activo:
-                        try:
-                            resultado_monitoreo = sistema_ml.monitorear_sensores_tiempo_real()
-                            alertas_generadas = len(resultado_monitoreo.get('alertas_generadas', []))
-                            if alertas_generadas > 0:
-                                print(f"Monitoreo automático: {alertas_generadas} alertas generadas")
-                            else:
-                                print("Monitoreo automático: Todos los valores en rango normal")
-                        except Exception as e:
-                            print(f"Error en monitoreo automático: {e}")
-                    
                 except Exception as e:
                     print(f"Error guardando datos unificados: {e}")
             else:
@@ -666,18 +641,6 @@ def on_message(client, userdata, msg):
             # Guardar solo cuando todos los sensores estén disponibles
             if save_complete_sensor_data():
                 print("Documento completo creado - sin valores nulos")
-                
-                # Ejecutar monitoreo en tiempo real tras guardar nuevos datos del cache
-                if sistema_ml and sistema_ml.monitoreo_activo:
-                    try:
-                        resultado_monitoreo = sistema_ml.monitorear_sensores_tiempo_real()
-                        alertas_generadas = len(resultado_monitoreo.get('alertas_generadas', []))
-                        if alertas_generadas > 0:
-                            print(f"Monitoreo automático cache: {alertas_generadas} alertas generadas")
-                        else:
-                            print("Monitoreo automático cache: Todos los valores en rango normal")
-                    except Exception as e:
-                        print(f"Error en monitoreo automático cache: {e}")
                 
     except Exception as e:
         print(f"Error procesando mensaje MQTT: {e}")
@@ -872,15 +835,6 @@ class SensoresManualResource(Resource):
             # Insertar en base de datos
             result = db.datos.insert_one(manual_data)
             
-            # Ejecutar monitoreo en tiempo real tras insertar datos manuales
-            alertas_generadas = []
-            if sistema_ml and sistema_ml.monitoreo_activo:
-                try:
-                    resultado_monitoreo = sistema_ml.monitorear_sensores_tiempo_real()
-                    alertas_generadas = resultado_monitoreo.get('alertas_generadas', [])
-                except Exception as e:
-                    print(f"Error en monitoreo automático: {e}")
-            
             return {
                 "success": True,
                 "data": {
@@ -893,7 +847,6 @@ class SensoresManualResource(Resource):
                     "usuario": manual_data['usuario']
                 },
                 "count": 1,
-                "alertas_generadas": len(alertas_generadas),
                 "mqtt_status": {
                     "connected": mqtt_connected,
                     "last_message": last_message_time.isoformat() if last_message_time else None
@@ -1286,416 +1239,6 @@ class ResolverAlertaResource(Resource):
             
         except Exception as e:
             alertas_ns.abort(500, success=False, error=str(e))
-
-@ml_ns.route('/predicciones')
-class PrediccionesResource(Resource):
-    @ml_ns.doc('get_predicciones')
-    @ml_ns.marshal_with(ml_response_model, code=200)
-    @ml_ns.response(500, 'Error interno del servidor', error_model)
-    @ml_ns.param('sensor', 'Sensor específico (opcional)', type=str, enum=['temperatura', 'ph', 'oxigeno'])
-    @ml_ns.param('horas', 'Horas a predecir', type=int, default=24)
-    @ensure_mongodb_connection
-    def get(self):
-        """
-        Genera predicciones con modelos de Machine Learning
-        
-        Utiliza modelos Perceptron entrenados para predecir valores futuros.
-        Puede generar predicciones para un sensor específico o todos.
-        Incluye análisis de riesgo y detección de anomalías.
-        """
-        try:
-            if not sistema_ml:
-                ml_ns.abort(500, success=False, error="Sistema ML no inicializado")
-            
-            sensor_param = request.args.get('sensor')
-            horas = request.args.get('horas', 24, type=int)
-            
-            # Validar parámetros
-            if horas < 1 or horas > 168:  # Máximo 1 semana
-                ml_ns.abort(400, success=False, error="Horas debe estar entre 1 y 168")
-            
-            # Verificar estado de API ML externa
-            estado_api = sistema_ml.verificar_estado_api_ml()
-            if not estado_api.get("disponible", False):
-                ml_ns.abort(503, success=False, error="API ML externa no disponible", details=estado_api)
-            
-            sensores = [sensor_param] if sensor_param else ['temperatura', 'ph', 'oxigeno']
-            
-            predicciones = {}
-            alertas_generadas = []
-            
-            for sensor in sensores:
-                try:
-                    # Generar predicción usando API ML externa
-                    prediccion = sistema_ml.predecir_sensor(sensor, horas)
-                    predicciones[sensor] = prediccion
-                    
-                    # Generar alerta si es necesaria y la predicción fue exitosa
-                    if prediccion.get("exito", False):
-                        alerta = sistema_ml.generar_alerta(sensor, prediccion)
-                        if alerta:
-                            alerta_id = sistema_ml.guardar_alerta(alerta)
-                            if alerta_id:
-                                alertas_generadas.append({
-                                    'sensor': sensor,
-                                    'nivel': alerta['nivel'],
-                                    'alerta_id': alerta_id,
-                                    'mensaje': alerta['mensaje'],
-                                    'valor_predicho': prediccion.get('prediccion', 0)
-                                })
-                            
-                except Exception as e:
-                    predicciones[sensor] = {
-                        "exito": False,
-                        "error": str(e),
-                        "timestamp": get_chile_time().isoformat()
-                    }
-            
-            return {
-                "success": True,
-                "predicciones": predicciones,
-                "alertas_generadas": alertas_generadas,
-                "estado_api_ml": estado_api,
-                "fecha_procesamiento": get_chile_time().isoformat(),
-                "parametros": {
-                    "horas_prediccion": horas,
-                    "sensores_procesados": sensores,
-                    "window_size": sistema_ml.window_size,
-                    "api_url": sistema_ml.ml_api_base_url
-                }
-            }
-            
-        except Exception as e:
-            ml_ns.abort(500, success=False, error=str(e))
-
-@ml_ns.route('/entrenar')
-class EntrenarModelosResource(Resource):
-    @ml_ns.doc('entrenar_modelos')
-    @ml_ns.marshal_with(ml_response_model, code=200)
-    @ml_ns.response(500, 'Error interno del servidor', error_model)
-    @ml_ns.param('sensor', 'Sensor específico (opcional)', type=str, enum=['temperatura', 'ph', 'oxigeno'])
-    @ml_ns.param('epochs', 'Épocas de entrenamiento', type=int, default=50)
-    @ensure_mongodb_connection
-    def post(self):
-        """
-        Entrena o re-entrena modelos de Machine Learning usando API externa
-        
-        Utiliza la API ML externa (ml-monitoreo.onrender.com) para entrenar modelos.
-        Puede entrenar un sensor específico o todos los sensores.
-        Retorna métricas de rendimiento del entrenamiento.
-        """
-        try:
-            if not sistema_ml:
-                ml_ns.abort(500, success=False, error="Sistema ML no inicializado")
-            
-            sensor_param = request.args.get('sensor')
-            epochs = request.args.get('epochs', 50, type=int)
-            
-            # Validar parámetros
-            if epochs < 10 or epochs > 200:
-                ml_ns.abort(400, success=False, error="Épocas debe estar entre 10 y 200")
-            
-            # Verificar estado de API ML externa
-            estado_api = sistema_ml.verificar_estado_api_ml()
-            if not estado_api.get("disponible", False):
-                ml_ns.abort(503, success=False, error="API ML externa no disponible", details=estado_api)
-            
-            if sensor_param:
-                # Entrenar sensor específico
-                resultado = sistema_ml.entrenar_modelo_individual(sensor_param, epochs)
-                metricas_modelos = {sensor_param: resultado}
-            else:
-                # Entrenar todos los modelos
-                resultado = sistema_ml.entrenar_todos_modelos(epochs)
-                if resultado.get("exito", False):
-                    metricas_modelos = resultado.get("resultados", {})
-                else:
-                    metricas_modelos = {"error": resultado.get("mensaje", "Error en entrenamiento masivo")}
-            
-            return {
-                "success": True,
-                "metricas_modelos": metricas_modelos,
-                "estado_api_ml": estado_api,
-                "fecha_procesamiento": get_chile_time().isoformat(),
-                "parametros": {
-                    "epochs": epochs,
-                    "window_size": sistema_ml.window_size,
-                    "sensor_especifico": sensor_param or "todos",
-                    "api_url": sistema_ml.ml_api_base_url
-                }
-            }
-            
-        except Exception as e:
-            ml_ns.abort(500, success=False, error=str(e))
-
-@ml_ns.route('/monitoreo-tiempo-real')
-class MonitoreoTiempoRealResource(Resource):
-    @ml_ns.doc('monitoreo_tiempo_real')
-    @ml_ns.marshal_with(ml_response_model, code=200)
-    @ml_ns.response(500, 'Error interno del servidor', error_model)
-    @ensure_mongodb_connection
-    def post(self):
-        """
-        Monitoreo en tiempo real de sensores
-        
-        Verifica los valores actuales de todos los sensores y genera alertas
-        automáticamente si algún parámetro está fuera del rango establecido.
-        
-        Esta función:
-        - Obtiene los últimos valores de temperatura, pH y oxígeno
-        - Verifica si están dentro de los rangos críticos y óptimos
-        - Genera alertas automáticamente para valores fuera de rango
-        - No requiere entrenamiento de modelos ML
-        """
-        try:
-            if not sistema_ml:
-                ml_ns.abort(500, success=False, error="Sistema ML no inicializado")
-            
-            resultado = sistema_ml.monitorear_sensores_tiempo_real()
-            
-            return {
-                "success": True,
-                "timestamp": resultado.get('timestamp'),
-                "sensores_monitoreados": resultado.get('sensores_monitoreados', []),
-                "alertas_generadas": resultado.get('alertas_generadas', []),
-                "valores_normales": resultado.get('valores_normales', []),
-                "errores": resultado.get('errores', []),
-                "resumen": {
-                    "sensores_verificados": len(resultado.get('sensores_monitoreados', [])),
-                    "alertas_creadas": len(resultado.get('alertas_generadas', [])),
-                    "valores_normales": len(resultado.get('valores_normales', [])),
-                    "errores_encontrados": len(resultado.get('errores', []))
-                }
-            }
-            
-        except Exception as e:
-            ml_ns.abort(500, success=False, error=str(e))
-
-@ml_ns.route('/sistema-completo')
-class SistemaCompletoResource(Resource):
-    @ml_ns.doc('sistema_completo')
-    @ml_ns.marshal_with(ml_response_model, code=200)
-    @ml_ns.response(500, 'Error interno del servidor', error_model)
-    @ensure_mongodb_connection
-    def post(self):
-        """
-        Ejecuta el sistema preventivo completo
-        
-        Entrena modelos, genera predicciones y crea alertas automáticas.
-        Proceso completo de análisis preventivo para todos los sensores.
-        Ideal para ejecución programada o manual completa del sistema.
-        """
-        try:
-            if not sistema_ml:
-                ml_ns.abort(500, success=False, error="Sistema ML no inicializado")
-            
-            resultado = sistema_ml.procesar_sistema_completo()
-            
-            return {
-                "success": True,
-                "predicciones": resultado.get('predicciones', {}),
-                "alertas_generadas": resultado.get('alertas_generadas', []),
-                "metricas_modelos": resultado.get('modelos_entrenados', {}),
-                "fecha_procesamiento": resultado.get('fecha_procesamiento'),
-                "errores": resultado.get('errores', []),
-                "resumen": {
-                    "modelos_procesados": len(resultado.get('modelos_entrenados', {})),
-                    "predicciones_generadas": len(resultado.get('predicciones', {})),
-                    "alertas_creadas": len(resultado.get('alertas_generadas', [])),
-                    "errores_encontrados": len(resultado.get('errores', []))
-                }
-            }
-            
-        except Exception as e:
-            ml_ns.abort(500, success=False, error=str(e))
-
-@ml_ns.route('/api-externa/estado')
-class EstadoAPIExternaResource(Resource):
-    @ml_ns.doc('estado_api_externa')
-    @ml_ns.response(500, 'Error interno del servidor', error_model)
-    @ensure_mongodb_connection
-    def get(self):
-        """
-        Verificar estado de la API ML externa
-        
-        Verifica la disponibilidad y estado de la API ML externa
-        en ml-monitoreo.onrender.com. Incluye información de conectividad
-        y servicios disponibles.
-        """
-        try:
-            if not sistema_ml:
-                ml_ns.abort(500, success=False, error="Sistema ML no inicializado")
-            
-            # Probar conexión a la API Externa directamente
-            try:
-                import requests
-                response = requests.get(f"{sistema_ml.ml_api_base_url}/health", timeout=10)
-                api_data = response.json() if response.status_code == 200 else {"error": "API no disponible"}
-            except Exception as e:
-                api_data = {"error": str(e)}
-            
-            return {
-                "success": True,
-                "api_ml_externa": {
-                    "disponible": True if "error" not in api_data else False,
-                    "estado": "activo" if "error" not in api_data else "error",
-                    "datos_api": api_data,
-                    "timestamp": datetime.now(CHILE_TZ).isoformat()
-                },
-                "configuracion": {
-                    "url": sistema_ml.ml_api_base_url,
-                    "timeout": sistema_ml.ml_api_timeout
-                },
-                "fecha_verificacion": datetime.now(CHILE_TZ).isoformat()
-            }
-            
-        except Exception as e:
-            print(f"Error detallado en estado API ML: {e}")
-            import traceback
-            traceback.print_exc()
-            ml_ns.abort(500, success=False, error=str(e))
-
-@ml_ns.route('/api-externa/muestra-datos')
-class MuestraDatosAPIResource(Resource):
-    @ml_ns.doc('muestra_datos_api')
-    @ml_ns.marshal_with(ml_response_model, code=200)
-    @ml_ns.response(500, 'Error interno del servidor', error_model)
-    @ensure_mongodb_connection
-    def get(self):
-        """
-        Obtener muestra de datos desde API ML externa
-        
-        Solicita a la API ML externa una muestra de los datos
-        disponibles para entrenamiento. Útil para verificar
-        la conectividad y disponibilidad de datos.
-        """
-        try:
-            if not sistema_ml:
-                ml_ns.abort(500, success=False, error="Sistema ML no inicializado")
-            
-            # Verificar estado de API
-            estado_api = sistema_ml.verificar_estado_api_ml()
-            if not estado_api.get("disponible", False):
-                ml_ns.abort(503, success=False, error="API ML externa no disponible", details=estado_api)
-            
-            muestra = sistema_ml.obtener_muestra_datos()
-            
-            return {
-                "success": True,
-                "muestra_datos": muestra,
-                "estado_api": estado_api,
-                "fecha_consulta": get_chile_time().isoformat()
-            }
-            
-        except Exception as e:
-            ml_ns.abort(500, success=False, error=str(e))
-
-@ml_ns.route('/entrenar-individual/<string:sensor>')
-class EntrenarSensorIndividualResource(Resource):
-    @ml_ns.doc('entrenar_sensor_individual')
-    @ml_ns.marshal_with(ml_response_model, code=200)
-    @ml_ns.response(400, 'Parámetros inválidos', error_model)
-    @ml_ns.response(503, 'API ML externa no disponible', error_model)
-    @ml_ns.response(500, 'Error interno del servidor', error_model)
-    @ml_ns.param('epochs', 'Épocas de entrenamiento', type=int, default=50)
-    @ensure_mongodb_connection
-    def post(self, sensor):
-        """
-        Entrenar modelo individual usando API ML externa
-        
-        Entrena un modelo específico para un sensor usando la API ML externa.
-        Permite control granular del entrenamiento con parámetros específicos.
-        Ideal para ajuste fino de modelos individuales.
-        """
-        try:
-            if not sistema_ml:
-                ml_ns.abort(500, success=False, error="Sistema ML no inicializado")
-            
-            # Validar sensor
-            if sensor not in ['temperatura', 'ph', 'oxigeno']:
-                ml_ns.abort(400, success=False, error="Sensor debe ser: temperatura, ph, oxigeno")
-            
-            epochs = request.args.get('epochs', 50, type=int)
-            
-            # Validar épocas
-            if epochs < 10 or epochs > 200:
-                ml_ns.abort(400, success=False, error="Épocas debe estar entre 10 y 200")
-            
-            # Verificar estado de API
-            estado_api = sistema_ml.verificar_estado_api_ml()
-            if not estado_api.get("disponible", False):
-                ml_ns.abort(503, success=False, error="API ML externa no disponible", details=estado_api)
-            
-            # Entrenar modelo individual
-            resultado = sistema_ml.entrenar_modelo_individual(sensor, epochs)
-            
-            return {
-                "success": resultado.get("exito", False),
-                "entrenamiento": resultado,
-                "estado_api": estado_api,
-                "fecha_procesamiento": get_chile_time().isoformat()
-            }
-            
-        except Exception as e:
-            ml_ns.abort(500, success=False, error=str(e))
-
-@ml_ns.route('/prediccion-individual/<string:sensor>')
-class PrediccionSensorIndividualResource(Resource):
-    @ml_ns.doc('prediccion_sensor_individual')
-    @ml_ns.marshal_with(ml_response_model, code=200)
-    @ml_ns.response(400, 'Parámetros inválidos', error_model)
-    @ml_ns.response(503, 'API ML externa no disponible', error_model)
-    @ml_ns.response(500, 'Error interno del servidor', error_model)
-    @ensure_mongodb_connection
-    def get(self, sensor):
-        """
-        Predicción individual usando API ML externa
-        
-        Genera predicción para un sensor específico usando la API ML externa.
-        Utiliza los últimos datos disponibles para hacer la predicción.
-        Incluye análisis de riesgo y generación automática de alertas.
-        """
-        try:
-            if not sistema_ml:
-                ml_ns.abort(500, success=False, error="Sistema ML no inicializado")
-            
-            # Validar sensor
-            if sensor not in ['temperatura', 'ph', 'oxigeno']:
-                ml_ns.abort(400, success=False, error="Sensor debe ser: temperatura, ph, oxigeno")
-            
-            # Verificar estado de API
-            estado_api = sistema_ml.verificar_estado_api_ml()
-            if not estado_api.get("disponible", False):
-                ml_ns.abort(503, success=False, error="API ML externa no disponible", details=estado_api)
-            
-            # Generar predicción
-            prediccion = sistema_ml.predecir_sensor(sensor)
-            
-            # Generar alerta si es necesaria
-            alerta_generada = None
-            if prediccion.get("exito", False):
-                alerta = sistema_ml.generar_alerta(sensor, prediccion)
-                if alerta:
-                    alerta_id = sistema_ml.guardar_alerta(alerta)
-                    if alerta_id:
-                        alerta_generada = {
-                            'sensor': sensor,
-                            'nivel': alerta['nivel'],
-                            'alerta_id': alerta_id,
-                            'mensaje': alerta['mensaje'],
-                            'valor_predicho': prediccion.get('prediccion', 0)
-                        }
-            
-            return {
-                "success": prediccion.get("exito", False),
-                "prediccion": prediccion,
-                "alerta_generada": alerta_generada,
-                "estado_api": estado_api,
-                "fecha_procesamiento": get_chile_time().isoformat()
-            }
-            
-        except Exception as e:
-            ml_ns.abort(500, success=False, error=str(e))
 
 # ================================
 # ENDPOINTS DE ALERTAS

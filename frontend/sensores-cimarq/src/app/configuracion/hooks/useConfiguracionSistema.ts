@@ -3,7 +3,6 @@ import {
   ConfiguracionSistemaCompleta, 
   ConfiguracionRangos,
   ConfiguracionGeneral,
-  ConfiguracionAlertas,
   configuracionSistemaCompleta as defaultConfig
 } from '../types';
 
@@ -116,18 +115,6 @@ export function useConfiguracionSistema() {
     return guardarConfiguracion(nuevaConfiguracion);
   };
 
-  // Actualizar configuración de alertas específicamente
-  const actualizarConfiguracionAlertas = (nuevasAlertas: ConfiguracionAlertas) => {
-    const nuevaConfiguracion = {
-      ...configuracion,
-      general: {
-        ...configuracion.general,
-        alertas: nuevasAlertas
-      }
-    };
-    return guardarConfiguracion(nuevaConfiguracion);
-  };
-
   // Restaurar configuración por defecto
   const restaurarDefecto = (seccion?: 'rangos' | 'general' | 'todo') => {
     let nuevaConfiguracion = { ...configuracion };
@@ -146,54 +133,12 @@ export function useConfiguracionSistema() {
     return guardarConfiguracion(nuevaConfiguracion);
   };
 
-  // Exportar configuración
-  const exportarConfiguracion = () => {
-    const dataStr = JSON.stringify(configuracion, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = `configuracion-sistema-${new Date().toISOString().split('T')[0]}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-  };
-
-  // Importar configuración
-  const importarConfiguracion = (archivo: File): Promise<boolean> => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const contenido = e.target?.result as string;
-          const configImportada = JSON.parse(contenido) as ConfiguracionSistemaCompleta;
-          
-          // Validar estructura básica
-          if (configImportada.rangos && configImportada.general) {
-            const exito = guardarConfiguracion(configImportada);
-            resolve(exito);
-          } else {
-            console.error('Archivo de configuración no válido');
-            resolve(false);
-          }
-        } catch (error) {
-          console.error('Error importando configuración:', error);
-          resolve(false);
-        }
-      };
-      reader.readAsText(archivo);
-    });
-  };
-
   return {
     configuracion,
     loading,
     guardarConfiguracion,
     actualizarRangos,
     actualizarConfiguracionGeneral,
-    actualizarConfiguracionAlertas,
-    restaurarDefecto,
-    exportarConfiguracion,
-    importarConfiguracion
+    restaurarDefecto
   };
 }

@@ -15,7 +15,6 @@ import {
 import {
   MdSettings,
   MdThermostat,
-  MdImportExport,
   MdInfo
 } from 'react-icons/md';
 
@@ -25,7 +24,6 @@ import { useNombreSistema } from '../hooks/useNombreSistema';
 import DynamicTitle from '../components/DynamicTitle';
 import ConfiguracionRangos from './components/ConfiguracionRangos';
 import ConfiguracionGeneral from './components/ConfiguracionGeneral';
-import ImportExportConfig from './components/ImportExportConfig';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -63,9 +61,7 @@ export default function ConfiguracionPage() {
     loading,
     actualizarRangos,
     actualizarConfiguracionGeneral,
-    restaurarDefecto,
-    exportarConfiguracion,
-    importarConfiguracion
+    restaurarDefecto
   } = useConfiguracionSistema();
 
   const nombreSistema = useNombreSistema();
@@ -150,12 +146,6 @@ export default function ConfiguracionPage() {
                 iconPosition="start"
                 {...a11yProps(1)} 
               />
-              <Tab 
-                label="Importar/Exportar"
-                icon={<MdImportExport />}
-                iconPosition="start"
-                {...a11yProps(2)} 
-              />
             </Tabs>
           </Box>
 
@@ -174,14 +164,6 @@ export default function ConfiguracionPage() {
               configuracion={configuracion.general}
               onActualizar={actualizarConfiguracionGeneral}
               onRestaurar={() => restaurarDefecto('general')}
-            />
-          </TabPanel>
-
-          {/* Panel de Importar/Exportar */}
-          <TabPanel value={tabActiva} index={2}>
-            <ImportExportConfig
-              onExportar={exportarConfiguracion}
-              onImportar={importarConfiguracion}
             />
           </TabPanel>
         </Paper>

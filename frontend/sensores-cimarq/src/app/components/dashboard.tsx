@@ -139,20 +139,9 @@ export default function SensoresPage() {
     const fetchAlertas = async () => {
       setLoadingAlertas(true);
       try {
-        // Configurar URL del backend según el entorno
-        const backendUrl = typeof window !== 'undefined' 
-          ? 'http://localhost:5000' 
-          : process.env.BACKEND_URL || 'http://localhost:5000';
+        console.log('🔄 Dashboard - Cargando alertas desde: /api/v1/alertas?limite=10');
         
-        console.log('🔄 Dashboard - Cargando alertas desde:', `${backendUrl}/api/v1/alertas?limite=10`);
-        
-        const response = await fetch(`${backendUrl}/api/v1/alertas?limite=10`, {
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        });
-        
-        const result = await response.json();
+        const result = await apiRequestJson<any>('/api/v1/alertas?limite=10');
         
         if (result.success) {
           // Aplicar estado local de alertas revisadas
@@ -292,7 +281,7 @@ export default function SensoresPage() {
   const getTemperaturaEstado = (temp: number) => {
     const estado = evaluarEstadoSensor('temperatura', temp);
     const colorMap: Record<string, string> = {
-      'crítico': 'error',
+      'critico': 'error',
       'aceptable': 'warning', 
       'optimo': 'success'
     };
@@ -305,7 +294,7 @@ export default function SensoresPage() {
   const getPhEstado = (ph: number) => {
     const estado = evaluarEstadoSensor('ph', ph);
     const colorMap: Record<string, string> = {
-      'crítico': 'error',
+      'critico': 'error',
       'aceptable': 'warning', 
       'optimo': 'success'
     };
@@ -318,7 +307,7 @@ export default function SensoresPage() {
   const getOxigenoEstado = (oxigeno: number) => {
     const estado = evaluarEstadoSensor('oxigeno', oxigeno);
     const colorMap: Record<string, string> = {
-      'crítico': 'error',
+      'critico': 'error',
       'aceptable': 'warning', 
       'optimo': 'success'
     };

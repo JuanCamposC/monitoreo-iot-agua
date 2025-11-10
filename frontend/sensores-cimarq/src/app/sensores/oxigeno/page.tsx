@@ -7,6 +7,7 @@ import { useNombreSistema } from '../../hooks/useNombreSistema';
 import DynamicTitle from '../../components/DynamicTitle';
 import InfoRangos from '../../components/InfoRangos';
 import { MdAir } from 'react-icons/md';
+import { apiRequestJson } from '../../config/api';
 
 interface OxigenoData {
   _id: string;
@@ -27,8 +28,7 @@ export default function OxigenoPage() {
   useEffect(() => {
     const fetchOxigeno = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/v1/oxigeno');
-        const data = await response.json();
+        const data = await apiRequestJson<any>('/api/v1/oxigeno');
         
         if (data.success) {
           const oxigenos = data.data;

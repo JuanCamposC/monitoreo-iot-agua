@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {Box,Typography,Card,CardContent,TextField,Button,Alert,FormControl,InputLabel,Select,MenuItem,Paper,CardHeader,Avatar,Grid,Switch,FormControlLabel} from '@mui/material';
-import { MdSettings, MdSave, MdRestore, MdSchedule, MdNotifications, MdError, MdWarning, MdInfo} from 'react-icons/md';
+import {Box,Typography,Card,CardContent,TextField,Button,Alert,FormControl,InputLabel,Select,MenuItem,Paper,CardHeader,Avatar,Grid} from '@mui/material';
+import { MdSettings, MdSave, MdRestore, MdSchedule } from 'react-icons/md';
 import { ConfiguracionGeneral, configuracionGeneralPorDefecto } from '../types';
 
 interface ConfiguracionGeneralProps {
@@ -147,99 +147,6 @@ export default function ConfiguracionGeneralComponent({
                 </Select>
               </FormControl>
             </Grid>
-
-            {/* Configuración de Alertas */}
-            <Grid size={{ xs: 12 }}>
-              <Card variant="outlined" sx={{ mt: 2 }}>
-                <CardHeader
-                  avatar={<Avatar sx={{ bgcolor: 'warning.main' }}><MdNotifications /></Avatar>}
-                  title="Configuración de Alertas"
-                  subheader="Selecciona qué tipos de alertas deseas recibir"
-                />
-                <CardContent>
-                  <Grid container spacing={2}>
-                    <Grid size={{ xs: 12, sm: 4 }}>
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            checked={configLocal.alertas.criticas}
-                            onChange={(e) =>
-                              setConfigLocal({
-                                ...configLocal,
-                                alertas: { ...configLocal.alertas, criticas: e.target.checked }
-                              })
-                            }
-                            color="error"
-                          />
-                        }
-                        label={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <MdError color="#d32f2f" />
-                            <Typography variant="body2">Alertas Críticas</Typography>
-                          </Box>
-                        }
-                      />
-                      <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'text.secondary' }}>
-                        Valores fuera del rango crítico
-                      </Typography>
-                    </Grid>
-                    
-                    <Grid size={{ xs: 12, sm: 4 }}>
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            checked={configLocal.alertas.advertencia}
-                            onChange={(e) =>
-                              setConfigLocal({
-                                ...configLocal,
-                                alertas: { ...configLocal.alertas, advertencia: e.target.checked }
-                              })
-                            }
-                            color="warning"
-                          />
-                        }
-                        label={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <MdWarning color="#ed6c02" />
-                            <Typography variant="body2">Alertas de Advertencia</Typography>
-                          </Box>
-                        }
-                      />
-                      <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'text.secondary' }}>
-                        Valores fuera del rango óptimo
-                      </Typography>
-                    </Grid>
-
-                    <Grid size={{ xs: 12, sm: 4 }}>
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            checked={configLocal.alertas.informativas}
-                            onChange={(e) =>
-                              setConfigLocal({
-                                ...configLocal,
-                                alertas: { ...configLocal.alertas, informativas: e.target.checked }
-                              })
-                            }
-                            color="info"
-                          />
-                        }
-                        label={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <MdInfo color="#0288d1" />
-                            <Typography variant="body2">Alertas Informativas</Typography>
-                          </Box>
-                        }
-                      />
-                      <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'text.secondary' }}>
-                        Información general del sistema
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </Card>
-            </Grid>
-
           </Grid>
         </CardContent>
       </Card>
@@ -248,10 +155,11 @@ export default function ConfiguracionGeneralComponent({
       <Paper sx={{ p: 2, mb: 3, bgcolor: '#f0f8ff' }}>
         <Typography variant="body2" color="text.secondary">
           <MdSchedule style={{ verticalAlign: 'middle', marginRight: 4 }} />
-          <strong>Información:</strong> Esta sección permite configurar solo los aspectos esenciales del sistema.
+          <strong>Información:</strong> Esta sección permite configurar los aspectos esenciales del sistema.
           El sistema está configurado para la zona horaria de Chile.
           Durante el horario de verano chileno (octubre a marzo), Santiago utiliza UTC-3.
           Durante el horario de invierno (abril a septiembre), utiliza UTC-4.
+          Las notificaciones están activadas por defecto para todos los niveles de alerta.
         </Typography>
       </Paper>
 

@@ -7,6 +7,7 @@ import { useNombreSistema } from '../../hooks/useNombreSistema';
 import DynamicTitle from '../../components/DynamicTitle';
 import InfoRangos from '../../components/InfoRangos';
 import { MdScience } from 'react-icons/md';
+import { apiRequestJson } from '../../config/api';
 
 interface PHData {
   _id: string;
@@ -27,8 +28,7 @@ export default function PhPage() {
   useEffect(() => {
     const fetchPH = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/v1/ph');
-        const data = await response.json();
+        const data = await apiRequestJson<any>('/api/v1/ph');
         
         if (data.success) {
           const phs = data.data;

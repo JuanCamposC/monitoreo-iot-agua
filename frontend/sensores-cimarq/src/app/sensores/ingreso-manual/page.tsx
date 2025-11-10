@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Box, Typography, Card, CardContent, TextField, Button, Grid, Alert,Snackbar,InputAdornment,Chip,Paper,CircularProgress } from '@mui/material';
 import { MdThermostat, MdScience, MdAir, MdSave, MdRefresh } from 'react-icons/md';
 import { useConfiguracionRangos } from '../../hooks/useConfiguracionRangos';
+import { apiRequestJson } from '../../config/api';
 
 interface DatosIngreso {
   temperatura: string;
@@ -95,9 +96,8 @@ export default function IngresoManualPage() {
 
       // Envío unificado al backend (datos completos en una sola petición)
       try {
-        const response = await fetch('http://localhost:5000/api/v1/sensores/manual', {
+        const resultado = await apiRequestJson<any>('/api/v1/sensores/manual', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             temperatura: datosEnvio.temperatura,
             ph: datosEnvio.ph,
@@ -108,26 +108,13 @@ export default function IngresoManualPage() {
           })
         });
 
-        if (response.ok) {
-          const resultado = await response.json();
-          setMensaje('Datos guardados exitosamente en la base de datos');
-          setTipoMensaje('success');
-          
-          // Limpiar formulario después del éxito
-          setTimeout(() => {
-            limpiarFormulario();
-          }, 2000);
-        } else {
-          // Intentar obtener el error del response
-          let errorMessage = 'Error al guardar datos';
-          try {
-            const errorData = await response.json();
-            errorMessage = errorData.error || errorData.message || errorMessage;
-          } catch (e) {
-            errorMessage = `Error ${response.status}: ${response.statusText}`;
-          }
-          throw new Error(errorMessage);
-        }
+        setMensaje('Datos guardados exitosamente en la base de datos');
+        setTipoMensaje('success');
+        
+        // Limpiar formulario después del éxito
+        setTimeout(() => {
+          limpiarFormulario();
+        }, 2000);
       } catch (networkError) {
         // Error de red o conexión
         const error = networkError as Error;

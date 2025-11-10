@@ -106,12 +106,22 @@ const MachineLearningPage = () => {
                       <div className="flex items-center gap-2">
                         <span>✅</span>
                         <span className="font-medium text-green-800">
-                          Datos obtenidos exitosamente de {muestraDatos.collection}
+                          Datos de entrenamiento obtenidos de {muestraDatos.collection}
                         </span>
                       </div>
                       <div className="text-sm text-green-600 mt-1">
-                        Tamaño de muestra: {muestraDatos.sample_size} registros por sensor
+                        {muestraDatos.description || `Últimos ${muestraDatos.sample_size} registros por sensor (datos de entrenamiento)`}
                       </div>
+                      {muestraDatos.training_info && (
+                        <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded">
+                          <div className="text-sm text-blue-800 font-medium">📚 Información de Entrenamiento:</div>
+                          <div className="text-xs text-blue-600 mt-1">
+                            • Window Size: {muestraDatos.training_info.window_size} valores por secuencia<br/>
+                            • Secuencias creadas: {muestraDatos.training_info.sequences_created} por sensor<br/>
+                            • {muestraDatos.training_info.explanation || `Con ${muestraDatos.sample_size} datos y window_size=${muestraDatos.training_info.window_size}, se crean ${muestraDatos.training_info.sequences_created} secuencias de entrenamiento`}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -155,6 +165,7 @@ const MachineLearningPage = () => {
                               <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                   <tr>
+                                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Pos.</th>
                                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Valor</th>
                                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Timestamp</th>
                                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Temp</th>
@@ -163,8 +174,13 @@ const MachineLearningPage = () => {
                                   </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                  {muestraDatos.data[sensor as keyof typeof muestraDatos.data]?.slice(0, 5).map((item: any, index: number) => (
+                                  {muestraDatos.data[sensor as keyof typeof muestraDatos.data]?.slice(0, 10).map((item: any, index: number) => (
                                     <tr key={item._id} className="hover:bg-gray-50">
+                                      <td className="px-3 py-2 text-sm text-center">
+                                        <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                                          {item.position_in_training || (index + 1)}
+                                        </span>
+                                      </td>
                                       <td className="px-3 py-2 text-sm font-medium text-gray-900">
                                         {item.value.toFixed(2)}
                                       </td>
@@ -184,9 +200,14 @@ const MachineLearningPage = () => {
                                   ))}
                                 </tbody>
                               </table>
-                              {muestraDatos.data[sensor as keyof typeof muestraDatos.data]?.length > 5 && (
+                              {muestraDatos.data[sensor as keyof typeof muestraDatos.data]?.length > 10 && (
                                 <div className="text-center text-sm text-gray-500 mt-2">
-                                  ... y {muestraDatos.data[sensor as keyof typeof muestraDatos.data].length - 5} registros más
+                                  ... y {muestraDatos.data[sensor as keyof typeof muestraDatos.data].length - 10} registros más
+                                </div>
+                              )}
+                              {muestraDatos.data[sensor as keyof typeof muestraDatos.data]?.length === 10 && (
+                                <div className="text-center text-sm text-blue-600 mt-2 font-medium">
+                                  📚 Estos son todos los datos de entrenamiento (últimos 10 registros)
                                 </div>
                               )}
                             </div>
@@ -198,7 +219,7 @@ const MachineLearningPage = () => {
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
-                  Haz clic en "Cargar Muestra" para obtener datos de ejemplo de la API ML externa
+                  Haz clic en &quot;Cargar Muestra&quot; para obtener datos de ejemplo de la API ML externa
                 </div>
               )}
             </div>

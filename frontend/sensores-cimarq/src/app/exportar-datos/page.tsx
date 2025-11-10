@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Box, Typography, Card, CardContent, TextField, Button, Grid, Alert,Snackbar,FormControl,InputLabel,Select,MenuItem,Chip,Paper,CircularProgress,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,TablePagination,Checkbox,FormControlLabel,Dialog,DialogTitle,DialogContent,DialogActions} from '@mui/material';
 import { MdDownload, MdEmail, MdFilterList,MdRefresh,MdDateRange,MdTableChart,MdFileDownload,MdSend} from 'react-icons/md';
 import { useConfiguracionRangos } from '../hooks/useConfiguracionRangos';
+import { apiRequestJson, apiRequestBlob } from '../config/api';
 
 interface DatoSensor {
   _id: string;
@@ -74,41 +75,29 @@ export default function ExportarDatosPage() {
 
   const cargarDatosInterno = async (reintentos = 3) => {
     try {
-      // Detectar la URL del backend automáticamente
-      const backendUrl = typeof window !== 'undefined' 
-        ? 'http://localhost:5000' 
-        : process.env.BACKEND_URL || 'http://localhost:5000';
-      
-      const url = `${backendUrl}/api/v1/sensores`;
+      const url = '/api/v1/sensores';
       console.log('Cargando datos desde:', url, `(intentos restantes: ${reintentos})`);
       
-      const respuesta = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
+      const resultado = await apiRequestJson<any>(url);
       
-      console.log('Respuesta recibida:', respuesta.status, respuesta.statusText);
+      console.log('Respuesta recibida con éxito');
       
-      if (respuesta.ok) {
-        const resultado = await respuesta.json();
-        
-        // Agrupar datos por fecha/timestamp para combinar registros del mismo momento
-        const registrosAgrupados: { [key: string]: DatoSensor } = {};
-        
-        // Procesar datos de temperatura
-        if (resultado.data.temperatura) {
-          resultado.data.temperatura.forEach((item: any) => {
-            const claveFecha = new Date(item.fecha).toISOString();
-            if (!registrosAgrupados[claveFecha]) {
-              registrosAgrupados[claveFecha] = {
-                _id: item._id,
-                fecha: item.fecha
-              };
-            }
-            registrosAgrupados[claveFecha].temperatura = item.temperatura;
-          });
-        }
+      // Agrupar datos por fecha/timestamp para combinar registros del mismo momento
+      const registrosAgrupados: { [key: string]: DatoSensor } = {};
+      
+      // Procesar datos de temperatura
+      if (resultado.data.temperatura) {
+        resultado.data.temperatura.forEach((item: any) => {
+          const claveFecha = new Date(item.fecha).toISOString();
+          if (!registrosAgrupados[claveFecha]) {
+            registrosAgrupados[claveFecha] = {
+              _id: item._id,
+              fecha: item.fecha
+            };
+          }
+          registrosAgrupados[claveFecha].temperatura = item.temperatura;
+        });
+      }
 
         // Procesar datos de pH
         if (resultado.data.ph) {
@@ -143,9 +132,6 @@ export default function ExportarDatosPage() {
         datosUnificados.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
         
         setDatos(datosUnificados);
-      } else {
-        throw new Error(`Error HTTP: ${respuesta.status} - ${respuesta.statusText}`);
-      }
     } catch (error: any) {
       console.error('Error completo:', error);
       console.error('Tipo de error:', error.name);
@@ -270,33 +256,23 @@ export default function ExportarDatosPage() {
     try {
       setExportando(true);
       
-      const respuesta = await fetch('http://localhost:5000/api/v1/notificaciones/descargar/csv', {
+      const { blob, filename } = await apiRequestBlob('/api/v1/notificaciones/descargar/csv', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ datos })
       });
 
-      if (respuesta.ok) {
-        // Obtener el nombre del archivo desde los headers
-        const contentDisposition = respuesta.headers.get('content-disposition');
-        const filename = contentDisposition?.match(/filename="(.+)"/)?.[1] || 'datos_sensores.csv';
-        
-        // Crear blob y descargar
-        const blob = await respuesta.blob();
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        
-        setMensaje('CSV descargado exitosamente');
-        setTipoMensaje('success');
-      } else {
-        throw new Error(`Error HTTP: ${respuesta.status}`);
-      }
+      // Descargar el archivo
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename || 'datos_sensores.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      setMensaje('CSV descargado exitosamente');
+      setTipoMensaje('success');
     } catch (error) {
       console.error('Error descargando CSV:', error);
       setMensaje('Error al descargar CSV');
@@ -310,33 +286,23 @@ export default function ExportarDatosPage() {
     try {
       setExportando(true);
       
-      const respuesta = await fetch('http://localhost:5000/api/v1/notificaciones/descargar/excel', {
+      const { blob, filename } = await apiRequestBlob('/api/v1/notificaciones/descargar/excel', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ datos })
       });
 
-      if (respuesta.ok) {
-        // Obtener el nombre del archivo desde los headers
-        const contentDisposition = respuesta.headers.get('content-disposition');
-        const filename = contentDisposition?.match(/filename="(.+)"/)?.[1] || 'datos_sensores.xlsx';
-        
-        // Crear blob y descargar
-        const blob = await respuesta.blob();
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        
-        setMensaje('Excel descargado exitosamente');
-        setTipoMensaje('success');
-      } else {
-        throw new Error(`Error HTTP: ${respuesta.status}`);
-      }
+      // Descargar el archivo
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename || 'datos_sensores.xlsx';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      setMensaje('Excel descargado exitosamente');
+      setTipoMensaje('success');
     } catch (error) {
       console.error('Error descargando Excel:', error);
       setMensaje('Error al descargar Excel');
@@ -378,9 +344,8 @@ export default function ExportarDatosPage() {
         Estado_Oxigeno: dato.oxigeno ? evaluarEstadoSensor('oxigeno', dato.oxigeno) : ''
       }));
       
-      const respuesta = await fetch('http://localhost:5000/api/v1/notificaciones/exportar', {
+      await apiRequestJson('/api/v1/notificaciones/exportar', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           destinatario: emailDestino,
           asunto: 'Exportación de Datos - Sistema de Monitoreo CIMARQ',
@@ -396,14 +361,10 @@ Este reporte incluye datos de temperatura, pH y oxígeno disuelto del sistema de
         })
       });
 
-      if (respuesta.ok) {
-        setMensaje(`Datos enviados exitosamente a ${emailDestino}`);
-        setTipoMensaje('success');
-        setModalEmail(false);
-        setEmailDestino('');
-      } else {
-        throw new Error('Error al enviar email');
-      }
+      setMensaje(`Datos enviados exitosamente a ${emailDestino}`);
+      setTipoMensaje('success');
+      setModalEmail(false);
+      setEmailDestino('');
     } catch (error) {
       console.error('Error:', error);
       setMensaje('Error al enviar el email. Verifique la configuración del servidor');

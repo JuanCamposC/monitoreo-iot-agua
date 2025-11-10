@@ -7,6 +7,7 @@ import { useConfiguracionRangos } from '../hooks/useConfiguracionRangos';
 import { useNombreSistema } from '../hooks/useNombreSistema';
 import DynamicTitle from '../components/DynamicTitle';
 import { Black_Han_Sans } from 'next/font/google';
+import { apiRequestJson } from '../config/api';
 
 interface ConfiguracionSimulador {
   activo: boolean;
@@ -243,7 +244,8 @@ export default function SimuladorPage() {
     try {
       const datoSimulado: any = {
         fuente: 'simulador',
-        usuario: 'simulador_web'
+        usuario: 'simulador_web',
+        fecha: new Date().toISOString()  // Formato ISO string como espera el backend
       };
 
       // Generar valores para sensores activos usando configuración global
@@ -259,44 +261,37 @@ export default function SimuladorPage() {
         datoSimulado.oxigeno = generarValorSensor(configuracion.oxigeno.tendencia, 'oxigeno');
       }
 
+      // Log de los datos que se van a enviar
+      console.log('Enviando datos al backend:', datoSimulado);
+
       // Enviar datos al endpoint manual
-      const respuesta = await fetch('http://localhost:5000/api/v1/sensores/manual', {
+      const resultado = await apiRequestJson<any>('/api/v1/sensores/manual', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(datoSimulado)
       });
 
       const ahora = new Date().toISOString();
       
-      if (respuesta.ok) {
-        const resultado = await respuesta.json();
+      // Agregar al historial
+      const nuevoRegistro: DatoSimulacion = {
+        timestamp: ahora,
+        temperatura: datoSimulado.temperatura,
+        ph: datoSimulado.ph,
+        oxigeno: datoSimulado.oxigeno,
+        estado: 'enviado'
+      };
+      
+      setHistorialDatos(prev => [nuevoRegistro, ...prev.slice(0, 49)]); // Mantener últimos 50
+      setUltimoEnvio(ahora);
         
-        // Agregar al historial
-        const nuevoRegistro: DatoSimulacion = {
-          timestamp: ahora,
-          temperatura: datoSimulado.temperatura,
-          ph: datoSimulado.ph,
-          oxigeno: datoSimulado.oxigeno,
-          estado: 'enviado'
-        };
-        
-        setHistorialDatos(prev => [nuevoRegistro, ...prev.slice(0, 49)]); // Mantener últimos 50
-        setUltimoEnvio(ahora);
-        
-        // Actualizar estadísticas
-        setEstadisticas(prev => ({
-          ...prev,
-          totalEnviados: prev.totalEnviados + 1
-        }));
+      // Actualizar estadísticas
+      setEstadisticas(prev => ({
+        ...prev,
+        totalEnviados: prev.totalEnviados + 1
+      }));
 
-        // Log de éxito
-        console.log('Dato simulado enviado:', datoSimulado);
-        
-      } else {
-        throw new Error(`Error HTTP: ${respuesta.status}`);
-      }
+      // Log de éxito
+      console.log('Dato simulado enviado:', datoSimulado);
       
     } catch (error: any) {
       console.error('Error enviando dato simulado:', error);

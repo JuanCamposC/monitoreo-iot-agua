@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useConfiguracionRangos, EstadoSensor } from './useConfiguracionRangos';
 import { useNotificaciones, AlertaNotificacion } from './useNotificaciones';
+import { apiRequestJson } from '../config/api';
 
 interface DatoSensor {
   _id: string;
@@ -177,11 +178,8 @@ const enviarCorreoCritico = async (alerta: AlertaAutomatica) => {
   }
 
   try {
-    const response = await fetch('http://localhost:5000/api/v1/notificaciones/correo-critico', {
+    await apiRequestJson('/api/v1/notificaciones/correo-critico', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({
         tipo: 'alerta_critica',
         sensor: alerta.sensor,
@@ -196,11 +194,7 @@ const enviarCorreoCritico = async (alerta: AlertaAutomatica) => {
       }),
     });
 
-    if (response.ok) {
-      console.log('Correo crítico enviado exitosamente');
-    } else {
-      console.warn(`No se pudo enviar correo crítico (HTTP ${response.status})`);
-    }
+    console.log('✅ Email de alerta crítica enviado correctamente');
   } catch (error) {
     console.warn('Backend no disponible - correo crítico no enviado:', error);
     // No mostrar como error crítico, solo como advertencia
@@ -283,10 +277,7 @@ export function useMonitoreoAutomatico() {
   // Obtener y agrupar datos NUEVOS por registro completo
   const obtenerRegistrosNuevos = async (): Promise<DatoSensor[]> => {
     try {
-      const response = await fetch('http://localhost:5000/api/v1/sensores');
-      if (!response.ok) throw new Error('Error al obtener datos');
-      
-      const data = await response.json();
+      const data = await apiRequestJson<any>('/api/v1/sensores');
       const ahora = new Date();
       const hace5Minutos = new Date(ahora.getTime() - 5 * 60 * 1000);
       

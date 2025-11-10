@@ -1,9 +1,13 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { createApiClient, apiRequestJson } from '../config/api';
 
 // URL de tu API ML externa
 const ML_API_BASE_URL = 'https://ml-monitoreo-production.up.railway.app';
+
+// Cliente de API para el servicio ML
+const mlApiClient = createApiClient(ML_API_BASE_URL);
 
 interface MLApiResponse {
   [key: string]: any;
@@ -158,12 +162,21 @@ interface EntrenamientoResponse {
   };
   data_points?: number;
   
-  // Para entrenamiento de todos los parámetros - estructura real
+  // Información general del entrenamiento
+  training_info?: {
+    data_used_for_training: number;
+    minimum_data_required: number;
+    window_size_default: number;
+    sequences_created_per_param: number;
+  };
+  
+  // Para entrenamiento de todos los parámetros - estructura actualizada
   summary?: {
     successful_models: number;
     success_rate: number;
     total_training_time: number;
     avg_training_time_per_model: number;
+    data_limitation: string; // Nuevo: explica que usa últimos 10 datos
   };
   performance_overview?: {
     average_rmse: number;
@@ -174,7 +187,7 @@ interface EntrenamientoResponse {
   detailed_results?: {
     temperatura?: {
       data_stats: {
-        count: number;
+        count: number; // Siempre será 10
         min: number;
         max: number;
         mean: number;
@@ -186,10 +199,11 @@ interface EntrenamientoResponse {
         mse: number;
       };
       training_config: {
-        window_size: number;
+        window_size: number; // Siempre será 5
         epochs: number;
-        sequences_created: number;
+        sequences_created: number; // Siempre será 5 (10-5=5 secuencias)
       };
+      training_data_used?: number[]; // Nuevo: datos exactos usados para entrenar
     };
     ph?: {
       data_stats: {
@@ -209,6 +223,7 @@ interface EntrenamientoResponse {
         epochs: number;
         sequences_created: number;
       };
+      training_data_used?: number[]; // Nuevo: datos exactos usados para entrenar
     };
     oxigeno?: {
       data_stats: {
@@ -228,6 +243,7 @@ interface EntrenamientoResponse {
         epochs: number;
         sequences_created: number;
       };
+      training_data_used?: number[]; // Nuevo: datos exactos usados para entrenar
     };
   };
   timestamp?: string;
@@ -247,12 +263,19 @@ interface EstadoAPIResponse {
 interface MuestraDatosResponse {
   status: string;
   collection: string;
-  sample_size: number;
+  sample_size: number; // Siempre será 10
+  description: string; // Nuevo: explicación de que son los datos de entrenamiento
+  training_info: { // Nuevo: información sobre cómo se usan los datos
+    window_size: number; // 5
+    sequences_created: number; // 5 (con 10 datos y window_size=5)
+    explanation: string; // Explicación de cómo se crean las secuencias
+  };
   data: {
     temperatura: Array<{
       _id: string;
       timestamp: number;
       value: number;
+      position_in_training: number; // Nuevo: posición en el dataset de entrenamiento (1-10)
       original_data: {
         temperatura: number;
         ph: number;
@@ -263,6 +286,7 @@ interface MuestraDatosResponse {
       _id: string;
       timestamp: number;
       value: number;
+      position_in_training: number;
       original_data: {
         temperatura: number;
         ph: number;
@@ -273,6 +297,7 @@ interface MuestraDatosResponse {
       _id: string;
       timestamp: number;
       value: number;
+      position_in_training: number;
       original_data: {
         temperatura: number;
         ph: number;
@@ -353,28 +378,16 @@ export const useMLApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const apiCall = useCallback(async (endpoint: string, options: RequestInit = {}) => {
+  const apiCall = useCallback(async <T = any>(endpoint: string, options: RequestInit = {}): Promise<T> => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(`${ML_API_BASE_URL}${endpoint}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers,
-        },
-        ...options,
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || data.error || `Error ${response.status}`);
-      }
-
+      const data = await mlApiClient<T>(endpoint, options);
       return data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+      console.error(`💥 API Call failed:`, err);
       setError(errorMessage);
       throw err;
     } finally {
@@ -384,19 +397,47 @@ export const useMLApi = () => {
 
   // Verificar estado de la API ML externa
   const verificarEstadoAPI = useCallback(async (): Promise<EstadoAPIResponse> => {
-    return apiCall('/health');
+    try {
+      console.log('🔍 Verificando estado de API ML...');
+      const result = await apiCall('/health');
+      console.log('✅ API ML disponible:', result);
+      return result;
+    } catch (error) {
+      console.warn('⚠️ API ML no disponible:', error);
+      // Devolver un estado de error pero sin lanzar excepción
+      return {
+        status: 'error',
+        database: 'disconnected',
+        models_loaded: {
+          temperatura: false,
+          ph: false,
+          oxigeno: false
+        }
+      };
+    }
   }, [apiCall]);
 
   // Obtener predicciones automáticas para un parámetro específico
   const obtenerPredicciones = useCallback(async (parameter: string, windowSize: number = 5): Promise<PrediccionResponse> => {
-    return apiCall('/predict', {
-      method: 'POST',
-      body: JSON.stringify({
-        parameter: parameter,
-        collection_name: 'datos',
-        window_size: windowSize
-      }),
-    });
+    console.log(`🔮 Solicitando predicción para ${parameter} con window_size=${windowSize}`);
+    const payload = {
+      parameter: parameter,
+      collection_name: 'datos',
+      window_size: windowSize
+    };
+    console.log('📤 Payload enviado:', payload);
+    
+    try {
+      const result = await apiCall('/predict', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      console.log(`✅ Predicción exitosa para ${parameter}:`, result);
+      return result;
+    } catch (error) {
+      console.error(`❌ Error en predicción de ${parameter}:`, error);
+      throw error;
+    }
   }, [apiCall]);
 
   // Obtener predicciones para todos los parámetros
@@ -470,8 +511,7 @@ export const useMLApi = () => {
   // Función adicional para obtener datos desde el backend local (para entrenar)
   const obtenerDatosBackend = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/v1/sensores');
-      return await response.json();
+      return await apiRequestJson<any>('/api/v1/sensores');
     } catch (err) {
       console.error('Error obteniendo datos del backend:', err);
       return null;

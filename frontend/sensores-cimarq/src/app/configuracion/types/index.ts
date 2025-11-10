@@ -13,18 +13,11 @@ export interface ConfiguracionRangos {
   oxigeno: RangoSensor;
 }
 
-export interface ConfiguracionAlertas {
-  criticas: boolean;
-  advertencia: boolean;
-  informativas: boolean;
-}
-
 export interface ConfiguracionGeneral {
   sistema: {
     nombre: string;
     timezone: string;
   };
-  alertas: ConfiguracionAlertas;
 }
 
 export interface ConfiguracionSistemaCompleta {
@@ -60,11 +53,6 @@ export const configuracionGeneralPorDefecto: ConfiguracionGeneral = {
   sistema: {
     nombre: 'CIMARQ IoT Monitor',
     timezone: 'America/Santiago'
-  },
-  alertas: {
-    criticas: true,
-    advertencia: true,
-    informativas: false
   }
 };
 

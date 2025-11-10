@@ -7,6 +7,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { SidebarProvider, useSidebar } from "./contexts/SidebarContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Sidebar from "./components/sidebar";
+import SessionWarning from "./components/SessionWarning";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -65,6 +66,7 @@ export default function RootLayout({
               <LayoutContent>
                 {children}
               </LayoutContent>
+              <SessionWarning />
             </SidebarProvider>
           </ProtectedRoute>
         </AuthProvider>

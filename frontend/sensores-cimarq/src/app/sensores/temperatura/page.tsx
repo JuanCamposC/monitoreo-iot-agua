@@ -7,6 +7,7 @@ import { useNombreSistema } from '../../hooks/useNombreSistema';
 import DynamicTitle from '../../components/DynamicTitle';
 import InfoRangos from '../../components/InfoRangos';
 import { MdThermostat } from 'react-icons/md';
+import { apiRequestJson } from '../../config/api';
 
 interface TemperaturaData {
   _id: string;
@@ -27,8 +28,7 @@ export default function TemperaturaPage() {
   useEffect(() => {
     const fetchTemperatura = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/v1/temperatura');
-        const data = await response.json();
+        const data = await apiRequestJson<any>('/api/v1/temperatura');
         
         if (data.success) {
           const temperaturas = data.data;
