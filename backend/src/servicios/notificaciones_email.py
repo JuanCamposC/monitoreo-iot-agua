@@ -1,6 +1,6 @@
 """
 Servicio de Notificaciones por Email para Sistema CIMARQ
-Maneja el envío automático de alertas críticas por correo electrónico
+Maneja el envío automático de alertas criticas por correo electrónico
 """
 
 import smtplib
@@ -40,7 +40,7 @@ class ServicioNotificacionesEmail:
         # Configuración de alertas
         self.niveles_notificacion = {
             'CRITICO': True,    # Siempre notificar
-            'ALTO': True,       # Notificar si está habilitado
+            'ALTO': False,       # Notificar si está habilitado
             'MEDIO': False,     # No notificar por email
             'BAJO': False       # No notificar por email
         }
@@ -54,7 +54,7 @@ class ServicioNotificacionesEmail:
     
     def verificar_emails_habilitados(self) -> bool:
         """Verifica si los emails están habilitados en la configuración de la base de datos"""
-        if not self.db:
+        if self.db is None:
             return True  # Por defecto habilitado si no hay BD
         
         try:
@@ -73,10 +73,17 @@ class ServicioNotificacionesEmail:
         )
     
     def generar_plantilla_alerta_critica(self, alerta_data: Dict[str, Any]) -> str:
-        """Genera el contenido HTML para alertas críticas"""
+        """Genera el contenido HTML para alertas criticas"""
         
         fecha_chile = datetime.now(CHILE_TZ).strftime("%d/%m/%Y %H:%M:%S")
         
+        # Detectar si es una alerta agrupada (múltiples sensores)
+        sensor_nombre = alerta_data.get('sensor', 'sensor')
+        mensaje_alerta = alerta_data.get('mensaje', '')
+        logger.info(f"📧 Generando email para sensor: '{sensor_nombre}'")
+        logger.info(f"📄 Mensaje: {mensaje_alerta[:150]}...")
+        es_alerta_agrupada = 'sensores' in sensor_nombre.lower() and 'criticos' in sensor_nombre.lower()
+        logger.info(f"¿Es alerta agrupada? {es_alerta_agrupada} (buscando 'sensores' y 'criticos' en '{sensor_nombre.lower()}')")
         
         # Color por nivel
         nivel_color = {
@@ -93,7 +100,7 @@ class ServicioNotificacionesEmail:
         <html>
         <head>
             <meta charset="UTF-8">
-            <title>CIMARQ - Alerta {alerta_data.get('nivel', 'CRÍTICA')}</title>
+            <title>CIMARQ - Alerta {alerta_data.get('nivel', 'CRITICA')}</title>
         </head>
         <body style="font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5;">
             <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
@@ -101,7 +108,7 @@ class ServicioNotificacionesEmail:
                 <!-- Header -->
                 <div style="background: {color}; color: white; padding: 20px; text-align: center;">
                     <h1 style="margin: 0; font-size: 24px;">
-                        SISTEMA CIMARQ - ALERTA {alerta_data.get('nivel', 'CRÍTICA')}
+                        {'🚨 ALERTA CRITICA MÚLTIPLE' if es_alerta_agrupada else f'SISTEMA CIMARQ - ALERTA {alerta_data.get("nivel", "CRITICA")}'}
                     </h1>
                     <p style="margin: 10px 0 0 0; opacity: 0.9;">
                         Sistema de Monitoreo Acuícola Preventivo
@@ -110,9 +117,110 @@ class ServicioNotificacionesEmail:
                 
                 <!-- Información Principal -->
                 <div style="padding: 30px;">
+        """
+        
+        # Contenido diferente para alertas agrupadas
+        if es_alerta_agrupada:
+            # Extraer información de sensores del mensaje
+            mensaje = alerta_data.get('mensaje', '')
+            logger.info(f"📝 Mensaje recibido: {mensaje[:200]}...")  # Primeros 200 caracteres
+            cantidad_sensores = alerta_data.get('valor_actual', 0)
+            
+            # Parsear sensores del mensaje (formato: "TEMPERATURA: 35°C\nPH: 5.2\nOXIGENO: 3.5 mg/L")
+            lineas_mensaje = mensaje.split('\n')
+            sensores_info = []
+            
+            for linea in lineas_mensaje:
+                linea = linea.strip()
+                if ':' in linea and any(s in linea.upper() for s in ['TEMPERATURA', 'PH', 'OXIGENO', 'OXÍGENO']):
+                    sensores_info.append(linea)
+            
+            html_content += f"""
+                    <div style="background: #ffebee; border-left: 4px solid {color}; padding: 20px; margin-bottom: 20px;">
+                        <h2 style="margin: 0 0 15px 0; color: {color}; font-size: 20px;">
+                            ⚠️ {cantidad_sensores} PARÁMETROS FUERA DE RANGO SEGURO
+                        </h2>
+                        <p style="margin: 0; font-size: 16px; line-height: 1.5; color: #c62828;">
+                            <strong>Se han detectado múltiples parámetros criticos que requieren atención inmediata.</strong>
+                        </p>
+                    </div>
+                    
+                    <!-- Tabla de Sensores Criticos -->
+                    <div style="margin: 20px 0;">
+                        <h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">
+                            Parámetros Afectados:
+                        </h3>
+                        <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                            <thead>
+                                <tr style="background: {color}; color: white;">
+                                    <th style="padding: 12px; text-align: left; border: 1px solid {color};">Parámetro</th>
+                                    <th style="padding: 12px; text-align: center; border: 1px solid {color};">Valor Actual</th>
+                                    <th style="padding: 12px; text-align: center; border: 1px solid {color};">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            """
+            
+            # Agregar filas para cada sensor
+            for sensor_linea in sensores_info:
+                if ':' in sensor_linea:
+                    sensor_nombre, valor = sensor_linea.split(':', 1)
+                    sensor_nombre = sensor_nombre.strip()
+                    valor = valor.strip()
+                    
+                    # Determinar ícono y color por sensor
+                    if 'TEMPERATURA' in sensor_nombre:
+                        icono = '🌡️'
+                        sensor_display = 'Temperatura'
+                    elif 'PH' in sensor_nombre:
+                        icono = '🧪'
+                        sensor_display = 'pH'
+                    elif 'OXIGENO' in sensor_nombre or 'OXÍGENO' in sensor_nombre:
+                        icono = '💨'
+                        sensor_display = 'Oxígeno Disuelto'
+                    else:
+                        icono = '📊'
+                        sensor_display = sensor_nombre
+                    
+                    html_content += f"""
+                                <tr style="background: #fff3e0;">
+                                    <td style="padding: 12px; border: 1px solid #e0e0e0;">
+                                        <strong>{icono} {sensor_display}</strong>
+                                    </td>
+                                    <td style="padding: 12px; border: 1px solid #e0e0e0; text-align: center;">
+                                        <span style="color: {color}; font-size: 18px; font-weight: bold;">{valor}</span>
+                                    </td>
+                                    <td style="padding: 12px; border: 1px solid #e0e0e0; text-align: center;">
+                                        <span style="background: {color}; color: white; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 12px;">
+                                            CRITICO
+                                        </span>
+                                    </td>
+                                </tr>
+                    """
+            
+            html_content += """
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Información Adicional -->
+                    <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 20px; margin: 20px 0;">
+                        <h3 style="margin: 0 0 10px 0; color: #856404; font-size: 16px;">
+                            ⚠️ Advertencia:
+                        </h3>
+                        <p style="margin: 0; color: #856404; line-height: 1.6;">
+                            Los valores actuales se encuentran <strong>fuera de los rangos seguros</strong> establecidos 
+                            para las condiciones acuícolas óptimas. Esta situación puede comprometer la salud de los 
+                            organismos acuáticos y afectar la calidad del agua.
+                        </p>
+                    </div>
+            """
+        else:
+            # Plantilla para sensor individual (código original)
+            html_content += f"""
                     <div style="background: #f8f9fa; border-left: 4px solid {color}; padding: 20px; margin-bottom: 20px;">
                         <h2 style="margin: 0 0 15px 0; color: {color}; font-size: 20px;">
-                            {alerta_data.get('sensor', 'Sensor').upper()}
+                            {sensor_nombre.upper()}
                         </h2>
                         <p style="margin: 0; font-size: 16px; line-height: 1.5; color: #333;">
                             <strong>{alerta_data.get('mensaje', 'Sin mensaje')}</strong>
@@ -156,6 +264,20 @@ class ServicioNotificacionesEmail:
                             </td>
                             <td style="padding: 12px; border: 1px solid #e0e0e0;">
                                 {alerta_data.get('prioridad', 3)}/5
+                            </td>
+                        </tr>
+                    </table>
+            """
+        
+        # Detalles de fecha (común para ambos tipos)
+        html_content += f"""
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <tr>
+                            <td style="padding: 12px; border: 1px solid #e0e0e0; background: #fafafa; font-weight: bold; width: 30%;">
+                                Fecha Detección:
+                            </td>
+                            <td style="padding: 12px; border: 1px solid #e0e0e0;">
+                                {alerta_data.get('fecha_creacion', fecha_chile)}
                             </td>
                         </tr>
                     </table>
@@ -284,7 +406,7 @@ class ServicioNotificacionesEmail:
         """Genera versión texto plano del email"""
         
         texto = f"""
-SISTEMA CIMARQ - ALERTA {alerta_data.get('nivel', 'CRÍTICA')}
+SISTEMA CIMARQ - ALERTA {alerta_data.get('nivel', 'CRITICA')}
 
 Sensor: {alerta_data.get('sensor', 'Desconocido').upper()}
 Nivel: {alerta_data.get('nivel', 'MEDIO')}

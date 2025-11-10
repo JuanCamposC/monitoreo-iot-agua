@@ -155,7 +155,7 @@ const generarImpactoAmbiental = (sensor: string, estado: EstadoSensor): string =
       : 'Riesgo moderado: Posible afectación en la reproducción y crecimiento de organismos';
   } else if (sensor === 'oxigeno') {
     return estado === 'critico'
-      ? 'Riesgo crítico: Puede causar asfixia masiva y muerte de fauna acuática'
+      ? 'Riesgo critico: Puede causar asfixia masiva y muerte de fauna acuática'
       : 'Riesgo moderado: Posible estrés respiratorio en organismos acuáticos';
   }
   return 'Impacto no determinado';
@@ -166,39 +166,6 @@ const determinarNivelRiesgo = (estado: EstadoSensor, porcentaje_exceso: number):
   if (porcentaje_exceso > 30) return 'alto';
   if (porcentaje_exceso > 15) return 'medio';
   return 'bajo';
-};
-
-// Función para enviar correo crítico
-const enviarCorreoCritico = async (alerta: AlertaAutomatica) => {
-  // Verificar si los emails están habilitados localmente (solo en cliente)
-  const emailsHabilitados = safeLocalStorage.getItem('emails-habilitados');
-  if (emailsHabilitados && !JSON.parse(emailsHabilitados)) {
-    console.log('📧 Emails deshabilitados - no se enviará correo crítico');
-    return;
-  }
-
-  try {
-    await apiRequestJson('/api/v1/notificaciones/correo-critico', {
-      method: 'POST',
-      body: JSON.stringify({
-        tipo: 'alerta_critica',
-        sensor: alerta.sensor,
-        valor: alerta.valor,
-        mensaje: alerta.mensaje,
-        timestamp: alerta.timestamp.toISOString(),
-        rangos: alerta.rangos,
-        acciones_recomendadas: alerta.acciones_recomendadas,
-        detalles_tecnicos: alerta.detalles_tecnicos,
-        impacto_ambiental: alerta.impacto_ambiental,
-        nivel_riesgo: alerta.nivel_riesgo
-      }),
-    });
-
-    console.log('✅ Email de alerta crítica enviado correctamente');
-  } catch (error) {
-    console.warn('Backend no disponible - correo crítico no enviado:', error);
-    // No mostrar como error crítico, solo como advertencia
-  }
 };
 
 // Función auxiliar para usar localStorage de forma segura
@@ -355,7 +322,7 @@ export function useMonitoreoAutomatico() {
     
     switch (estado) {
       case 'critico':
-        return `${nombreSensor} en nivel CRÍTICO: ${valor}${unidad}. Requiere atención inmediata.`;
+        return `${nombreSensor} en nivel CRITICO: ${valor}${unidad}. Requiere atención inmediata.`;
       case 'aceptable':
         return `${nombreSensor} fuera del rango óptimo: ${valor}${unidad}. Revisar condiciones.`;
       default:
@@ -375,7 +342,7 @@ export function useMonitoreoAutomatico() {
     }
   };
 
-  // Función para enviar notificación inmediata
+  // Función para enviar notificación inmediata (SOLO WEB, sin email)
   const enviarNotificacionInmediata = (sensor: 'temperatura' | 'ph' | 'oxigeno', valor: number, estado: EstadoSensor, timestamp: Date): void => {
     if (estado === 'optimo') return; // No notificar si está en rango óptimo
 
@@ -384,7 +351,7 @@ export function useMonitoreoAutomatico() {
     const nivel = convertirEstadoANivel(estado);
     
     const mensaje = estado === 'critico' 
-      ? `🚨 ALERTA CRÍTICA: ${nombreSensor} fuera de rango seguro (${valor}${unidad}). Acción inmediata requerida.`
+      ? `🚨 ALERTA CRITICA: ${nombreSensor} fuera de rango seguro (${valor}${unidad}). Acción inmediata requerida.`
       : `⚠️ ADVERTENCIA: ${nombreSensor} fuera de rango óptimo (${valor}${unidad}). Revisar condiciones.`;
 
     const notificacion: AlertaNotificacion = {
@@ -398,10 +365,12 @@ export function useMonitoreoAutomatico() {
       prioridad: estado === 'critico' ? 1 : 2,
       sugerencias: estado === 'critico' 
         ? ['Verificar sistema inmediatamente', 'Contactar personal técnico', 'Revisar equipos de medición']
-        : ['Monitorear tendencia', 'Verificar calibración', 'Revisar condiciones ambientales']
+        : ['Monitorear tendencia', 'Verificar calibración', 'Revisar condiciones ambientales'],
+      // IMPORTANTE: Marcar para NO enviar email individual (se enviará agrupado)
+      enviarEmail: false
     };
 
-    console.log(`🔔 Enviando notificación inmediata: ${nombreSensor} ${valor}${unidad} (${estado})`);
+    console.log(`🔔 Enviando notificación web inmediata: ${nombreSensor} ${valor}${unidad} (${estado})`);
     mostrarAlerta(notificacion);
   };
 
@@ -427,15 +396,13 @@ export function useMonitoreoAutomatico() {
 
         // Evaluar TODOS los sensores del registro como conjunto
         const sensoresAfectados: any[] = [];
+        const sensoresCriticos: { sensor: string; valor: number; estado: EstadoSensor }[] = [];
         let estadoGeneral: EstadoSensor = 'optimo';
         let nivelRiesgoMaximo: 'bajo' | 'medio' | 'alto' | 'critico' = 'bajo';
         
-        // Evaluar cada sensor del registro
+        // Evaluar cada sensor del registro SIN enviar notificaciones individuales
         if (registro.temperatura !== undefined) {
           const estado = evaluarEstadoSensor('temperatura', registro.temperatura);
-          
-          // 🔔 NOTIFICACIÓN INMEDIATA para temperatura
-          enviarNotificacionInmediata('temperatura', registro.temperatura, estado, new Date(registro.fecha));
           
           if (estado !== 'optimo') {
             const detalles = generarDetallesTecnicos(registro.temperatura, configuracion.temperatura);
@@ -448,8 +415,13 @@ export function useMonitoreoAutomatico() {
               rangos: configuracion.temperatura
             });
             
-            if (estado === 'critico') estadoGeneral = 'critico';
-            else if (estado === 'aceptable' && estadoGeneral === 'optimo') estadoGeneral = 'aceptable';
+            // Guardar si es crítico para email agrupado
+            if (estado === 'critico') {
+              sensoresCriticos.push({ sensor: 'temperatura', valor: registro.temperatura, estado });
+              estadoGeneral = 'critico';
+            } else if (estado === 'aceptable' && estadoGeneral === 'optimo') {
+              estadoGeneral = 'aceptable';
+            }
             
             // Actualizar nivel de riesgo si es mayor
             const nivelesRiesgo = ['bajo', 'medio', 'alto', 'critico'];
@@ -466,9 +438,6 @@ export function useMonitoreoAutomatico() {
         if (registro.ph !== undefined) {
           const estado = evaluarEstadoSensor('ph', registro.ph);
           
-          // 🔔 NOTIFICACIÓN INMEDIATA para pH
-          enviarNotificacionInmediata('ph', registro.ph, estado, new Date(registro.fecha));
-          
           if (estado !== 'optimo') {
             const detalles = generarDetallesTecnicos(registro.ph, configuracion.ph);
             const riesgo = determinarNivelRiesgo(estado, detalles.porcentaje_exceso);
@@ -480,8 +449,13 @@ export function useMonitoreoAutomatico() {
               rangos: configuracion.ph
             });
             
-            if (estado === 'critico') estadoGeneral = 'critico';
-            else if (estado === 'aceptable' && estadoGeneral === 'optimo') estadoGeneral = 'aceptable';
+            // Guardar si es crítico para email agrupado
+            if (estado === 'critico') {
+              sensoresCriticos.push({ sensor: 'ph', valor: registro.ph, estado });
+              estadoGeneral = 'critico';
+            } else if (estado === 'aceptable' && estadoGeneral === 'optimo') {
+              estadoGeneral = 'aceptable';
+            }
             
             // Actualizar nivel de riesgo si es mayor
             const nivelesRiesgo = ['bajo', 'medio', 'alto', 'critico'];
@@ -498,9 +472,6 @@ export function useMonitoreoAutomatico() {
         if (registro.oxigeno !== undefined) {
           const estado = evaluarEstadoSensor('oxigeno', registro.oxigeno);
           
-          // 🔔 NOTIFICACIÓN INMEDIATA para oxígeno
-          enviarNotificacionInmediata('oxigeno', registro.oxigeno, estado, new Date(registro.fecha));
-          
           if (estado !== 'optimo') {
             const detalles = generarDetallesTecnicos(registro.oxigeno, configuracion.oxigeno);
             const riesgo = determinarNivelRiesgo(estado, detalles.porcentaje_exceso);
@@ -512,8 +483,13 @@ export function useMonitoreoAutomatico() {
               rangos: configuracion.oxigeno
             });
             
-            if (estado === 'critico') estadoGeneral = 'critico';
-            else if (estado === 'aceptable' && estadoGeneral === 'optimo') estadoGeneral = 'aceptable';
+            // Guardar si es crítico para email agrupado
+            if (estado === 'critico') {
+              sensoresCriticos.push({ sensor: 'oxigeno', valor: registro.oxigeno, estado });
+              estadoGeneral = 'critico';
+            } else if (estado === 'aceptable' && estadoGeneral === 'optimo') {
+              estadoGeneral = 'aceptable';
+            }
             
             // Actualizar nivel de riesgo si es mayor
             const nivelesRiesgo = ['bajo', 'medio', 'alto', 'critico'];
@@ -525,6 +501,46 @@ export function useMonitoreoAutomatico() {
           } else {
             console.log(`💨 Oxígeno en rango óptimo: ${registro.oxigeno} mg/L`);
           }
+        }
+        
+        // DESPUÉS de evaluar todos los sensores, enviar notificaciones
+        // 1. Notificaciones web individuales (navegador) - SIEMPRE se muestran
+        // PERO los sensores críticos NO envían email individual (se agrupan después)
+        if (registro.temperatura !== undefined) {
+          const estado = evaluarEstadoSensor('temperatura', registro.temperatura);
+          enviarNotificacionInmediata('temperatura', registro.temperatura, estado, new Date(registro.fecha));
+        }
+        if (registro.ph !== undefined) {
+          const estado = evaluarEstadoSensor('ph', registro.ph);
+          enviarNotificacionInmediata('ph', registro.ph, estado, new Date(registro.fecha));
+        }
+        if (registro.oxigeno !== undefined) {
+          const estado = evaluarEstadoSensor('oxigeno', registro.oxigeno);
+          enviarNotificacionInmediata('oxigeno', registro.oxigeno, estado, new Date(registro.fecha));
+        }
+        
+        // 2. UN SOLO EMAIL si hay sensores críticos (agrupados)
+        if (sensoresCriticos.length > 0) {
+          console.log(`📧 Enviando email agrupado para ${sensoresCriticos.length} sensor(es) critico(s)`);
+          
+          // Enviar notificación agrupada con los sensores críticos
+          // El BACKEND se encargará de construir el mensaje y el formato del email
+          const notificacionAgrupada: AlertaNotificacion = {
+            _id: `email_agrupado_${registro._id}_${Date.now()}`,
+            sensor: `${sensoresCriticos.length} Sensores Criticos`,
+            nivel: 'CRITICO',
+            mensaje: `Alerta crítica múltiple detectada`, // Mensaje simple, el backend lo construye
+            valor_actual: sensoresCriticos.length,
+            fecha_creacion: new Date(registro.fecha).toISOString(),
+            resuelto: false,
+            prioridad: 1,
+            sugerencias: [],
+            enviarEmail: true,  // Esta sí envía email (la agrupada)
+            sensoresCriticos: sensoresCriticos  // Enviar array de sensores al backend
+          };
+          
+          // Esta notificación dispara el email automático (solo una vez para todos)
+          mostrarAlerta(notificacionAgrupada);
         }
 
         // Solo generar alerta si hay sensores afectados
@@ -571,10 +587,8 @@ export function useMonitoreoAutomatico() {
           
           nuevasAlertas.push(alerta);
           
-          // Enviar correo si es crítico
-          if (estadoGeneral === 'critico') {
-            enviarCorreoCritico(alerta);
-          }
+          // Los emails críticos se envían automáticamente desde useNotificaciones
+          // cuando se dispara enviarNotificacionInmediata() con estado 'critico'
         } else {
           console.log(`✅ Registro completo en rangos óptimos - No se genera alerta`);
         }
@@ -600,7 +614,7 @@ export function useMonitoreoAutomatico() {
         const alertasCriticas = nuevasAlertas.filter(a => a.estado === 'critico');
         if (alertasCriticas.length > 0) {
           new Notification('Sistema de Monitoreo CIMARQ', {
-            body: `${alertasCriticas.length} alerta(s) crítica(s) detectada(s)`,
+            body: `${alertasCriticas.length} alerta(s) critica(s) detectada(s)`,
             icon: '/favicon.ico'
           });
         }

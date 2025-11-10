@@ -21,8 +21,13 @@ import hashlib
 import secrets
 import jwt
 from functools import wraps
+import logging
 
 load_dotenv()
+
+# Configurar logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Configuración de zona horaria Chile (GMT-3)
 CHILE_TZ = pytz.timezone('America/Santiago')
@@ -1463,6 +1468,12 @@ class NotificacionEnviarResource(Resource):
             destinatarios_custom = data.get('destinatarios', [])
             mensaje_custom = data.get('mensaje_personalizado')
             
+            # NUEVO: Aceptar datos de alerta directamente en el request
+            alerta_directa = data.get('alerta_data')
+            
+            # NUEVO: Soporte para alertas agrupadas (múltiples sensores críticos)
+            sensores_criticos = data.get('sensores_criticos', [])
+            
             resultado = {
                 'success': True,
                 'mensaje': 'Notificación procesada exitosamente',
@@ -1471,9 +1482,51 @@ class NotificacionEnviarResource(Resource):
                 'errores': []
             }
             
-            # Obtener datos de la alerta si se proporciona ID
+            # Obtener datos de la alerta
             alerta_data = None
-            if alerta_id:
+            
+            # 1. Si hay múltiples sensores críticos, crear alerta agrupada en el backend
+            if sensores_criticos and len(sensores_criticos) > 0:
+                logger.info(f"📧 Creando alerta agrupada para {len(sensores_criticos)} sensores críticos")
+                
+                # Construir detalles de sensores
+                sensores_detalles = []
+                for sensor_info in sensores_criticos:
+                    sensor = sensor_info.get('sensor', '')
+                    valor = sensor_info.get('valor', 0)
+                    
+                    if sensor == 'temperatura':
+                        sensores_detalles.append(f"TEMPERATURA: {valor}°C")
+                    elif sensor == 'ph':
+                        sensores_detalles.append(f"PH: {valor}")
+                    elif sensor == 'oxigeno':
+                        sensores_detalles.append(f"OXIGENO: {valor} mg/L")
+                
+                mensaje_agrupado = "🚨 ALERTA CRÍTICA MÚLTIPLE:\n\n" + "\n".join(sensores_detalles) + "\n\nAcción inmediata requerida."
+                
+                alerta_data = {
+                    'sensor': f"{len(sensores_criticos)} Sensores Criticos",
+                    'nivel': 'CRITICO',
+                    'mensaje': mensaje_agrupado,
+                    'valor_actual': len(sensores_criticos),
+                    'fecha_creacion': datetime.now(CHILE_TZ).strftime('%d/%m/%Y %H:%M:%S'),
+                    'prioridad': 1,
+                    'sugerencias': [
+                        'Verificar sistema inmediatamente',
+                        'Contactar personal técnico',
+                        'Revisar equipos de medición',
+                        'Evaluar condiciones ambientales'
+                    ]
+                }
+                logger.info(f"✅ Alerta agrupada creada: {alerta_data['sensor']}")
+            
+            # 2. Si hay datos directos del request (legacy)
+            elif alerta_directa:
+                alerta_data = alerta_directa
+                logger.info(f"📧 Usando datos de alerta directos: sensor='{alerta_data.get('sensor')}'")
+            
+            # 3. Buscar por ID en BD
+            elif alerta_id:
                 try:
                     if ObjectId.is_valid(alerta_id):
                         alerta_doc = db.alertas.find_one({'_id': ObjectId(alerta_id)})
@@ -1531,6 +1584,10 @@ class NotificacionEnviarResource(Resource):
             
         except Exception as e:
             notificaciones_ns.abort(500, success=False, error=str(e))
+    
+    def options(self):
+        """Manejar petición OPTIONS para CORS preflight"""
+        return {}, 200
 
 @notificaciones_ns.route('/configuracion')
 class NotificacionConfiguracionResource(Resource):

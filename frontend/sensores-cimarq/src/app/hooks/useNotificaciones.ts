@@ -16,6 +16,8 @@ export interface AlertaNotificacion {
   resuelto: boolean;
   prioridad: number;
   sugerencias?: string[];
+  enviarEmail?: boolean; // Flag para controlar si se debe enviar email automáticamente
+  sensoresCriticos?: Array<{ sensor: string; valor: number; estado: string }>; // Para alertas agrupadas
 }
 
 export interface ConfiguracionNotificaciones {
@@ -243,28 +245,46 @@ export const useNotificaciones = (): UseNotificacionesReturn => {
     // Marcar como procesada
     alertasProcessadasRef.current.add(alerta._id);
 
-    // Establecer alerta activa
-    setAlertaActiva(alerta);
+    // Detectar si es una notificación agrupada (solo para email, no para UI)
+    const esNotificacionAgrupada = alerta.sensor.toLowerCase().includes('sensores') && 
+                                   alerta.sensor.toLowerCase().includes('criticos');
+    
+    // Si NO es notificación agrupada, mostrar en UI
+    if (!esNotificacionAgrupada) {
+      // Establecer alerta activa
+      setAlertaActiva(alerta);
 
-    // Mostrar modal si está habilitado
-    if (configuracion.habilitarModal) {
-      setModalAbierto(true);
+      // Mostrar modal si está habilitado
+      if (configuracion.habilitarModal) {
+        setModalAbierto(true);
+      }
+
+      // Mostrar notificación web
+      mostrarNotificacionWeb(alerta);
+
+      // Reproducir sonido de alerta
+      if (configuracion.habilitarSonido) {
+        generarTonoEmergencia();
+      }
+    } else {
+      console.log('📧 Notificación agrupada detectada - solo se enviará email (no UI)');
     }
 
-    // Mostrar notificación web
-    mostrarNotificacionWeb(alerta);
-
-    // Reproducir sonido de alerta
-    if (configuracion.habilitarSonido) {
-      generarTonoEmergencia();
+    // Enviar email automáticamente para alertas críticas (si no está deshabilitado)
+    if (configuracion.habilitarEmail && alerta.nivel === 'CRITICO' && alerta.enviarEmail !== false) {
+      console.log(esNotificacionAgrupada 
+        ? '📧 Enviando email agrupado para múltiples sensores críticos...'
+        : '🚨 Alerta CRÍTICA detectada - enviando email automáticamente...');
+      enviarNotificacionEmail(alerta).catch((error) => {
+        console.error('Error en envío automático de email:', error);
+      });
+    } else if (alerta.nivel === 'CRITICO' && alerta.enviarEmail === false) {
+      console.log('📧 Alerta CRÍTICA sin envío de email individual (se enviará agrupado)');
+    } else if (alerta.nivel === 'CRITICO') {
+      console.log('⚠️ Alerta CRÍTICA detectada pero emails deshabilitados en configuración');
     }
 
-    // Enviar email automáticamente para alertas críticas
-    if (configuracion.habilitarEmail && alerta.nivel === 'CRITICO') {
-      enviarNotificacionEmail(alerta).catch(console.error);
-    }
-
-    console.log(`Alerta ${alerta.nivel} procesada:`, alerta.mensaje);
+    console.log(`✅ Alerta ${alerta.nivel} procesada:`, alerta.mensaje.substring(0, 100));
   }, [
     configuracion,
     mostrarNotificacionWeb,
@@ -291,25 +311,47 @@ export const useNotificaciones = (): UseNotificacionesReturn => {
     destinatarios?: string[]
   ): Promise<boolean> => {
     if (!configuracion.habilitarEmail) {
-      console.log('Notificaciones por email están deshabilitadas');
+      console.log('📧 Notificaciones por email están deshabilitadas en configuración local');
       return false;
     }
+
+    console.log(`📧 Intentando enviar email para alerta ${alerta.nivel}:`, {
+      sensor: alerta.sensor,
+      mensaje: alerta.mensaje,
+      destinatarios: destinatarios || configuracion.destinatariosEmail || 'Por defecto del servidor'
+    });
 
     setEnviandoEmail(true);
 
     try {
-      const result = await apiRequestJson<any>('/notificaciones/enviar', {
+      const result = await apiRequestJson<any>('/api/v1/notificaciones/enviar', {
         method: 'POST',
         body: JSON.stringify({
           tipo: 'critica',
           alerta_id: alerta._id,
           canales: ['email'],
-          destinatarios: destinatarios || configuracion.destinatariosEmail
+          destinatarios: destinatarios || configuracion.destinatariosEmail,
+          // Si hay sensores críticos, enviarlos al backend para que construya el email
+          sensores_criticos: alerta.sensoresCriticos || [],
+          // También enviar datos de alerta (para compatibilidad)
+          alerta_data: !alerta.sensoresCriticos ? {
+            sensor: alerta.sensor,
+            nivel: alerta.nivel,
+            mensaje: alerta.mensaje,
+            valor_actual: alerta.valor_actual,
+            fecha_creacion: alerta.fecha_creacion,
+            prioridad: alerta.prioridad,
+            sugerencias: alerta.sugerencias || []
+          } : undefined
         })
       });
 
       if (result.success) {
-        console.log('Email enviado exitosamente:', result);
+        console.log('✅ Email enviado exitosamente:', {
+          destinatarios: result.destinatarios_exitosos,
+          canales: result.canales_enviados,
+          mensaje: result.mensaje
+        });
         
         // Mostrar notificación de éxito
         if (notificacionesHabilitadas) {
@@ -323,10 +365,11 @@ export const useNotificaciones = (): UseNotificacionesReturn => {
         return true;
       } else {
         const errorMsg = result.errores?.join(', ') || 'Error desconocido';
-        console.error('Error enviando email:', {
+        console.error('❌ Error enviando email:', {
           errores: result.errores,
           mensaje: result.mensaje,
-          configuracion_activa: result.configuracion || 'No disponible'
+          configuracion_activa: result.configuracion || 'No disponible',
+          destinatarios_intentados: result.destinatarios_fallidos
         });
         
         // Mostrar notificación de error si las notificaciones están habilitadas
@@ -342,11 +385,12 @@ export const useNotificaciones = (): UseNotificacionesReturn => {
       }
 
     } catch (error) {
-      console.error('Error de conexión al enviar email:', {
+      console.error('❌ Error de conexión al enviar email:', {
         error: error,
-        endpoint: '/notificaciones/enviar',
+        endpoint: '/api/v1/notificaciones/enviar',
         alerta_id: alerta._id,
-        sensor: alerta.sensor
+        sensor: alerta.sensor,
+        detalles: error instanceof Error ? error.message : 'Error desconocido'
       });
       
       // Mostrar notificación de error de conexión

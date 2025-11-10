@@ -49,9 +49,9 @@ const AlertaAutomaticaDetallada = ({ alerta, onMarcarLeida }: {
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
             <Box sx={{ minWidth: '40px' }}>
-              {alerta.tipo === 'temperatura' && <MdThermostat size={24} color="#ff5722" />}
-              {alerta.tipo === 'ph' && <MdScience size={24} color="#3f51b5" />}
-              {alerta.tipo === 'oxigeno' && <MdAir size={24} color="#00bcd4" />}
+              {alerta.sensor === 'temperatura' && <MdThermostat size={24} color="#ff5722" />}
+              {alerta.sensor === 'ph' && <MdScience size={24} color="#3f51b5" />}
+              {alerta.sensor === 'oxigeno' && <MdAir size={24} color="#00bcd4" />}
             </Box>
             
             <Box sx={{ flex: 1 }}>
@@ -74,7 +74,7 @@ const AlertaAutomaticaDetallada = ({ alerta, onMarcarLeida }: {
             
             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
               <Chip
-                label={alerta.estado === 'critico' ? 'CRÍTICO' : alerta.estado === 'aceptable' ? 'ADVERTENCIA' : 'ÓPTIMO'}
+                label={alerta.estado === 'critico' ? 'CRITICO' : alerta.estado === 'aceptable' ? 'ADVERTENCIA' : 'ÓPTIMO'}
                 color={alerta.estado === 'critico' ? 'error' : alerta.estado === 'aceptable' ? 'warning' : 'success'}
                 size="small"
               />
@@ -157,7 +157,6 @@ export default function AlertasPage() {
     alertas: alertasML,
     alertasNoLeidas,
     loading: cargandoML,
-    generarAlertasML,
     marcarComoLeida: marcarComoLeidaML,
     limpiarAlertasLeidas: limpiarAlertasLeidasML
   } = useAlertasML();
@@ -250,7 +249,7 @@ export default function AlertasPage() {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <MdAlert />
             <Typography variant="body2">
-              {estadisticasUnificadas.alertasCriticas} críticas
+              {estadisticasUnificadas.alertasCriticas} criticas
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -261,6 +260,22 @@ export default function AlertasPage() {
           </Box>
         </Box>
       </Paper>
+
+      {/* Información sobre notificaciones por email */}
+      <Alert severity="info" sx={{ mb: 3 }}>
+        <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
+          📧 Sistema de Notificaciones por Correo Electrónico
+        </Typography>
+        <Typography variant="body2" component="div">
+          • Las alertas <strong>CRITICAS</strong> se envían automáticamente por email cuando se detectan
+          <br />
+          • Los emails se configuran en las variables de entorno del backend (.env)
+          <br />
+          • Verifica la configuración en: <code>EMAIL_REMITENTE</code>, <code>EMAIL_PASSWORD</code>, <code>EMAIL_OPERADOR</code>
+          <br />
+          • Las alertas ML también se envían por email cuando el nivel es CRITICO
+        </Typography>
+      </Alert>
 
       {/* Panel de Control del Monitoreo Automático */}
       <Card sx={{ mb: 3 }}>
@@ -282,7 +297,7 @@ export default function AlertasPage() {
             </Paper>
             <Paper sx={{ flex: 1, p: 2, textAlign: 'center', bgcolor: 'error.light', color: 'white', minWidth: '150px' }}>
               <Typography variant="h4">{estadisticasUnificadas.alertasCriticas}</Typography>
-              <Typography variant="caption">Críticas</Typography>
+              <Typography variant="caption">Criticas</Typography>
             </Paper>
             <Paper sx={{ flex: 1, p: 2, textAlign: 'center', bgcolor: 'warning.light', color: 'white', minWidth: '150px' }}>
               <Typography variant="h4">{estadisticasUnificadas.alertasAutomaticas}</Typography>
@@ -315,16 +330,6 @@ export default function AlertasPage() {
                 variant="outlined"
               />
             )}
-
-            <Button
-              variant="contained"
-              onClick={generarAlertasML}
-              disabled={cargandoML}
-              startIcon={cargandoML ? <CircularProgress size={16} /> : <MdTimeline />}
-              color="primary"
-            >
-              Generar Alertas ML
-            </Button>
 
             <Button
               variant="text"
@@ -410,7 +415,7 @@ export default function AlertasPage() {
                           <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
                             {grupo.sensor === 'temperatura' ? 'Temperatura' : 
                              grupo.sensor === 'ph' ? 'pH' : 'Oxígeno'} - 
-                            {grupo.estado === 'critico' ? ' CRÍTICO' : grupo.estado === 'aceptable' ? ' ADVERTENCIA' : ' ÓPTIMO'}
+                            {grupo.estado === 'critico' ? ' CRITICO' : grupo.estado === 'aceptable' ? ' ADVERTENCIA' : ' ÓPTIMO'}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
                             {grupo.alertas.length} alerta{grupo.alertas.length > 1 ? 's' : ''} • 
@@ -420,7 +425,7 @@ export default function AlertasPage() {
                         
                         <Box>
                           <Chip
-                            label={grupo.estado === 'critico' ? 'CRÍTICO' : grupo.estado === 'aceptable' ? 'ADVERTENCIA' : 'ÓPTIMO'}
+                            label={grupo.estado === 'critico' ? 'CRITICO' : grupo.estado === 'aceptable' ? 'ADVERTENCIA' : 'ÓPTIMO'}
                             color={grupo.estado === 'critico' ? 'error' : grupo.estado === 'aceptable' ? 'warning' : 'success'}
                             size="small"
                           />
@@ -470,7 +475,10 @@ export default function AlertasPage() {
                   No hay alertas inteligentes ML
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>
-                  Haga clic en &quot;Generar Alertas ML&quot; para analizar los datos con ML
+                  Las alertas ML se generan automáticamente desde el componente de Machine Learning en el Dashboard
+                </Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary', mt: 1, display: 'block' }}>
+                  💡 Tip: Ve a Dashboard → Predicciones ML para entrenar modelos y generar alertas inteligentes
                 </Typography>
               </Paper>
             ) : (
