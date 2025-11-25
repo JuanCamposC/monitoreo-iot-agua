@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { HiHome, HiChartBar, HiExclamation, HiCog, HiMenu, HiX, HiChevronDown, HiDownload } from "react-icons/hi";
-import { FaThermometerHalf, FaTint, FaWind, FaPlay } from "react-icons/fa";
+import { FaThermometerHalf, FaTint, FaWind, FaPlay, FaRobot } from "react-icons/fa";
 import { useAuth } from "../contexts/AuthContext";
 import { useSidebar } from "../contexts/SidebarContext";
 import ProfileModal from "./ProfileModal";
@@ -20,15 +21,15 @@ const menuItems: MenuItem[] = [
     icon: <HiChartBar className="w-5 h-5" />,
     label: "Sensores",
     children: [
-      { icon: <FaThermometerHalf className="w-4 h-4" />, label: "Temperatura", href: "/sensores/temperatura" },
-      { icon: <FaTint className="w-4 h-4" />, label: "pH", href: "/sensores/ph" },
-      { icon: <FaWind className="w-4 h-4" />, label: "Oxígeno", href: "/sensores/oxigeno" },
+      { icon: <FaThermometerHalf className="w-5 h-5" />, label: "Temperatura", href: "/sensores/temperatura" },
+      { icon: <FaTint className="w-5 h-5" />, label: "pH", href: "/sensores/ph" },
+      { icon: <FaWind className="w-5 h-5" />, label: "Oxígeno", href: "/sensores/oxigeno" },
     ],
   },
-  { icon: <HiCog className="w-4 h-4" />, label: "Ingreso Manual", href: "/sensores/ingreso-manual" },
+  { icon: <HiCog className="w-5 h-5" />, label: "Ingreso Manual", href: "/sensores/ingreso-manual" },
   { icon: <FaPlay className="w-5 h-5" />, label: "Simulador", href: "/simulador" },
   { icon: <HiDownload className="w-5 h-5" />, label: "Exportar Datos", href: "/exportar-datos" },
-  { icon: <span className="text-lg">🤖</span>, label: "Machine Learning", href: "/machine-learning" },
+  { icon: <FaRobot className="w-5 h-5" />, label: "Machine Learning", href: "/machine-learning" },
   { icon: <HiExclamation className="w-5 h-5" />, label: "Alertas", href: "/alertas" },
   { icon: <HiCog className="w-5 h-5" />, label: "Configuración", href: "/configuracion" },
 ];
@@ -165,12 +166,21 @@ function Header({
     <div className="p-4 border-b border-slate-700">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">C</span>
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
+            <Image
+              src="/logo.png"
+              alt="Logo CIMARQ"
+              width={40}
+              height={40}
+              priority
+              style={{
+                objectFit: 'contain'
+              }}
+            />
           </div>
           {isOpen && (
             <div>
-              <h1 className="text-lg font-bold">CIMARQ</h1>
+              <h1 className="text-lg font-bold">CIMARQSentinel</h1>
               <p className="text-xs text-slate-400">Monitor de Sensores</p>
             </div>
           )}

@@ -55,34 +55,28 @@ export default function LoginPage() {
           sx={{ 
             bgcolor: 'primary.main', 
             color: 'white', 
-            p: 4, 
+            py: 3,
+            px: 4, 
             textAlign: 'center',
             background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)'
           }}
         >
-          <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1 }}>
             <Image
               src="/logo.png"
               alt="Logo CIMARQ"
-              width={200}
-              height={200}
+              width={100}
+              height={100}
               priority
               style={{
-                filter: 'brightness(0) invert(1)',
                 objectFit: 'contain',
-                width: 'auto',
-                height: 'auto',
-                maxWidth: '200px',
-                maxHeight: '200px'
+                borderRadius: 1
               }}
             />
+            <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: 'white', m: 0 }}>
+              CIMARQSentinel
+            </Typography>
           </Box>
-          <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Sistema de Monitoreo
-          </Typography>
-          <Typography variant="body1" sx={{ opacity: 0.9 }}>
-            Análisis predictivo de la calidad del agua
-          </Typography>
         </Box>
 
         <CardContent sx={{ p: 4 }}>
@@ -170,7 +164,7 @@ export default function LoginPage() {
 
           <Box sx={{ textAlign: 'center', mt: 3 }}>
             <Typography variant="body2" color="text.secondary">
-              Sistema de Monitoreo CIMARQ
+              CIMARQSentinel
             </Typography>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
               De no tener acceso, contacta al administrador del sistema.

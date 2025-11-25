@@ -32,7 +32,7 @@ const MachineLearningPage = () => {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          🤖 Sistema Machine Learning
+          Sistema Machine Learning
         </h1>
         <p className="text-gray-600">
           Predicciones, entrenamiento y monitoreo inteligente de sensores
@@ -85,7 +85,7 @@ const MachineLearningPage = () => {
             <div className="p-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  📊 Muestra de Datos
+                  Muestra de Datos
                 </h3>
                 <button
                   onClick={cargarMuestraDatos}
@@ -207,7 +207,7 @@ const MachineLearningPage = () => {
                               )}
                               {muestraDatos.data[sensor as keyof typeof muestraDatos.data]?.length === 10 && (
                                 <div className="text-center text-sm text-blue-600 mt-2 font-medium">
-                                  📚 Estos son todos los datos de entrenamiento (últimos 10 registros)
+                                  Estos son todos los datos de entrenamiento (últimos 10 registros)
                                 </div>
                               )}
                             </div>

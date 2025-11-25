@@ -53,8 +53,9 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
-        <title>Sistema CIMARQ - Monitoreo IoT</title>
-        <meta name="description" content="Sistema de Monitoreo de Sensores de Calidad del Agua" />
+        <title>CIMARQSentinel - Monitoreo IoT</title>
+        <meta name="description" content="Sistema de monitoreo de sensores de calidad del agua" />
+        <link rel="icon" href="/logo.png" type="image/png" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
