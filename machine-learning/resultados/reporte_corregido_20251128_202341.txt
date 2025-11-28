@@ -1,0 +1,84 @@
+================================================================================
+🐟 CIMARQ - ANÁLISIS PREDICTIVO CORREGIDO
+================================================================================
+
+📅 Fecha: 2025-11-28 20:23:41
+📊 Registros: 182
+📏 Window size: 5
+🎯 Variables: temperatura, ph, oxigeno
+
+
+================================================================================
+📊 SENSOR: TEMPERATURA
+================================================================================
+
+🏆 RANKING POR R² (Precisión):
+1. LSTM_Multi                | R²: 0.8437 | MAE: 0.631 | RMSE: 0.804
+2. Perceptron_Multi          | R²: 0.7535 | MAE: 0.801 | RMSE: 1.010
+3. VAR                       | R²: 0.0832 | MAE: 1.688 | RMSE: 1.947
+4. ARIMA temperatura         | R²: -1.7066 | MAE: 2.942 | RMSE: 3.346
+5. SARIMA temperatura        | R²: -1.9823 | MAE: 3.097 | RMSE: 3.512
+
+⚡ RANKING POR RAPIDEZ:
+1. VAR                       | Tiempo: 0.013s
+2. Perceptron_Multi          | Tiempo: 0.030s
+3. ARIMA temperatura         | Tiempo: 0.051s
+4. SARIMA temperatura        | Tiempo: 0.221s
+5. LSTM_Multi                | Tiempo: 6.911s
+
+✅ MEJOR MODELO: LSTM_Multi (R²: 0.8437)
+
+================================================================================
+📊 SENSOR: PH
+================================================================================
+
+🏆 RANKING POR R² (Precisión):
+1. LSTM_Multi                | R²: 0.4046 | MAE: 0.053 | RMSE: 0.067
+2. Perceptron_Multi          | R²: 0.1604 | MAE: 0.059 | RMSE: 0.080
+3. VAR                       | R²: -0.1024 | MAE: 0.073 | RMSE: 0.092
+4. ARIMA ph                  | R²: -2.1772 | MAE: 0.134 | RMSE: 0.156
+5. SARIMA ph                 | R²: -2.3115 | MAE: 0.137 | RMSE: 0.159
+
+⚡ RANKING POR RAPIDEZ:
+1. VAR                       | Tiempo: 0.013s
+2. Perceptron_Multi          | Tiempo: 0.030s
+3. ARIMA ph                  | Tiempo: 0.049s
+4. SARIMA ph                 | Tiempo: 0.149s
+5. LSTM_Multi                | Tiempo: 6.911s
+
+✅ MEJOR MODELO: LSTM_Multi (R²: 0.4046)
+
+================================================================================
+📊 SENSOR: OXIGENO
+================================================================================
+
+🏆 RANKING POR R² (Precisión):
+1. LSTM_Multi                | R²: 0.4191 | MAE: 0.349 | RMSE: 0.455
+2. Perceptron_Multi          | R²: 0.3109 | MAE: 0.387 | RMSE: 0.496
+3. VAR                       | R²: -0.1492 | MAE: 0.513 | RMSE: 0.640
+4. ARIMA oxigeno             | R²: -0.5128 | MAE: 0.592 | RMSE: 0.734
+5. SARIMA oxigeno            | R²: -0.7649 | MAE: 0.650 | RMSE: 0.793
+
+⚡ RANKING POR RAPIDEZ:
+1. VAR                       | Tiempo: 0.013s
+2. Perceptron_Multi          | Tiempo: 0.030s
+3. ARIMA oxigeno             | Tiempo: 0.056s
+4. SARIMA oxigeno            | Tiempo: 0.138s
+5. LSTM_Multi                | Tiempo: 6.911s
+
+✅ MEJOR MODELO: LSTM_Multi (R²: 0.4191)
+
+================================================================================
+🎯 RESUMEN GLOBAL
+================================================================================
+
+📈 PROMEDIO POR MODELO (3 sensores):
+1. LSTM_Multi                | R²: 0.5558 | MAE: 0.344 | ⏱️ 6.911s
+2. Perceptron_Multi          | R²: 0.4083 | MAE: 0.416 | ⏱️ 0.030s
+3. VAR                       | R²: -0.0562 | MAE: 0.758 | ⏱️ 0.013s
+4. ARIMA oxigeno             | R²: -0.5128 | MAE: 0.592 | ⏱️ 0.056s
+5. SARIMA oxigeno            | R²: -0.7649 | MAE: 0.650 | ⏱️ 0.138s
+6. ARIMA temperatura         | R²: -1.7066 | MAE: 2.942 | ⏱️ 0.051s
+7. SARIMA temperatura        | R²: -1.9823 | MAE: 3.097 | ⏱️ 0.221s
+8. ARIMA ph                  | R²: -2.1772 | MAE: 0.134 | ⏱️ 0.049s
+9. SARIMA ph                 | R²: -2.3115 | MAE: 0.137 | ⏱️ 0.149s

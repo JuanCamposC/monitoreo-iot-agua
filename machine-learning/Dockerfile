@@ -28,5 +28,5 @@ RUN mkdir -p /app/resultados
 # Verificar instalación
 RUN python verificar_sistema.py
 
-# Comando por defecto
-CMD ["python", "analisis_predictivo_sensores.py"]
+# Comando por defecto - Versión corregida
+CMD ["python", "analisis_multivariante_corregido.py"]
