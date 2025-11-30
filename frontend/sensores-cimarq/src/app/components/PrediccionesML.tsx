@@ -369,21 +369,11 @@ const PrediccionesML: React.FC<PrediccionesMLProps> = ({ className = '' }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Sensor (opcional)
+                Sensor
               </label>
-              <select
-                value={sensorSeleccionado}
-                onChange={(e) => setSensorSeleccionado(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                disabled={loading}
-              >
-                <option value="">Todos los sensores</option>
-                {sensores.map(sensor => (
-                  <option key={sensor.id} value={sensor.id}>
-                    {sensor.icono} {sensor.nombre}
-                  </option>
-                ))}
-              </select>
+              <div className="w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-gray-700">
+                <span className="font-semibold">Todos los sensores</span>
+              </div>
             </div>
 
             <div>
