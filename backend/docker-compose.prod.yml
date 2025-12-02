@@ -1,0 +1,38 @@
+services:
+  api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: sensores-api-prod
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - FLASK_DEBUG=0
+      # Variables de entorno para servicios en la nube
+      - MONGO_URI=${MONGO_URI}
+      - DB_NAME=${DB_NAME}
+      - MQTT_BROKER=${MQTT_BROKER}
+      - MQTT_PORT=${MQTT_PORT}
+      - MQTT_USERNAME=${MQTT_USERNAME}
+      - MQTT_PASSWORD=${MQTT_PASSWORD}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # Límites de recursos para producción
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+networks:
+  default:
+    name: sensores-network

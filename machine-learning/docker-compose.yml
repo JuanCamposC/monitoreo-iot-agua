@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  ml-analysis:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cimarq-ml-prediccion
+    volumes:
+      - ./resultados:/app/resultados
+      - ./datos_entrenamiento.csv:/app/datos_entrenamiento.csv:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TF_CPP_MIN_LOG_LEVEL=2
+    restart: no

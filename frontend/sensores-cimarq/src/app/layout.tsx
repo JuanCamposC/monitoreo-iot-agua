@@ -1,6 +1,13 @@
-import type { Metadata } from "next";
+'use client';
+
+'use client';
+
 import { Geist, Geist_Mono } from "next/font/google";
+import { AuthProvider } from "./contexts/AuthContext";
+import { SidebarProvider, useSidebar } from "./contexts/SidebarContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Sidebar from "./components/sidebar";
+import SessionWarning from "./components/SessionWarning";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,10 +20,30 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Sensores CIMARQ",
-  description: "Sistema de Monitoreo de Sensores",
-};
+// Componente para manejar el layout con margen dinámico
+function LayoutContent({ children }: { children: React.ReactNode }) {
+  const { isOpen, isMobile } = useSidebar();
+
+  const getMarginLeft = () => {
+    if (isMobile) return '0px';
+    return isOpen ? '256px' : '64px';
+  };
+
+  return (
+    <div className="flex h-screen">
+      <Sidebar />
+      <main 
+        className="flex-1 overflow-y-auto bg-gray-50 transition-all duration-300 ease-in-out"
+        style={{ 
+          marginLeft: getMarginLeft(),
+          height: '100vh'
+        }}
+      >
+        {children}
+      </main>
+    </div>
+  );
+}
 
 export default function RootLayout({
   children,
@@ -25,15 +52,25 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
+      <head>
+        <title>CIMARQSentinel - Monitoreo IoT</title>
+        <meta name="description" content="Sistema de monitoreo de sensores de calidad del agua" />
+        <link rel="icon" href="/logo.png" type="image/png" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        style={{ margin: 0, padding: 0 }}
       >
-        <div className="flex h-screen bg-gray-50">
-          <Sidebar />
-          <main className="flex-1 overflow-y-auto">
-            {children}
-          </main>
-        </div>
+        <AuthProvider>
+          <ProtectedRoute>
+            <SidebarProvider>
+              <LayoutContent>
+                {children}
+              </LayoutContent>
+              <SessionWarning />
+            </SidebarProvider>
+          </ProtectedRoute>
+        </AuthProvider>
       </body>
     </html>
   );
