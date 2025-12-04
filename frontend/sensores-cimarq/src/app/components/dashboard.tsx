@@ -203,6 +203,9 @@ export default function SensoresPage() {
     let timeLimit: Date;
     
     switch (filter) {
+      case '30m':
+        timeLimit = new Date(now.getTime() - 30 * 60 * 1000);
+        break;
       case '1h':
         timeLimit = new Date(now.getTime() - 60 * 60 * 1000);
         break;
@@ -389,6 +392,7 @@ export default function SensoresPage() {
               label="Período de Análisis"
               onChange={(e) => setTimeFilter(e.target.value)}
             >
+              <MenuItem value="30m">Últimos 30 minutos</MenuItem>
               <MenuItem value="1h">Última hora</MenuItem>
               <MenuItem value="6h">Últimas 6h</MenuItem>
               <MenuItem value="24h">Últimas 24h</MenuItem>
@@ -829,7 +833,7 @@ export default function SensoresPage() {
           </Grid>
           <Grid size= {{xs: 12, md: 3}}>
             <Typography variant="body2" color="text.secondary" textAlign="center">
-              Período: {timeFilter === '1h' ? 'Última hora' : timeFilter === '6h' ? 'Últimas 6h' : timeFilter === '24h' ? 'Últimas 24h' : timeFilter === '7d' ? 'Últimos 7 días' : 'Todos los datos'}
+              Período: {timeFilter === '30m' ? 'Últimos 30 minutos' : timeFilter === '1h' ? 'Última hora' : timeFilter === '6h' ? 'Últimas 6h' : timeFilter === '24h' ? 'Últimas 24h' : timeFilter === '7d' ? 'Últimos 7 días' : 'Todos los datos'}
             </Typography>
           </Grid>
           <Grid size= {{xs: 12, md: 3}}>
